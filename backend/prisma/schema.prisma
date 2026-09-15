@@ -1,0 +1,150 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// --- Ubicación (nacional, no hardcodeada a Melipilla) ---
+// Sembrada desde datos oficiales SUBDERE (16 regiones, 346 comunas) — ver prisma/seed.ts.
+
+model Region {
+  id      Int      @id
+  nombre  String   @unique
+  comunas Comuna[]
+}
+
+model Comuna {
+  id       String @id // código oficial SUBDERE de 5 dígitos, ej. "13101"
+  nombre   String
+  regionId Int
+  region   Region @relation(fields: [regionId], references: [id])
+
+  properties Property[]
+
+  @@unique([nombre, regionId])
+  @@index([regionId])
+}
+
+// --- Cuentas ---
+// ADMIN: panel interno. PERSONA/CORREDORA: publicadores — confirmado con el socio que una
+// corredora es UNA cuenta por agencia (no una por agente individual); sus agentes suben material
+// bajo esa misma cuenta. El registro público todavía no existe (MVP curado, admin crea las cuentas
+// a mano), pero el modelo ya soporta ambos tipos de publicador sin tener que rehacerse.
+
+enum Role {
+  ADMIN
+  PERSONA
+  CORREDORA
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String // nombre de contacto (persona) o nombre de la agencia (corredora)
+  whatsapp     String? // formato E.164, ej. "+56912345678" — contacto de sus fichas, link wa.me
+  role         Role     @default(ADMIN)
+
+  corredoraProfile CorredoraProfile?
+  properties       Property[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Datos propios de una agencia — solo existe cuando User.role = CORREDORA.
+model CorredoraProfile {
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  user        User    @relation(fields: [userId], references: [id])
+  razonSocial String?
+  rut         String? @unique
+}
+
+// --- Propiedades ---
+
+enum TipoOperacion {
+  VENTA
+  ARRIENDO
+}
+
+enum TipoPropiedad {
+  CASA
+  DEPARTAMENTO
+  PARCELA
+  TERRENO
+  OFICINA
+  LOCAL_COMERCIAL
+  BODEGA
+}
+
+enum EstadoPublicacion {
+  BORRADOR
+  PUBLICADA
+  PAUSADA
+  CERRADA // vendida o arrendada, según tipoOperacion
+}
+
+model Property {
+  id     String            @id @default(cuid())
+  slug   String            @unique
+  estado EstadoPublicacion @default(BORRADOR)
+
+  // Contacto de la ficha = el publicador dueño de la cuenta (User.name / User.whatsapp).
+  // Admin sigue pudiendo cargar propiedades a nombre de cualquier cuenta durante el MVP curado.
+  publicadorId String
+  publicador   User   @relation(fields: [publicadorId], references: [id])
+
+  tipoOperacion TipoOperacion
+  tipoPropiedad TipoPropiedad
+  destacada     Boolean       @default(false)
+
+  comunaId  String
+  comuna    Comuna  @relation(fields: [comunaId], references: [id])
+  direccion String?
+  lat       Float?
+  lng       Float?
+
+  // Venta en UF, arriendo en CLP — convención chilena (ver ARCHITECTURE.md).
+  precioUf  Decimal? @db.Decimal(12, 2)
+  precioClp Int?
+
+  m2Construidos    Float?
+  m2Terreno        Float?
+  dormitorios      Int?
+  banos            Int?
+  estacionamientos Int?
+  bodegas          Int?
+  gastosComunesClp Int?
+
+  descripcion String
+
+  videoUrl String?
+  fotos    PropertyFoto[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([comunaId])
+  @@index([publicadorId])
+  @@index([tipoOperacion, tipoPropiedad, estado])
+}
+
+model PropertyFoto {
+  id                 String   @id @default(cuid())
+  propertyId         String
+  property           Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  cloudinaryPublicId String
+  orden              Int
+
+  @@index([propertyId])
+}
