@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+Thumbs.db
+*:Zone.Identifier
+
+# Editores / Office
+~$*.docx
+~$*.xlsx
+
+# Entornos
+.env
+.env.*
+!.env.example
+
+# Docker
+postgres-data/
+
+# Audios/notas de voz de trabajo (contenido personal, no pertenece al repo)
+*.ogg
+*.opus
+*.mp3
+*.m4a
+*.wav
