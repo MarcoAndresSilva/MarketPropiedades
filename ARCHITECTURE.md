@@ -188,3 +188,43 @@ no corre en este entorno) y aplicada con `prisma migrate deploy` — segura porq
 afectadas estaban vacías. Prueba end-to-end contra Postgres real: creada una cuenta `CORREDORA` con
 su `CorredoraProfile`, una `Property` en Melipilla apuntando a esa cuenta, verificada la relación
 completa (publicador + comuna) y limpiada sin dejar residuos. Build, lint y test siguen limpios.
+
+### Fase 4 — Autenticación del panel (JWT + argon2)
+
+**Decisión — mismo patrón que Imperio Barber: `JwtStrategy` revalida contra la base en cada
+request.** El JWT solo prueba que en algún momento se hizo login — no confirma que la cuenta siga
+existiendo. `JwtStrategy.validate()` busca el usuario por `id` en cada request autenticada; si fue
+borrado, el token deja de servir aunque no haya expirado. Costo: una consulta extra por request
+autenticada — aceptable frente a la alternativa (confiar ciegamente en el payload del token).
+
+**Bug real encontrado — `PassportModule` sin `.register()` rompe en NestJS 12:** `AuthGuard('jwt')`
+depende de inyectar `AuthModuleOptions`, marcada `@Optional()` tanto a nivel de constructor como de
+propiedad en el código de `@nestjs/passport`. En versiones anteriores de Nest, si `PassportModule` se
+importaba "pelado" (sin `.register()`, que es lo único que efectivamente provee `AuthModuleOptions`),
+esa dependencia opcional simplemente quedaba `undefined` sin problema. En NestJS 12, la resolución de
+metadata `@Optional()` sobre la clase mixin dinámica que genera `AuthGuard()` falla y tira
+`UnknownDependenciesException` en el arranque — un cambio de comportamiento real entre versiones, no
+un error de configuración. Fix: `PassportModule.register({ defaultStrategy: 'jwt' })` en vez de
+`PassportModule` a secas — la forma explícita, que además es la recomendada en la documentación de
+`@nestjs/passport`, nunca dependió de esa resolución opcional.
+
+**Decisión — `@nestjs/throttler` sí se usa, pese al warning de `peerDependencies`.** La versión
+publicada (6.5.0) todavía declara soporte solo hasta `@nestjs/common@^11` — no es que sea
+incompatible con v12, es que el paquete no bumpeó su `package.json` todavía (usa únicamente API
+pública y estable de Nest: `CanActivate`, `ExecutionContext`, `Reflector`). Se instaló con
+`legacy-peer-deps=true` (persistido en `backend/.npmrc`, no solo en la sesión) después de **verificar
+en runtime** — no solo que compilara — que el guard bloquea de verdad: 6 intentos seguidos a
+`/auth/login` devuelven `401,401,401,429,429,429`, exactamente el límite de 5/min configurado.
+Rechazar la librería por el warning sin probarla hubiese sido quedarse con la opción peor
+(sin rate-limiting en el login) por una incompatibilidad que no era real.
+
+**Implementación:** `POST /auth/login` (JWT HS256, expira a las 8h) + `argon2` para hashear
+contraseñas; límite de 5 intentos/min por IP en login (por encima del límite global de 60/min de
+todo el resto de la API). `GET /auth/me` protegido con `JwtAuthGuard`, devuelve el usuario desde
+`@CurrentUser()`. `prisma/seed-admin.ts` crea/actualiza la cuenta `ADMIN` desde `ADMIN_EMAIL`/
+`ADMIN_PASSWORD`/`ADMIN_NAME` del entorno — idempotente, mismo patrón que Imperio Barber.
+
+**Verificado:** build/lint/test limpios; servidor levantado contra Postgres real; login con
+credenciales correctas devuelve JWT válido, `/auth/me` con ese token devuelve el usuario, login con
+password incorrecta devuelve 401, `/auth/me` sin token devuelve 401, y el rate-limit de
+`/auth/login` corta al 6º intento en la ventana de 60s — probado con requests reales, no asumido.
