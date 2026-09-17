@@ -1,0 +1,73 @@
+// =============================================================================
+// Tokens de color — semánticos (nombrados por función, no por color).
+//
+// Estrategia de tema:
+//   :root  y  :root[data-theme='light']  → tema CLARO (por defecto)
+//   :root[data-theme='dark']             → tema OSCURO
+//
+// Light-first a propósito: es un portal de consumo masivo (compradores/arrendatarios
+// de cualquier edad), no una herramienta técnica — a diferencia del portafolio, acá
+// no se fuerza oscuro por defecto. ThemeService respeta el sistema si nadie eligió
+// todavía (ver theme.service.ts + el script anti-parpadeo en index.html).
+//
+// Paleta: terracota cálida + verde profundo — deliberadamente NO el azul corporativo
+// genérico de los portales grandes (PortalInmobiliario, etc.). Investigado contra
+// tendencias reales de 2026: acentos discretos, la foto de la propiedad como
+// protagonista, tonos cálidos ligados a lo local para posicionamiento boutique/de
+// confianza en vez de "corporación distante". Ver ARCHITECTURE.md.
+// =============================================================================
+
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg: #faf8f5;
+  --surface: #ffffff;
+  --surface-2: #f2ede6;
+  --surface-3: #e9e1d6;
+
+  --border: #e2d9cd;
+  --border-strong: #cbbfae;
+
+  --text: #241f1a;
+  --text-muted: #6b6055;
+  --text-subtle: #8a8073;
+
+  --accent: #b1502e;
+  --accent-hover: #953f22;
+  --accent-soft: rgba(177, 80, 46, 0.1);
+  --accent-contrast: #ffffff;
+
+  --success: #3f7d52;
+  --success-soft: rgba(63, 125, 82, 0.12);
+  --danger: #b3261e;
+
+  --focus-ring: #b1502e;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #1b1712;
+  --surface: #241f19;
+  --surface-2: #2c2620;
+  --surface-3: #3a332a;
+
+  --border: #3a332a;
+  --border-strong: #4a4136;
+
+  --text: #f2ece3;
+  --text-muted: #b5aa9c;
+  --text-subtle: #8a8073;
+
+  --accent: #e2825a;
+  --accent-hover: #ec9873;
+  --accent-soft: rgba(226, 130, 90, 0.16);
+  --accent-contrast: #1b1712;
+
+  --success: #6fb885;
+  --success-soft: rgba(111, 184, 133, 0.14);
+  --danger: #e2726b;
+
+  --focus-ring: #e2825a;
+}

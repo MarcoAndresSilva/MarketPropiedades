@@ -322,3 +322,32 @@ API, servida por el catálogo con SSR real (`curl` al HTML crudo antes de cualqu
 navegador: aparece "1 propiedad encontrada", "Melipilla", "UF 4.200"). Ficha de detalle verificada
 igual, incluido el link `wa.me` con el número correcto del publicador. Estado "no encontrado"
 probado con un slug inexistente. Build (desarrollo y producción) y test limpios.
+
+### Fase 8 — Sistema de diseño: header y tema claro/oscuro
+
+**Decisión — paleta terracota + verde, no el azul corporativo genérico.** Investigado contra
+tendencias reales de portales inmobiliarios 2026 (no elegido a ojo): los sitios serios usan
+acentos discretos para que la foto de la propiedad sea la protagonista, y el color de marca
+comunica posicionamiento — navy/azul se lee como "corporación distante" (el molde de
+PortalInmobiliario y similares), mientras que tonos cálidos ligados a lo local comunican
+confianza/boutique. Terracota como acento único (CTAs, precios, destacados) + verde profundo
+reservado para estados de éxito — coherente con el diferenciador real del producto (contacto
+humano directo por WhatsApp, no un portal corporativo frío).
+
+**Decisión — tipografía Fraunces (títulos) + Plus Jakarta Sans (cuerpo), no Inter.** Fraunces es
+un serif moderno con calidez real (óptica variable, no un serif rígido de banco) para títulos y
+precios; Plus Jakarta Sans para todo el resto — geométrica pero con terminaciones redondeadas, más
+distintiva que la opción "seteo por defecto" del ecosistema.
+
+**Decisión — mismo patrón técnico de tema del portafolio, pero *light-first*, no dark-first.** El
+`ThemeService` (señal + `effect` que escribe `data-theme` en `<html>` y persiste en
+`localStorage`) y el script anti-parpadeo inline en `index.html` son el mismo patrón ya probado.
+La diferencia deliberada: acá se respeta `prefers-color-scheme` del sistema como default cuando
+nadie eligió todavía, en vez de forzar oscuro — el portafolio es una pieza personal con público
+técnico; esto es un portal de consumo masivo (compradores/arrendatarios de cualquier edad), no hay
+motivo para pisar la preferencia que la persona ya configuró en su equipo.
+
+**Verificado con capturas reales, no solo "compiló":** se instaló Chromium vía Playwright en el
+scratchpad (reutilizando el binario ya cacheado, sin descarga nueva) y se sacó captura del
+catálogo y la ficha de propiedad en ambos temas (`emulateMedia({ colorScheme })`), confirmando que
+los tokens de color se aplican correctamente en toda la UI, no solo en el header.
