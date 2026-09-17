@@ -8,7 +8,11 @@
     { "key": "baseUrl", "value": "http://localhost:3002" },
     { "key": "accessToken", "value": "" },
     { "key": "adminEmail", "value": "marco.silvaponce10@gmail.com" },
-    { "key": "adminPassword", "value": "cambia-esta-contrasena-min-8-chars" }
+    { "key": "adminPassword", "value": "cambia-esta-contrasena-min-8-chars" },
+    { "key": "comunaId", "value": "13501" },
+    { "key": "publicadorId", "value": "" },
+    { "key": "propertyId", "value": "" },
+    { "key": "propertySlug", "value": "" }
   ],
   "item": [
     {
@@ -116,6 +120,163 @@
               }
             }
           ]
+        }
+      ]
+    },
+    {
+      "name": "Users (publicadores)",
+      "item": [
+        {
+          "name": "Crear corredora de prueba",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"paula@corredora-test.cl\",\n  \"password\": \"corredora123\",\n  \"name\": \"Corredora Paula\",\n  \"whatsapp\": \"+56922222222\",\n  \"role\": \"CORREDORA\",\n  \"razonSocial\": \"Paula Propiedades SpA\",\n  \"rut\": \"22.222.222-2\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+            "description": "Requiere estar logueado (correr 'Login (correcto)' primero). Guarda el id creado en {{publicadorId}} para usarlo al crear una propiedad. Si ya la corriste antes, va a dar 409 (email duplicado) — normal, la cuenta ya existe."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "if (pm.response.code === 201 || pm.response.code === 200) {",
+                  "  pm.collectionVariables.set('publicadorId', pm.response.json().id);",
+                  "  console.log('publicadorId guardado:', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar publicadores",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}" }] },
+            "url": { "raw": "{{baseUrl}}/users", "host": ["{{baseUrl}}"], "path": ["users"] },
+            "description": "Todas las cuentas PERSONA/CORREDORA (el admin no sale en esta lista)."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Properties",
+      "item": [
+        {
+          "name": "1. Crear propiedad (queda BORRADOR)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"publicadorId\": \"{{publicadorId}}\",\n  \"tipoOperacion\": \"VENTA\",\n  \"tipoPropiedad\": \"CASA\",\n  \"comunaId\": \"{{comunaId}}\",\n  \"precioUf\": 3500,\n  \"dormitorios\": 3,\n  \"banos\": 2,\n  \"descripcion\": \"Casa de prueba con 3 dormitorios y buen patio en Melipilla.\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/properties", "host": ["{{baseUrl}}"], "path": ["properties"] },
+            "description": "Necesita {{publicadorId}} seteado (correr antes 'Crear corredora de prueba'). Toda propiedad nueva nace en estado BORRADOR — invisible en el catálogo público a propósito."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Devuelve 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('Nace en BORRADOR', () => pm.expect(body.estado).to.eql('BORRADOR'));",
+                  "pm.collectionVariables.set('propertyId', body.id);",
+                  "pm.collectionVariables.set('propertySlug', body.slug);",
+                  "console.log('propertyId:', body.id, '| slug:', body.slug);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "2. Catálogo público (BORRADOR no debe aparecer)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/properties?comunaId={{comunaId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties"],
+              "query": [{ "key": "comunaId", "value": "{{comunaId}}" }]
+            },
+            "description": "Sin token a propósito — es el endpoint que va a usar el sitio público. La propiedad recién creada NO debería salir acá todavía (sigue BORRADOR)."
+          }
+        },
+        {
+          "name": "3. Ficha pública por slug (debe dar 404)",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/properties/{{propertySlug}}", "host": ["{{baseUrl}}"], "path": ["properties", "{{propertySlug}}"] },
+            "description": "Mismo motivo que el anterior: BORRADOR no es visible por slug tampoco."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": { "type": "text/javascript", "exec": ["pm.test('Devuelve 404 (todavia borrador)', () => pm.response.to.have.status(404));"] }
+            }
+          ]
+        },
+        {
+          "name": "4. Publicar (PATCH estado=PUBLICADA)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}" }] },
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"PUBLICADA\",\n  \"destacada\": true\n}" },
+            "url": { "raw": "{{baseUrl}}/properties/{{propertyId}}", "host": ["{{baseUrl}}"], "path": ["properties", "{{propertyId}}"] },
+            "description": "PATCH acepta solo los campos que mandás (UpdatePropertyDto es todo opcional) — acá solo cambiamos estado y destacada."
+          }
+        },
+        {
+          "name": "5. Catálogo público de nuevo (ahora sí aparece)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/properties?comunaId={{comunaId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["properties"],
+              "query": [{ "key": "comunaId", "value": "{{comunaId}}" }]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const body = pm.response.json();",
+                  "pm.test('Aparece al menos 1 propiedad', () => pm.expect(body.total).to.be.above(0));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "6. Listado admin (todas, cualquier estado)",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}" }] },
+            "url": { "raw": "{{baseUrl}}/properties/admin/all", "host": ["{{baseUrl}}"], "path": ["properties", "admin", "all"] },
+            "description": "Protegido. Sin token da 401 — probalo sacando el Bearer Token de la pestaña Authorization."
+          }
+        },
+        {
+          "name": "7. Borrar propiedad de prueba",
+          "request": {
+            "method": "DELETE",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}" }] },
+            "url": { "raw": "{{baseUrl}}/properties/{{propertyId}}", "host": ["{{baseUrl}}"], "path": ["properties", "{{propertyId}}"] },
+            "description": "Limpieza — dejá el catálogo de prueba sin basura."
+          }
         }
       ]
     }
