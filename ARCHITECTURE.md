@@ -284,3 +284,41 @@ independiente** con `crypto` de Node fuera del código de la app, confirmando qu
 exactamente el que exige Cloudinary (parámetros ordenados alfabéticamente, unidos con `&`, más el
 secreto, todo en `sha1` hex). También probado el flujo completo de asociar y quitar una foto de una
 propiedad real. Build, lint y test limpios.
+
+### Fase 7 — Frontend: catálogo público y ficha de propiedad
+
+**Decisión — `RenderMode.Server`, no `Prerender`, para todo el frontend.** El scaffold traía
+`RenderMode.Prerender` por defecto (render único en build time). El catálogo depende de qué
+propiedades están `PUBLICADA` en cada momento — prerenderizarlo congelaría el contenido hasta el
+próximo deploy. Se cambia a SSR real por request; ISR/regeneración periódica queda para cuando el
+volumen lo justifique.
+
+**Decisión — `environments/` generado con el schematic oficial de Angular (`ng generate
+environments`), no armado a mano.** `environment.ts` (producción) y `environment.development.ts`
+(reemplaza al anterior en builds de desarrollo vía `fileReplacements` en `angular.json`) — ahí vive
+`apiUrl` y `cloudinaryCloudName`. Ninguno de los dos es secreto: son valores públicos que de todas
+formas terminan visibles en el bundle del navegador.
+
+**Bug real / gotcha encontrado — `ng build` (sin flags) compila con la configuración de
+producción por defecto**, no con la de desarrollo. Al probar el catálogo localmente contra el
+backend de la máquina, el build tomó `environment.ts` (la URL de Render, que todavía no existe) en
+vez de `environment.development.ts` (`localhost:3002`) — el fetch durante SSR devolvía 404 real
+contra un dominio que no existe, no un error de código. Para probar en local: `ng build
+--configuration development` (lo mismo que hace `ng serve` automáticamente).
+
+**Decisión — `provideHttpClient(withFetch())`, no el cliente XHR por defecto.** La API Fetch nativa
+de Node funciona igual en el servidor y en el navegador, evitando la dependencia de polyfills tipo
+`xhr2` para las llamadas HTTP que se hacen durante SSR.
+
+**Implementación:** `CatalogComponent` (lista + filtros por operación/tipo, consumiendo `GET
+/properties`) y `PropertyDetailComponent` (`GET /properties/:slug`, con botones reales de
+"Contactar por WhatsApp" y "Agendar visita" armados con `wa.me` — el diferenciador central del
+producto). Precio formateado según la convención ya definida (UF para venta, CLP para arriendo).
+Fotos servidas desde Cloudinary con transformación de recorte/calidad en la URL (`c_fill,q_auto,
+f_auto`), sin backend propio de imágenes.
+
+**Verificado end-to-end, no solo con datos de mentira:** propiedad real creada y publicada vía la
+API, servida por el catálogo con SSR real (`curl` al HTML crudo antes de cualquier JS del
+navegador: aparece "1 propiedad encontrada", "Melipilla", "UF 4.200"). Ficha de detalle verificada
+igual, incluido el link `wa.me` con el número correcto del publicador. Estado "no encontrado"
+probado con un slug inexistente. Build (desarrollo y producción) y test limpios.

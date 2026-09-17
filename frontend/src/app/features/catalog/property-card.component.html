@@ -1,0 +1,34 @@
+<a class="card" [routerLink]="['/propiedad', property().slug]">
+  @if (property().fotos.length > 0) {
+    <img
+      class="card__photo"
+      [src]="cloudinaryImageUrl(property().fotos[0].cloudinaryPublicId)"
+      [alt]="formatTipoPropiedad(property().tipoPropiedad) + ' en ' + property().comuna.nombre"
+      loading="lazy"
+    />
+  } @else {
+    <div class="card__photo card__photo--placeholder" aria-hidden="true">Sin fotos todavía</div>
+  }
+
+  @if (property().destacada) {
+    <span class="card__badge">Destacada</span>
+  }
+
+  <div class="card__body">
+    <p class="card__tipo">{{ formatTipoPropiedad(property().tipoPropiedad) }} · {{ property().tipoOperacion === 'VENTA' ? 'Venta' : 'Arriendo' }}</p>
+    <p class="card__comuna">{{ property().comuna.nombre }}</p>
+    <p class="card__precio">{{ formatPrecio(property()) }}</p>
+
+    <ul class="card__specs">
+      @if (property().dormitorios !== null) {
+        <li>{{ property().dormitorios }} dorm.</li>
+      }
+      @if (property().banos !== null) {
+        <li>{{ property().banos }} baños</li>
+      }
+      @if (property().m2Construidos !== null) {
+        <li>{{ property().m2Construidos }} m²</li>
+      }
+    </ul>
+  </div>
+</a>

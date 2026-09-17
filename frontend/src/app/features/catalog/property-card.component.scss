@@ -1,0 +1,81 @@
+.card {
+  display: block;
+  position: relative;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  text-decoration: none;
+  color: inherit;
+  background: var(--surface);
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    transform: translateY(-2px);
+  }
+}
+
+.card__photo {
+  display: block;
+  width: 100%;
+  aspect-ratio: 3 / 2;
+  object-fit: cover;
+  background: var(--surface-2);
+}
+
+.card__photo--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-subtle);
+  font-size: 0.85rem;
+}
+
+.card__badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  padding: 3px 9px;
+  border-radius: 4px;
+}
+
+.card__body {
+  padding: 14px 16px;
+}
+
+.card__tipo {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--text-subtle);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.card__comuna {
+  margin: 4px 0 0;
+  font-weight: 600;
+}
+
+.card__precio {
+  margin: 6px 0 0;
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.card__specs {
+  list-style: none;
+  display: flex;
+  gap: 12px;
+  margin: 12px 0 0;
+  padding: 0;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}

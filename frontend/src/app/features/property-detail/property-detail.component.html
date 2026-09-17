@@ -1,0 +1,61 @@
+@if (notFound()) {
+  <main class="ficha ficha--vacia">
+    <p>No encontramos esta propiedad. Puede que ya no esté disponible.</p>
+    <a routerLink="/">Volver al catálogo</a>
+  </main>
+} @else if (property(); as p) {
+  <main class="ficha">
+    <a routerLink="/" class="ficha__volver">← Volver al catálogo</a>
+
+    <h1>{{ formatTipoPropiedad(p.tipoPropiedad) }} en {{ p.comuna.nombre }}</h1>
+    <p class="ficha__region">{{ p.comuna.region.nombre }}{{ p.direccion ? ' · ' + p.direccion : '' }}</p>
+
+    @if (p.fotos.length > 0) {
+      <div class="ficha__galeria">
+        @for (foto of p.fotos; track foto.id) {
+          <img [src]="cloudinaryImageUrl(foto.cloudinaryPublicId, 800, 533)" [alt]="'Foto de la propiedad'" loading="lazy" />
+        }
+      </div>
+    }
+
+    <p class="ficha__precio">{{ formatPrecio(p) }}</p>
+
+    <ul class="ficha__specs">
+      @if (p.dormitorios !== null) {
+        <li><strong>{{ p.dormitorios }}</strong> dormitorios</li>
+      }
+      @if (p.banos !== null) {
+        <li><strong>{{ p.banos }}</strong> baños</li>
+      }
+      @if (p.estacionamientos !== null) {
+        <li><strong>{{ p.estacionamientos }}</strong> estacionamientos</li>
+      }
+      @if (p.bodegas !== null) {
+        <li><strong>{{ p.bodegas }}</strong> bodegas</li>
+      }
+      @if (p.m2Construidos !== null) {
+        <li><strong>{{ p.m2Construidos }}</strong> m² construidos</li>
+      }
+      @if (p.m2Terreno !== null) {
+        <li><strong>{{ p.m2Terreno }}</strong> m² de terreno</li>
+      }
+      @if (p.gastosComunesClp !== null) {
+        <li>Gastos comunes: <strong>{{ p.gastosComunesClp | number }}</strong></li>
+      }
+    </ul>
+
+    <p class="ficha__descripcion">{{ p.descripcion }}</p>
+
+    <div class="ficha__contacto">
+      <p>Publica: <strong>{{ p.publicador.name }}</strong></p>
+      @if (p.publicador.whatsapp) {
+        <a class="btn btn--whatsapp" [href]="whatsappContactoUrl(p)" target="_blank" rel="noopener">Contactar por WhatsApp</a>
+        <a class="btn btn--agendar" [href]="whatsappAgendarUrl(p)" target="_blank" rel="noopener">Agendar visita</a>
+      }
+    </div>
+  </main>
+} @else {
+  <main class="ficha">
+    <p role="status">Cargando…</p>
+  </main>
+}

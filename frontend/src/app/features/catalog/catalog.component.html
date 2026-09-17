@@ -1,0 +1,45 @@
+<main class="catalog">
+  <h1>Propiedades en Melipilla</h1>
+
+  <form class="filters" (ngSubmit)="buscar()">
+    <label>
+      Operación
+      <select name="tipoOperacion" [(ngModel)]="tipoOperacion">
+        <option value="">Todas</option>
+        <option value="VENTA">Venta</option>
+        <option value="ARRIENDO">Arriendo</option>
+      </select>
+    </label>
+
+    <label>
+      Tipo
+      <select name="tipoPropiedad" [(ngModel)]="tipoPropiedad">
+        <option value="">Todos</option>
+        <option value="CASA">Casa</option>
+        <option value="DEPARTAMENTO">Departamento</option>
+        <option value="PARCELA">Parcela</option>
+        <option value="TERRENO">Terreno</option>
+        <option value="OFICINA">Oficina</option>
+        <option value="LOCAL_COMERCIAL">Local comercial</option>
+        <option value="BODEGA">Bodega</option>
+      </select>
+    </label>
+
+    <button type="submit">Buscar</button>
+  </form>
+
+  @if (loading()) {
+    <p role="status">Cargando propiedades…</p>
+  } @else if (error()) {
+    <p role="alert">No se pudo cargar el catálogo. Intenta de nuevo más tarde.</p>
+  } @else if (items().length === 0) {
+    <p>No hay propiedades publicadas con esos filtros todavía.</p>
+  } @else {
+    <p class="catalog__total">{{ total() }} propiedad{{ total() === 1 ? '' : 'es' }} encontrada{{ total() === 1 ? '' : 's' }}</p>
+    <div class="catalog__grid">
+      @for (property of items(); track property.id) {
+        <app-property-card [property]="property" />
+      }
+    </div>
+  }
+</main>

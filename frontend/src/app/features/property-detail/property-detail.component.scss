@@ -1,0 +1,91 @@
+.ficha {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 24px 16px 60px;
+}
+
+.ficha--vacia {
+  text-align: center;
+}
+
+.ficha__volver {
+  display: inline-block;
+  margin-bottom: 16px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.ficha__region {
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+.ficha__galeria {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 8px;
+  margin: 16px 0;
+
+  img {
+    width: 100%;
+    border-radius: 8px;
+    aspect-ratio: 3 / 2;
+    object-fit: cover;
+  }
+}
+
+.ficha__precio {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--accent);
+  margin: 16px 0 8px;
+}
+
+.ficha__specs {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding: 0;
+  margin: 0 0 20px;
+  color: var(--text-muted);
+}
+
+.ficha__descripcion {
+  white-space: pre-line;
+  line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.ficha__contacto {
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.btn {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-weight: 600;
+  color: #fff;
+}
+
+// Verde de marca de WhatsApp — se mantiene reconocible sin importar el tema del sitio,
+// igual que un botón "Iniciar sesión con Google" conserva los colores de Google.
+.btn--whatsapp {
+  background: #25d366;
+}
+
+.btn--agendar {
+  background: var(--accent);
+
+  &:hover {
+    background: var(--accent-hover);
+  }
+}
