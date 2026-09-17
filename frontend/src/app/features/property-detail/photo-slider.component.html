@@ -1,0 +1,32 @@
+<div
+  class="slider"
+  tabindex="0"
+  role="group"
+  [attr.aria-label]="'Galería de fotos, imagen ' + (currentIndex() + 1) + ' de ' + fotos().length"
+  (keydown)="onKeydown($event)"
+>
+  <img
+    class="slider__image"
+    [src]="cloudinaryImageUrl(currentFoto().cloudinaryPublicId, 900, 600)"
+    alt="Foto de la propiedad"
+  />
+
+  @if (fotos().length > 1) {
+    <button type="button" class="slider__nav slider__nav--prev" (click)="prev()" aria-label="Foto anterior">‹</button>
+    <button type="button" class="slider__nav slider__nav--next" (click)="next()" aria-label="Foto siguiente">›</button>
+
+    <div class="slider__counter">{{ currentIndex() + 1 }} / {{ fotos().length }}</div>
+
+    <div class="slider__dots">
+      @for (foto of fotos(); track foto.id; let i = $index) {
+        <button
+          type="button"
+          class="slider__dot"
+          [class.slider__dot--active]="i === currentIndex()"
+          (click)="goTo(i)"
+          [attr.aria-label]="'Ir a la foto ' + (i + 1)"
+        ></button>
+      }
+    </div>
+  }
+</div>

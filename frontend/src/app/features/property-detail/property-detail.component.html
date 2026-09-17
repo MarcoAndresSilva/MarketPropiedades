@@ -11,11 +11,13 @@
     <p class="ficha__region">{{ p.comuna.region.nombre }}{{ p.direccion ? ' · ' + p.direccion : '' }}</p>
 
     @if (p.fotos.length > 0) {
-      <div class="ficha__galeria">
-        @for (foto of p.fotos; track foto.id) {
-          <img [src]="cloudinaryImageUrl(foto.cloudinaryPublicId, 800, 533)" [alt]="'Foto de la propiedad'" loading="lazy" />
-        }
-      </div>
+      <app-photo-slider [fotos]="p.fotos" class="ficha__galeria" />
+    } @else if (!p.videoUrl) {
+      <div class="ficha__sin-fotos">Sin fotos todavía</div>
+    }
+
+    @if (p.videoUrl) {
+      <video class="ficha__video" [src]="p.videoUrl" controls preload="metadata"></video>
     }
 
     <p class="ficha__precio">{{ formatPrecio(p) }}</p>

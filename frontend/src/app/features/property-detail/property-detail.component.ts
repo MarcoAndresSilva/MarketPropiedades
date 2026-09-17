@@ -4,12 +4,12 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PropertiesService } from '../../core/properties.service';
 import { Property } from '../../core/property.model';
 import { formatPrecio, formatTipoPropiedad } from '../../core/format.util';
-import { cloudinaryImageUrl } from '../../core/cloudinary.util';
 import { buildWhatsappUrl } from '../../core/whatsapp.util';
+import { PhotoSliderComponent } from './photo-slider.component';
 
 @Component({
   selector: 'app-property-detail',
-  imports: [RouterLink, DecimalPipe],
+  imports: [RouterLink, DecimalPipe, PhotoSliderComponent],
   templateUrl: './property-detail.component.html',
   styleUrl: './property-detail.component.scss',
 })
@@ -22,7 +22,6 @@ export class PropertyDetailComponent implements OnInit {
 
   readonly formatPrecio = formatPrecio;
   readonly formatTipoPropiedad = formatTipoPropiedad;
-  readonly cloudinaryImageUrl = cloudinaryImageUrl;
 
   ngOnInit(): void {
     const slug = this.route.snapshot.paramMap.get('slug');

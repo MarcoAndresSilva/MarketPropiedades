@@ -21,17 +21,31 @@
 }
 
 .ficha__galeria {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 8px;
+  display: block;
   margin: 16px 0;
+  max-width: 500px;
+}
 
-  img {
-    width: 100%;
-    border-radius: 8px;
-    aspect-ratio: 3 / 2;
-    object-fit: cover;
-  }
+.ficha__sin-fotos {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 3 / 2;
+  max-width: 500px;
+  margin: 16px 0;
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text-subtle);
+  font-size: 0.9rem;
+}
+
+.ficha__video {
+  display: block;
+  width: 100%;
+  max-width: 500px;
+  margin: 16px 0;
+  border-radius: 10px;
+  background: #000;
 }
 
 .ficha__precio {

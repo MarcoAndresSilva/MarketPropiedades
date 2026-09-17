@@ -351,3 +351,35 @@ motivo para pisar la preferencia que la persona ya configuró en su equipo.
 scratchpad (reutilizando el binario ya cacheado, sin descarga nueva) y se sacó captura del
 catálogo y la ficha de propiedad en ambos temas (`emulateMedia({ colorScheme })`), confirmando que
 los tokens de color se aplican correctamente en toda la UI, no solo en el header.
+
+### Fase 9 — Slider de fotos, video, y logo del header
+
+**Decisión — pantalla aparte para el detalle (`/propiedad/:slug`), no modal.** Un modal no tiene
+URL propia indexable — rompería el objetivo central de SSR (cada ficha como oportunidad de
+tráfico orgánico). Una ruta real, con su propio `<title>`/meta tags (Fase 10, SEO), es insustituible
+para ese objetivo; un modal es la elección correcta para una acción secundaria dentro de una
+página, no para el contenido principal de una ficha.
+
+**Decisión — slider de fotos construido a mano, sin librería.** `PhotoSliderComponent` (señal para
+el índice actual, prev/next con wraparound, navegación por teclado con flechas) — la necesidad es
+simple (recorrer un array de fotos) y no justifica una dependencia externa con su propio bundle y
+API a aprender.
+
+**Decisión — fotos de relleno como SVG estáticos propios, no fotos de internet ni Cloudinary
+real.** `frontend/public/demo-fotos/*.svg` en vez de hotlinkear un servicio externo (que puede
+caerse o cambiar) o pretender que son fotos reales de una propiedad. `cloudinaryImageUrl()` ahora
+detecta si ya recibió una URL completa (empieza con `http` o `/`) y la deja pasar tal cual, en vez
+de siempre armar la URL de transformación de Cloudinary — así el mismo helper sirve para relleno
+local hoy y para Cloudinary real el día que exista la cuenta, sin tocar el resto del código.
+
+**Decisión — video con `<video controls>` nativo, no un embed de YouTube/Vimeo.** El campo
+`Property.videoUrl` está pensado para un archivo de video real subido a Cloudinary (mismo patrón
+de firma que las fotos) — un `<video>` HTML5 apunta directo a esa URL sin intermediarios. Para
+probarlo sin cuenta de Cloudinary todavía, el seed de demo usa un video de muestra público
+(cortometraje libre de Blender Foundation) — deja claro en el código que es de prueba, no una
+visita real.
+
+**Verificado con interacción real, no solo visual:** captura de pantalla confirmando slider +
+video renderizados: además, un click programático en el botón "siguiente" y lectura del contador
+(`1 / 4` → `2 / 4`) confirma que la navegación realmente cambia de foto, no que solo se ve bien
+estática.
