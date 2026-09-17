@@ -8,11 +8,21 @@
 }
 
 .site-header__brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
   font-family: 'Fraunces', Georgia, serif;
   font-weight: 600;
   font-size: 1.3rem;
   color: var(--text);
   text-decoration: none;
+}
+
+.site-header__mark {
+  width: 26px;
+  height: 26px;
+  fill: var(--accent);
+  flex-shrink: 0;
 }
 
 .theme-toggle {
