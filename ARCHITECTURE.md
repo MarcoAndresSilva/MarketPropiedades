@@ -228,3 +228,37 @@ todo el resto de la API). `GET /auth/me` protegido con `JwtAuthGuard`, devuelve 
 credenciales correctas devuelve JWT válido, `/auth/me` con ese token devuelve el usuario, login con
 password incorrecta devuelve 401, `/auth/me` sin token devuelve 401, y el rate-limit de
 `/auth/login` corta al 6º intento en la ventana de 60s — probado con requests reales, no asumido.
+
+### Fase 5 — CRUD de propiedades y cuentas de publicador
+
+**Decisión — módulo `Users` mínimo, solo para que el CRUD de propiedades sea probable.**
+`Property.publicadorId` es obligatorio desde Fase 3, pero no existía ninguna forma de crear una
+cuenta `PERSONA`/`CORREDORA` más allá del seed del admin. `POST /users` / `GET /users` (protegidos,
+sin login propio para el publicador todavía — sigue siendo MVP curado) alcanzan para eso. No es un
+sistema de gestión de publicadores, es la pieza mínima necesaria para que el resto funcione.
+
+**Decisión — catálogo público y panel de administración comparten controller, separados por
+guard.** `GET /properties` y `GET /properties/:slug` son públicos y **siempre** filtran por
+`estado: PUBLICADA` — no hay forma de pedir un borrador ajeno por la API pública. `GET
+/properties/admin/all`, `POST`, `PATCH` y `DELETE` exigen `JwtAuthGuard`. Un solo controller en vez
+de dos porque todas las operaciones son sobre el mismo recurso; la separación real es el guard, no
+el archivo.
+
+**Decisión — el slug se genera una vez al crear y nunca se toca en el update.** Formato
+`tipo-comuna-sufijoAleatorio` (ej. `casa-melipilla-b64fvj`). Cambiar el slug en una edición
+rompería cualquier link o posición en Google ya indexada — la URL de una ficha es, a efectos
+prácticos, su identidad pública.
+
+**Bug real encontrado — borrar un `User` con `CorredoraProfile` fallaba por FK.** La relación
+`CorredoraProfile.user` no tenía `onDelete: Cascade` — intentar borrar una cuenta de corredora
+tiraba una violación de foreign key en vez de borrarse. Se detectó limpiando datos de prueba a
+mano, no con un test escrito para eso. Fix: `onDelete: Cascade` en esa relación específica — un
+perfil de corredora no tiene sentido sin su cuenta, a diferencia de `Property.publicador`, que
+deliberadamente **no** es cascade (borrar una cuenta no debería poder borrar de arrastre las fichas
+publicadas de un negocio real).
+
+**Verificado end-to-end contra Postgres real:** login → crear corredora → crear propiedad (queda
+`BORRADOR`, invisible en `/properties` y 404 en `/properties/:slug`) → `PATCH estado=PUBLICADA` →
+aparece de inmediato en el catálogo público y en la ficha por slug → `DELETE` la borra. Guards
+verificados: `/properties/admin/all` y `POST /properties` devuelven 401 sin token. Cascade de
+`CorredoraProfile` verificado con un insert/delete manual. Build, lint y test limpios.
