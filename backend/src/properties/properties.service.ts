@@ -4,6 +4,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { QueryPropertiesDto } from './dto/query-properties.dto';
+import { CreatePropertyFotoDto } from './dto/create-property-foto.dto';
 import { EstadoPublicacion } from '../generated/prisma/enums';
 import { randomSlugSuffix, slugify } from './slug.util';
 
@@ -76,6 +77,22 @@ export class PropertiesService {
   async remove(id: string) {
     await this.findOneOrThrow(id);
     await this.prisma.property.delete({ where: { id } });
+    return { ok: true };
+  }
+
+  async addFoto(propertyId: string, dto: CreatePropertyFotoDto) {
+    await this.findOneOrThrow(propertyId);
+    return this.prisma.propertyFoto.create({
+      data: { propertyId, cloudinaryPublicId: dto.cloudinaryPublicId, orden: dto.orden },
+    });
+  }
+
+  async removeFoto(fotoId: string) {
+    const foto = await this.prisma.propertyFoto.findUnique({ where: { id: fotoId } });
+    if (!foto) {
+      throw new NotFoundException('Foto no encontrada.');
+    }
+    await this.prisma.propertyFoto.delete({ where: { id: fotoId } });
     return { ok: true };
   }
 

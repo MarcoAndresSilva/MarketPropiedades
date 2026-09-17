@@ -12,7 +12,8 @@
     { "key": "comunaId", "value": "13501" },
     { "key": "publicadorId", "value": "" },
     { "key": "propertyId", "value": "" },
-    { "key": "propertySlug", "value": "" }
+    { "key": "propertySlug", "value": "" },
+    { "key": "fotoId", "value": "" }
   ],
   "item": [
     {
@@ -166,6 +167,35 @@
       ]
     },
     {
+      "name": "Uploads (Cloudinary)",
+      "item": [
+        {
+          "name": "Firma para subir foto/video",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}" }] },
+            "url": { "raw": "{{baseUrl}}/uploads/signature", "host": ["{{baseUrl}}"], "path": ["uploads", "signature"] },
+            "description": "Con las credenciales de prueba del .env, esto NO sube nada real a Cloudinary — solo prueba que el backend arma bien la firma. Con credenciales reales (cuenta free en cloudinary.com), esta respuesta es lo que el frontend necesita para subir un archivo directo a `https://api.cloudinary.com/v1_1/{cloudName}/auto/upload` (form-data: file, api_key, timestamp, signature, folder)."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Devuelve 201', () => pm.response.to.have.status(201));",
+                  "const body = pm.response.json();",
+                  "pm.test('Trae los 5 campos esperados', () => {",
+                  "  ['cloudName','apiKey','timestamp','folder','signature'].forEach(k => pm.expect(body).to.have.property(k));",
+                  "});"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Properties",
       "item": [
         {
@@ -270,7 +300,41 @@
           }
         },
         {
-          "name": "7. Borrar propiedad de prueba",
+          "name": "7. Asociar una foto (simulada, sin subir de verdad)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}" }] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cloudinaryPublicId\": \"market-propiedades/properties/test123\",\n  \"orden\": 0\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/properties/{{propertyId}}/fotos", "host": ["{{baseUrl}}"], "path": ["properties", "{{propertyId}}", "fotos"] },
+            "description": "En la app real, `cloudinaryPublicId` sale de subir el archivo con la firma de 'Firma para subir foto/video'. Acá se manda un id inventado solo para probar que la relación PropertyFoto se arma bien."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Devuelve 201', () => pm.response.to.have.status(201));",
+                  "pm.collectionVariables.set('fotoId', pm.response.json().id);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "8. Quitar la foto",
+          "request": {
+            "method": "DELETE",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}" }] },
+            "url": { "raw": "{{baseUrl}}/properties/fotos/{{fotoId}}", "host": ["{{baseUrl}}"], "path": ["properties", "fotos", "{{fotoId}}"] }
+          }
+        },
+        {
+          "name": "9. Borrar propiedad de prueba",
           "request": {
             "method": "DELETE",
             "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{accessToken}}" }] },

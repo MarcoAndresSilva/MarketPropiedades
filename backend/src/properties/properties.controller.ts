@@ -4,6 +4,7 @@ import { PropertiesService } from './properties.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { QueryPropertiesDto } from './dto/query-properties.dto';
+import { CreatePropertyFotoDto } from './dto/create-property-foto.dto';
 
 @Controller('properties')
 export class PropertiesController {
@@ -45,5 +46,20 @@ export class PropertiesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.properties.remove(id);
+  }
+
+  // --- Fotos: se suben directo a Cloudinary (ver UploadsController), acá solo se
+  // registra el resultado (cloudinaryPublicId) contra la propiedad. ---
+
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/fotos')
+  addFoto(@Param('id') id: string, @Body() dto: CreatePropertyFotoDto) {
+    return this.properties.addFoto(id, dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Delete('fotos/:fotoId')
+  removeFoto(@Param('fotoId') fotoId: string) {
+    return this.properties.removeFoto(fotoId);
   }
 }

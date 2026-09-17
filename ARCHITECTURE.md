@@ -262,3 +262,25 @@ publicadas de un negocio real).
 aparece de inmediato en el catálogo público y en la ficha por slug → `DELETE` la borra. Guards
 verificados: `/properties/admin/all` y `POST /properties` devuelven 401 sin token. Cascade de
 `CorredoraProfile` verificado con un insert/delete manual. Build, lint y test limpios.
+
+### Fase 6 — Subida de fotos/video (firma de Cloudinary)
+
+**Decisión — el backend firma, el archivo nunca lo toca.** Mismo patrón que Imperio Barber:
+`POST /uploads/signature` (protegido) devuelve `{ cloudName, apiKey, timestamp, folder, signature }`
+calculado con `crypto` nativo de Node (`sha1` de los parámetros ordenados + el secreto) — cero
+dependencias nuevas, no hace falta el SDK de Cloudinary para esto. El navegador usa esos datos para
+subir directo a la API de Cloudinary; el backend nunca recibe el binario, solo el resultado
+(`cloudinaryPublicId`) que después se asocia a la propiedad vía `POST /properties/:id/fotos`.
+
+**Decisión — asociar la foto es un endpoint aparte de crear la propiedad.** El flujo real de un
+formulario de carga es: crear la propiedad primero (o tenerla ya creada), subir cada foto a
+Cloudinary por separado, y por cada una avisarle al backend con `cloudinaryPublicId` + `orden`. No
+tiene sentido mandar todas las fotos en el mismo `POST` que crea la propiedad — el usuario puede
+agregar o sacar fotos después, sin recrear la ficha entera.
+
+**Verificado:** con credenciales de prueba en `.env` (no reales — falta crear la cuenta free de
+Cloudinary), se pidió una firma real al endpoint y se **recalculó el mismo hash de forma
+independiente** con `crypto` de Node fuera del código de la app, confirmando que el algoritmo es
+exactamente el que exige Cloudinary (parámetros ordenados alfabéticamente, unidos con `&`, más el
+secreto, todo en `sha1` hex). También probado el flujo completo de asociar y quitar una foto de una
+propiedad real. Build, lint y test limpios.
