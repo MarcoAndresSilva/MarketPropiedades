@@ -1,0 +1,37 @@
+<section
+  class="hero"
+  role="region"
+  aria-label="Destacados"
+  (mouseenter)="pause()"
+  (mouseleave)="resume()"
+  (focusin)="pause()"
+  (focusout)="resume()"
+>
+  @for (slide of slides; track $index; let i = $index) {
+    @if (i === currentIndex()) {
+      @if (slide.kind === 'valor') {
+        <div class="hero__slide" [class]="'hero__slide--' + slide.tone">
+          <h2>{{ slide.title }}</h2>
+          <p>{{ slide.text }}</p>
+          <a href="#catalogo-grid" class="hero__cta">Ver propiedades</a>
+        </div>
+      } @else {
+        <a class="hero__banner" [href]="slide.href ?? '#catalogo-grid'">
+          <img [src]="slide.imageUrl" [alt]="slide.alt" />
+        </a>
+      }
+    }
+  }
+</section>
+
+<div class="hero__dots">
+  @for (slide of slides; track $index; let i = $index) {
+    <button
+      type="button"
+      class="hero__dot"
+      [class.hero__dot--active]="i === currentIndex()"
+      (click)="goTo(i)"
+      [attr.aria-label]="'Ir al destacado ' + (i + 1)"
+    ></button>
+  }
+</div>

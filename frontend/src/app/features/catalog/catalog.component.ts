@@ -3,10 +3,11 @@ import { FormsModule } from '@angular/forms';
 import { PropertiesService } from '../../core/properties.service';
 import { CatalogFilters, Property, TipoOperacion, TipoPropiedad } from '../../core/property.model';
 import { PropertyCardComponent } from './property-card.component';
+import { HeroCarouselComponent } from './hero-carousel.component';
 
 @Component({
   selector: 'app-catalog',
-  imports: [PropertyCardComponent, FormsModule],
+  imports: [PropertyCardComponent, HeroCarouselComponent, FormsModule],
   templateUrl: './catalog.component.html',
   styleUrl: './catalog.component.scss',
 })
