@@ -356,7 +356,7 @@ los tokens de color se aplican correctamente en toda la UI, no solo en el header
 
 **Decisión — pantalla aparte para el detalle (`/propiedad/:slug`), no modal.** Un modal no tiene
 URL propia indexable — rompería el objetivo central de SSR (cada ficha como oportunidad de
-tráfico orgánico). Una ruta real, con su propio `<title>`/meta tags (Fase 10, SEO), es insustituible
+tráfico orgánico). Una ruta real, con su propio `<title>`/meta tags (SEO, todavía pendiente), es insustituible
 para ese objetivo; un modal es la elección correcta para una acción secundaria dentro de una
 página, no para el contenido principal de una ficha.
 
@@ -383,3 +383,55 @@ visita real.
 video renderizados: además, un click programático en el botón "siguiente" y lectura del contador
 (`1 / 4` → `2 / 4`) confirma que la navegación realmente cambia de foto, no que solo se ve bien
 estática.
+
+### Fase 10 — Hero con carrusel en el catálogo
+
+**Decisión — mensajes reales del negocio, no estadísticas inventadas.** Las tres tarjetas del
+hero (contacto directo por WhatsApp, agendar visita, indexabilidad en Google) son beneficios ya
+decididos y construidos del producto — no cifras de relleno tipo "+500 propiedades" que no existen
+todavía. El diseño queda listo como infraestructura para que el equipo de marketing reemplace el
+contenido por banners/fotos propias sin tocar el componente.
+
+**Decisión — autoplay deshabilitado durante SSR.** `HeroCarouselComponent` solo arranca el
+`setInterval` si `isPlatformBrowser` es verdadero — un timer corriendo en el servidor no tiene
+ningún efecto útil (nadie ve la animación) y sería una fuga de recursos por cada request
+renderizado. Se pausa además al pasar el mouse o el foco de teclado por encima, para no competir
+con la lectura del texto.
+
+**Decisión — indicadores (dots) fuera de la franja de color del slide, no superpuestos.** Cada
+slide usa un tono de fondo distinto (acento, éxito, neutro) — puntos blancos semitransparentes
+superpuestos se leerían bien sobre un fondo oscuro pero perderían contraste sobre el slide de tono
+claro. Los dots viven en una franja aparte, sobre el fondo de la página, con colores de los tokens
+de tema — contraste consistente sin importar qué slide esté activo.
+
+**Decisión — el slide admite dos formas: tarjeta de texto o imagen completa.** `HeroSlide` es un
+tipo discriminado por `kind` (`'valor' | 'banner'`). Los banners promocionales con ofertas
+específicas (porcentajes de descuento, nombres de proyectos, precios) son piezas de marketing con
+datos reales del negocio — no algo que se pueda generar en el código sin esa información real. La
+variante `'banner'` deja el componente listo para recibir esas piezas como imagen completa (con un
+link opcional) el día que existan, sin tener que rediseñar nada.
+
+**Verificado con interacción real:** click programático en el tercer punto de navegación y lectura
+del título del slide resultante, confirmando que cambia de contenido — no solo captura estática.
+Probado en ambos temas.
+
+### Fase 11 — Página explicativa del proceso de publicación
+
+**Decisión — página propia (`/publicar`) en vez de un link directo a WhatsApp en el header.** Un
+link "seco" abre WhatsApp sin contexto: quien llega ahí no sabe qué información traer ni qué pasa
+después de escribir. La ruta `/publicar` explica el proceso real en tres pasos (escribir por
+WhatsApp con los datos básicos → armar la ficha con fotos y descripción, con revisión del
+publicador → quedar publicado y recibir contactos directo), cada uno con un ícono propio. El botón
+de contacto queda al final, ya con el mensaje pre-armado (`buildWhatsappUrl` + la constante
+centralizada en `core/business-contact.ts`, para poder cambiar el número en un solo lugar si el
+negocio define un canal más formal más adelante).
+
+**Decisión — los tres pasos describen el proceso curado real, no un formulario automático.**
+Mientras no exista registro público de publicadores (§1), el flujo de verdad es manual: alguien
+escribe, el equipo arma la ficha, se publica. Mostrar un formulario de varios pasos que pareciera
+autogestionado sería fabricar un flujo que no existe — la página describe honestamente el proceso
+tal cual funciona hoy. Si más adelante se construye un formulario público real, esta página es el
+lugar natural para reemplazarlo.
+
+**Verificado:** el `href` del botón final se leyó directamente del DOM renderizado, confirmando la
+URL de `wa.me` con el número y el mensaje correctos. Probado en ambos temas y en viewport móvil.

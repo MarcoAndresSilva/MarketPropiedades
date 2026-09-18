@@ -1,0 +1,141 @@
+.publicar {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 48px 24px 72px;
+}
+
+.publicar__intro {
+  text-align: center;
+  max-width: 620px;
+  margin: 0 auto 56px;
+
+  h1 {
+    font-family: 'Fraunces', Georgia, serif;
+    font-size: clamp(1.7rem, 1.3rem + 1.6vw, 2.4rem);
+    margin: 0 0 14px;
+    text-wrap: balance;
+  }
+
+  p {
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin: 0;
+  }
+}
+
+.publicar__pasos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+  position: relative;
+
+  @media (min-width: 720px) {
+    &::before {
+      content: '';
+      position: absolute;
+      top: 27px;
+      left: calc(100% / 6);
+      right: calc(100% / 6);
+      height: 1px;
+      background: var(--border);
+      z-index: 0;
+    }
+  }
+
+  @media (max-width: 719px) {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+.paso {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+}
+
+.paso__icono {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  transition: transform 0.2s ease;
+
+  svg {
+    width: 26px;
+    height: 26px;
+  }
+
+  .paso:hover & {
+    transform: translateY(-3px);
+  }
+}
+
+.paso__numero {
+  font-family: 'Fraunces', Georgia, serif;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-subtle);
+  letter-spacing: 0.06em;
+
+  &::before {
+    content: 'Paso ';
+  }
+}
+
+.paso__titulo {
+  font-size: 1.08rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+.paso__texto {
+  color: var(--text-muted);
+  font-size: 0.92rem;
+  line-height: 1.55;
+  margin: 0;
+  max-width: 30ch;
+}
+
+.publicar__cta {
+  margin-top: 64px;
+  text-align: center;
+}
+
+.publicar__boton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px 32px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 600;
+  text-decoration: none;
+  transition:
+    background-color 0.15s ease,
+    transform 0.15s ease;
+
+  &:hover {
+    background: var(--accent-hover);
+    transform: translateY(-1px);
+  }
+}
+
+.publicar__nota {
+  margin: 14px 0 0;
+  color: var(--text-subtle);
+  font-size: 0.85rem;
+}
