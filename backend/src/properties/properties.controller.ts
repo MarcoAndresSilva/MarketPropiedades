@@ -17,6 +17,13 @@ export class PropertiesController {
     return this.properties.findPublished(query);
   }
 
+  // Antes de ':slug' a propósito: si fuera después, Nest matchearía "/properties/comunas"
+  // contra la ruta de un solo segmento ':slug' y nunca llegaría acá.
+  @Get('comunas')
+  findComunasConPropiedades() {
+    return this.properties.findComunasConPropiedades();
+  }
+
   @Get(':slug')
   findPublishedBySlug(@Param('slug') slug: string) {
     return this.properties.findPublishedBySlug(slug);

@@ -24,7 +24,13 @@ const DEMO_PUBLICADOR = {
   rut: '11.111.111-1',
 };
 
+// Melipilla + comunas vecinas reales (misma zona poniente de la Región Metropolitana) —
+// para poder probar el filtro de comuna del catálogo con más de una opción real, en vez
+// de simular un dato que no existiría en producción con este mismo volumen de datos.
 const MELIPILLA = '13501';
+const SAN_PEDRO = '13505';
+const TALAGANTE = '13601';
+const EL_MONTE = '13602';
 
 const FOTOS = ['/demo-fotos/foto-1.svg', '/demo-fotos/foto-2.svg', '/demo-fotos/foto-3.svg', '/demo-fotos/foto-4.svg'];
 
@@ -35,6 +41,7 @@ const VIDEO_DEMO = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/s
 const DEMO_PROPERTIES = [
   {
     slug: 'demo-casa-melipilla-centro',
+    comunaId: MELIPILLA,
     tipoOperacion: 'VENTA',
     tipoPropiedad: 'CASA',
     destacada: true,
@@ -51,6 +58,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-depto-melipilla-plaza',
+    comunaId: MELIPILLA,
     tipoOperacion: 'ARRIENDO',
     tipoPropiedad: 'DEPARTAMENTO',
     destacada: false,
@@ -65,6 +73,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-parcela-melipilla-rural',
+    comunaId: MELIPILLA,
     tipoOperacion: 'VENTA',
     tipoPropiedad: 'PARCELA',
     destacada: true,
@@ -76,6 +85,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-oficina-melipilla-centro',
+    comunaId: MELIPILLA,
     tipoOperacion: 'ARRIENDO',
     tipoPropiedad: 'OFICINA',
     destacada: false,
@@ -87,6 +97,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-local-melipilla-avenida',
+    comunaId: MELIPILLA,
     tipoOperacion: 'VENTA',
     tipoPropiedad: 'LOCAL_COMERCIAL',
     destacada: false,
@@ -94,6 +105,71 @@ const DEMO_PROPERTIES = [
     m2Construidos: 80,
     descripcion: 'Local comercial de 80 m² sobre avenida principal, alto flujo peatonal y vehicular.',
     fotos: [] as string[],
+  },
+  {
+    slug: 'demo-casa-san-pedro-vista-cerro',
+    comunaId: SAN_PEDRO,
+    tipoOperacion: 'VENTA',
+    tipoPropiedad: 'CASA',
+    destacada: false,
+    precioUf: 3100,
+    dormitorios: 3,
+    banos: 2,
+    m2Construidos: 110,
+    m2Terreno: 200,
+    descripcion: 'Casa de 3 dormitorios en San Pedro, sector tranquilo con vista a los cerros. A 25 minutos de Melipilla.',
+    fotos: FOTOS.slice(0, 2),
+  },
+  {
+    slug: 'demo-parcela-san-pedro-agricola',
+    comunaId: SAN_PEDRO,
+    tipoOperacion: 'VENTA',
+    tipoPropiedad: 'PARCELA',
+    destacada: false,
+    precioUf: 6200,
+    m2Terreno: 8000,
+    descripcion: 'Parcela agrícola de 8.000 m² en San Pedro, con pozo profundo y derechos de agua al día.',
+    fotos: FOTOS.slice(0, 1),
+  },
+  {
+    slug: 'demo-depto-talagante-centro',
+    comunaId: TALAGANTE,
+    tipoOperacion: 'ARRIENDO',
+    tipoPropiedad: 'DEPARTAMENTO',
+    destacada: true,
+    precioClp: 380000,
+    dormitorios: 2,
+    banos: 1,
+    m2Construidos: 48,
+    estacionamientos: 1,
+    gastosComunesClp: 38000,
+    descripcion: 'Departamento de 2 dormitorios a pasos de la estación de Talagante, ideal para quien viaja a Santiago.',
+    fotos: FOTOS.slice(0, 3),
+  },
+  {
+    slug: 'demo-bodega-talagante-industrial',
+    comunaId: TALAGANTE,
+    tipoOperacion: 'ARRIENDO',
+    tipoPropiedad: 'BODEGA',
+    destacada: false,
+    precioClp: 650000,
+    m2Construidos: 200,
+    descripcion: 'Bodega de 200 m² en sector industrial de Talagante, con acceso para camión y altura libre de 6 metros.',
+    fotos: [] as string[],
+  },
+  {
+    slug: 'demo-casa-el-monte-rio',
+    comunaId: EL_MONTE,
+    tipoOperacion: 'VENTA',
+    tipoPropiedad: 'CASA',
+    destacada: false,
+    precioUf: 3600,
+    dormitorios: 3,
+    banos: 2,
+    m2Construidos: 130,
+    m2Terreno: 400,
+    descripcion: 'Casa de 3 dormitorios cerca del río Maipo en El Monte, patio amplio con árboles frutales.',
+    fotos: FOTOS.slice(0, 2),
   },
 ] as const;
 
@@ -122,7 +198,6 @@ async function main() {
       create: {
         ...p,
         estado: 'PUBLICADA',
-        comunaId: MELIPILLA,
         publicadorId: publicador.id,
       },
     });

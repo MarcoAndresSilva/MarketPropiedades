@@ -51,6 +51,17 @@ export class PropertiesService {
     return { items, total, page: query.page, pageSize: query.pageSize };
   }
 
+  // Solo comunas con al menos una propiedad publicada — un dropdown con las 346 comunas del
+  // país cuando el catálogo tiene propiedades solo en un puñado de ellas confundiría más de lo
+  // que ayuda.
+  findComunasConPropiedades() {
+    return this.prisma.comuna.findMany({
+      where: { properties: { some: { estado: EstadoPublicacion.PUBLICADA } } },
+      select: { id: true, nombre: true, regionId: true },
+      orderBy: { nombre: 'asc' },
+    });
+  }
+
   async findPublishedBySlug(slug: string) {
     const property = await this.prisma.property.findFirst({
       where: { slug, estado: EstadoPublicacion.PUBLICADA },

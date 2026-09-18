@@ -1,22 +1,32 @@
 <main class="catalog">
   <app-hero-carousel />
 
-  <h1 id="catalogo-grid">Propiedades en Melipilla</h1>
+  <form class="search-bar" (ngSubmit)="buscar()" aria-label="Buscar propiedades">
+    @if (comunas().length > 0) {
+      <label class="search-bar__field">
+        <span class="search-bar__label">Comuna</span>
+        <select name="comunaId" [(ngModel)]="comunaId">
+          <option value="">Todas las comunas</option>
+          @for (comuna of comunas(); track comuna.id) {
+            <option [value]="comuna.id">{{ comuna.nombre }}</option>
+          }
+        </select>
+      </label>
+    }
 
-  <form class="filters" (ngSubmit)="buscar()">
-    <label>
-      Operación
+    <label class="search-bar__field">
+      <span class="search-bar__label">Operación</span>
       <select name="tipoOperacion" [(ngModel)]="tipoOperacion">
-        <option value="">Todas</option>
-        <option value="VENTA">Venta</option>
-        <option value="ARRIENDO">Arriendo</option>
+        <option value="">Comprar o arrendar</option>
+        <option value="VENTA">Comprar</option>
+        <option value="ARRIENDO">Arrendar</option>
       </select>
     </label>
 
-    <label>
-      Tipo
+    <label class="search-bar__field">
+      <span class="search-bar__label">Tipo</span>
       <select name="tipoPropiedad" [(ngModel)]="tipoPropiedad">
-        <option value="">Todos</option>
+        <option value="">Todos los tipos</option>
         <option value="CASA">Casa</option>
         <option value="DEPARTAMENTO">Departamento</option>
         <option value="PARCELA">Parcela</option>
@@ -27,8 +37,10 @@
       </select>
     </label>
 
-    <button type="submit">Buscar</button>
+    <button type="submit" class="search-bar__submit">Buscar</button>
   </form>
+
+  <h1 id="catalogo-grid">Propiedades en Melipilla y alrededores</h1>
 
   @if (loading()) {
     <p role="status">Cargando propiedades…</p>

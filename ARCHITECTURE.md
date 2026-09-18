@@ -450,3 +450,52 @@ fabricar presencia que no existe.
 propiedad ya declaraban su propio `<main>`; `/publicar` usaba un `<section>` suelto. Se corrigió
 para que las tres páginas compartan la misma estructura de landmarks (`header` → `main` → `footer`)
 que usa cualquier lector de pantalla para navegar la página por regiones.
+
+### Fase 13 — Filtro de comuna en el catálogo
+
+**Decisión — `GET /properties/comunas` devuelve solo comunas con al menos una propiedad
+publicada, no las 346 del país.** El modelo de datos es nacional a propósito (§1), pero el
+catálogo real solo cubre Melipilla y su zona. Un dropdown con las 346 comunas del país para un
+catálogo que cubre un puñado confundiría más de lo que ayuda — el filtro se llena con
+`Comuna.findMany({ where: { properties: { some: { estado: PUBLICADA } } } })`, así que crece solo
+a medida que el catálogo realmente cubre más comunas.
+
+**Decisión — el seed de demo se amplió a 4 comunas reales, no solo Melipilla.** Con datos
+únicamente en una comuna, el filtro nunca podía probarse de verdad — un `<select>` con una sola
+opción no ejercita nada. Se agregaron 5 propiedades más en San Pedro, Talagante y El Monte
+(comunas reales de la zona poniente de la Región Metropolitana, con sus códigos SUBDERE reales:
+`13505`, `13601`, `13602`), para que el MVP se comporte como se comportaría en producción con
+cobertura real en más de una comuna — no un mock que solo funciona en el caso de una sola comuna
+sembrada.
+
+**Decisión de ruteo — `GET /properties/comunas` se declara antes de `GET /properties/:slug`.**
+Ambas son rutas de un solo segmento bajo `/properties`; si `:slug` se declarara primero, Nest
+interpretaría cualquier request a `/properties/comunas` como una búsqueda de la ficha con slug
+`"comunas"` y nunca llegaría al controller correcto. `GET /properties/admin/all` no tiene este
+problema porque son dos segmentos, no uno.
+
+**Decisión — el filtro de comuna no se muestra si la lista viene vacía.** Si `findComunasConPropiedades()` no devuelve nada (o falla la request), el `<select>` completo desaparece del formulario en vez de mostrarse vacío o con un placeholder falso — un filtro sin opciones reales no aporta nada y confunde.
+
+**Verificado de punta a punta:** con el backend y Postgres corriendo de verdad (no mockeado) y el
+seed ampliado, se confirmó que el endpoint devuelve las 4 comunas reales (`El Monte`, `Melipilla`,
+`San Pedro`, `Talagante`) y que filtrar por una de ellas (Talagante) devuelve exactamente las 2
+propiedades sembradas ahí.
+
+### Fase 14 — Buscador integrado como card flotante
+
+**Decisión — los mismos tres filtros pasan de formulario plano a card flotante sobre el hero.**
+Funcionalmente no cambió nada (comuna, operación, tipo, mismo endpoint) — cambió la ubicación y el
+tratamiento visual: una card blanca con sombra, superpuesta al borde inferior del hero
+(`margin-top` negativo que consume el espacio en blanco que ya dejaban los indicadores del
+carrusel), en vez de un formulario suelto debajo. Es el mismo patrón que un buscador integrado de
+portal real — la búsqueda como elemento central de la portada, no una sección secundaria.
+
+**Decisión — sigue siendo un `<select>` por comuna, no un campo de texto libre.** Con solo un
+puñado de comunas reales en el catálogo, un desplegable sigue siendo más simple y sin ambigüedad
+que un campo de texto con autocompletado — eso solo se justificaría con muchas más comunas y un
+volumen de datos que hiciera necesaria la búsqueda difusa.
+
+**Decisión — el encabezado del catálogo se corrigió a "Melipilla y alrededores".** Con el seed ya
+cubriendo Talagante, San Pedro y El Monte además de Melipilla, el título "Propiedades en
+Melipilla" a secas quedó desactualizado — un detalle chico, pero un `<h1>` que no refleja lo que
+realmente muestra la página por debajo no es un detalle menor para SEO ni para el usuario.

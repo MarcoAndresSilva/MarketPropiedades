@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
-import { CatalogFilters, PaginatedProperties, Property } from './property.model';
+import { CatalogFilters, Comuna, PaginatedProperties, Property } from './property.model';
 
 @Injectable({ providedIn: 'root' })
 export class PropertiesService {
@@ -22,5 +22,9 @@ export class PropertiesService {
 
   findBySlug(slug: string): Observable<Property> {
     return this.http.get<Property>(`${this.baseUrl}/${slug}`);
+  }
+
+  findComunasConPropiedades(): Observable<Pick<Comuna, 'id' | 'nombre' | 'regionId'>[]> {
+    return this.http.get<Pick<Comuna, 'id' | 'nombre' | 'regionId'>[]>(`${this.baseUrl}/comunas`);
   }
 }
