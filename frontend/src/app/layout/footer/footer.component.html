@@ -1,0 +1,25 @@
+<footer class="site-footer">
+  <div class="site-footer__top">
+    <div class="site-footer__brand">
+      <svg class="site-footer__mark" viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          fill-rule="evenodd"
+          clip-rule="evenodd"
+          d="M12 2.3 L20.6 9.3 V14.6 C20.6 19.2 16.9 22.2 12 22.2 C7.1 22.2 3.4 19.2 3.4 14.6 V9.3 L12 2.3 Z M12 8.1 A2.6 2.6 0 1 0 12.01 8.1 Z"
+        />
+      </svg>
+      <div>
+        <p class="site-footer__nombre">Market Propiedades</p>
+        <p class="site-footer__tagline">Portal inmobiliario de Melipilla, con contacto directo por WhatsApp.</p>
+      </div>
+    </div>
+
+    <nav class="site-footer__nav" aria-label="Enlaces del sitio">
+      <a routerLink="/">Propiedades</a>
+      <a routerLink="/publicar">¿Quieres publicar tu propiedad?</a>
+      <a [href]="contactoUrl" target="_blank" rel="noopener">Contacto por WhatsApp</a>
+    </nav>
+  </div>
+
+  <p class="site-footer__copyright">© {{ anio }} Market Propiedades.</p>
+</footer>

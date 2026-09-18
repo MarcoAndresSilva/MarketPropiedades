@@ -435,3 +435,18 @@ lugar natural para reemplazarlo.
 
 **Verificado:** el `href` del botón final se leyó directamente del DOM renderizado, confirmando la
 URL de `wa.me` con el número y el mensaje correctos. Probado en ambos temas y en viewport móvil.
+
+### Fase 12 — Footer
+
+**Decisión — footer con contenido real, sin fabricar redes sociales ni dirección.** El sitio
+terminaba de golpe justo después de la grilla de propiedades, sin cierre visual ni landmarks de
+accesibilidad (`<main>`/`<footer>`). El footer nuevo repite la marca, un texto breve real (qué es
+el portal), navegación a las páginas que ya existen y el mismo contacto de WhatsApp centralizado en
+`core/business-contact.ts`. No incluye íconos de redes sociales ni una dirección física — no
+existen cuentas ni oficina real todavía, y un ícono de Instagram/Facebook sin cuenta detrás sería
+fabricar presencia que no existe.
+
+**Decisión — `<main>` explícito en cada página, incluida `/publicar`.** El catálogo y la ficha de
+propiedad ya declaraban su propio `<main>`; `/publicar` usaba un `<section>` suelto. Se corrigió
+para que las tres páginas compartan la misma estructura de landmarks (`header` → `main` → `footer`)
+que usa cualquier lector de pantalla para navegar la página por regiones.
