@@ -6,10 +6,11 @@ import { Property } from '../../core/property.model';
 import { formatPrecio, formatTipoPropiedad } from '../../core/format.util';
 import { buildWhatsappUrl } from '../../core/whatsapp.util';
 import { PhotoSliderComponent } from './photo-slider.component';
+import { PropertyMapComponent } from './property-map.component';
 
 @Component({
   selector: 'app-property-detail',
-  imports: [RouterLink, DecimalPipe, PhotoSliderComponent],
+  imports: [RouterLink, DecimalPipe, PhotoSliderComponent, PropertyMapComponent],
   templateUrl: './property-detail.component.html',
   styleUrl: './property-detail.component.scss',
 })

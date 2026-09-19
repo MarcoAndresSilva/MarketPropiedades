@@ -47,6 +47,8 @@ export interface Property {
   comunaId: string;
   comuna: Comuna;
   direccion: string | null;
+  lat: number | null;
+  lng: number | null;
   precioUf: string | null;
   precioClp: number | null;
   m2Construidos: number | null;

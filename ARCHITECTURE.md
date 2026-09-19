@@ -483,12 +483,14 @@ propiedades sembradas ahí.
 
 ### Fase 14 — Buscador integrado como card flotante
 
-**Decisión — los mismos tres filtros pasan de formulario plano a card flotante sobre el hero.**
-Funcionalmente no cambió nada (comuna, operación, tipo, mismo endpoint) — cambió la ubicación y el
-tratamiento visual: una card blanca con sombra, superpuesta al borde inferior del hero
-(`margin-top` negativo que consume el espacio en blanco que ya dejaban los indicadores del
-carrusel), en vez de un formulario suelto debajo. Es el mismo patrón que un buscador integrado de
-portal real — la búsqueda como elemento central de la portada, no una sección secundaria.
+**Decisión — los mismos tres filtros pasan de formulario plano a card destacada bajo el hero.**
+Funcionalmente no cambió nada (comuna, operación, tipo, mismo endpoint) — cambió el tratamiento
+visual: una card blanca con sombra y borde redondeado, en vez de un formulario suelto sin fondo. Es
+el mismo patrón que un buscador integrado de portal real — la búsqueda como elemento central de la
+portada, no una sección secundaria. Se probó primero con un `margin-top` negativo para que la card
+se superpusiera al borde del hero, pero los indicadores del carrusel (L-18) viven en su propia
+franja con espacio propio justo ahí — el resultado quedaba apretado, no "flotante". La versión
+final usa un margen positivo normal, sin superposición.
 
 **Decisión — sigue siendo un `<select>` por comuna, no un campo de texto libre.** Con solo un
 puñado de comunas reales en el catálogo, un desplegable sigue siendo más simple y sin ambigüedad
@@ -499,3 +501,76 @@ volumen de datos que hiciera necesaria la búsqueda difusa.
 cubriendo Talagante, San Pedro y El Monte además de Melipilla, el título "Propiedades en
 Melipilla" a secas quedó desactualizado — un detalle chico, pero un `<h1>` que no refleja lo que
 realmente muestra la página por debajo no es un detalle menor para SEO ni para el usuario.
+
+### Fase 15 — Mapa en la ficha de propiedad
+
+**Decisión — Leaflet + OpenStreetMap, ya elegido en la Fase 1 (§2), recién implementado ahora.**
+`Property.lat`/`Property.lng` existían en el schema desde el modelo original pero nadie los usaba
+todavía. `PropertyMapComponent` los consume: un mapa con un pin en la ficha, sin costo ni tarjeta
+de crédito (a diferencia de Google Maps), coherente con un proyecto sin ingresos reales todavía.
+
+**Decisión — el mapa solo se muestra si la propiedad tiene coordenadas reales.** Ninguna
+propiedad tiene todavía una dirección exacta geocodificada (`direccion` es un sector genérico, no
+una calle real) — mostrar un pin igual, ubicado por ejemplo en el centro de la comuna, se leería
+como la ubicación exacta de la propiedad sin serlo. `@if (p.lat !== null && p.lng !== null)`
+esconde el bloque completo en vez de fabricar una precisión que no existe.
+
+**Decisión — Leaflet se carga con import dinámico, solo en el navegador.** Igual que el autoplay
+del hero (Fase 10), Leaflet manipula el DOM directo contra un elemento real — no tiene sentido
+durante SSR y, peor, instanciar un mapa contra un contenedor que no existe todavía en el proceso
+de Node rompería el render del servidor. `ngAfterViewInit` con `isPlatformBrowser` más
+`await import('leaflet')` deja el bundle del servidor sin ninguna dependencia de Leaflet.
+
+**Bug real: los íconos por defecto de Leaflet se rompen con cualquier bundler moderno.**
+`Icon.Default._getIconUrl` antepone incondicionalmente una ruta auto-detectada (vía un truco de
+lectura de una clase CSS) delante de la URL que se le configure — así que ni siquiera
+`Icon.Default.mergeOptions({ iconUrl: '...' })` alcanza para reemplazarla del todo; el resultado
+era una URL con un prefijo `/media//leaflet/...` que nunca existió, y el pin se veía roto. La
+salida real fue no tocar `Icon.Default`: se arma un ícono propio con `L.icon({ iconUrl, ... })` y
+se le pasa explícito a cada `L.marker(coords, { icon })` — esa ruta de código no tiene el
+comportamiento de anteponer nada. Los PNG del ícono se copiaron a `public/leaflet/` en vez de
+importarlos como asset del bundler, para no depender de si el pipeline de esbuild resuelve
+imports de imágenes de la misma forma que otros bundlers.
+
+**Decisión — `scrollWheelZoom: false`.** Sin esto, hacer scroll normal de la página mientras el
+cursor pasa sobre el mapa termina haciendo zoom al mapa en vez de bajar la página — una trampa de
+scroll clásica. El usuario igual puede hacer zoom con los botones +/- o gesto de pellizco en móvil.
+
+**Decisión — los tiles de OpenStreetMap no cambian con el tema claro/oscuro del sitio.** Es una
+limitación real de usar tiles rasterizados públicos (no hay una versión "oscura" gratuita sin
+cuenta ni configuración adicional) — se deja así a propósito en vez de invertir colores con CSS
+`filter`, que distorsionaría los tiles y los haría menos legibles.
+
+**Bug real en el seed: `update` del upsert no sincronizaba campos nuevos.** Al agregar
+`lat`/`lng` a `DEMO_PROPERTIES`, correr el seed sobre datos que ya existían de una corrida
+anterior no los guardaba — el `update` del upsert traía una lista angosta escrita a mano (solo
+`estado` y `videoUrl`), el mismo patrón de bug que ya había afectado a `comunaId` en la Fase 13.
+Se corrigió para que `update` y `create` compartan el mismo objeto de datos derivado de
+`DEMO_PROPERTIES`, así un campo nuevo se sincroniza automáticamente sin volver a tocar esta lógica.
+
+**Verificado con interacción real vía Playwright:** carga del mapa contra los tiles reales de
+OpenStreetMap (no un mock), confirmando 0 errores de consola, el marcador presente en el DOM, y
+los tiles efectivamente cargados — no solo que el contenedor se veía bien vacío. Se detectó y
+corrigió el bug del ícono roto en este mismo proceso, comparando la URL real solicitada contra la
+esperada.
+
+### Fase 16 — Foto y video lado a lado en desktop; video de relleno propio
+
+**Decisión — grid de dos columnas solo cuando existen ambos medios, y solo desde 640px.** Con
+`display: grid; grid-template-columns: 1fr` como base (una columna, mobile-first) y un modificador
+`.ficha__media--dual` que activa `grid-template-columns: 1fr 1fr` en pantallas más anchas, el
+layout de dos columnas aparece únicamente cuando la propiedad tiene foto Y video — con solo uno de
+los dos, ese elemento sigue ocupando una sola columna angosta (`max-width: 500px`) en vez de
+estirarse a lo ancho o dejar la mitad de la fila vacía junto a él.
+
+**Decisión — video de relleno propio (5s, generado con `ffmpeg`), no un video público
+descargado.** El video de muestra anterior era un cortometraje libre de Blender Foundation — servía
+para probar que el `<video>` funcionaba, pero no tenía ninguna relación con el rubro ni con la
+identidad visual del sitio. El nuevo video es un clip de 5 segundos con el color de acento de la
+marca y el texto "Video de prueba — de relleno" (mismo criterio que las fotos SVG: honesto sobre
+ser contenido de relleno, no una visita real), generado con un filtro `drawtext` de `ffmpeg` y
+servido como archivo estático desde `public/demo-video/`, igual que las fotos.
+
+**Verificado visualmente vía Playwright:** capturas en desktop (foto y video lado a lado),
+mobile (apilados) y en una ficha con solo foto (columna única, sin espacio vacío), confirmando los
+tres casos del layout condicional.

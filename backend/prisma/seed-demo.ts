@@ -32,16 +32,34 @@ const SAN_PEDRO = '13505';
 const TALAGANTE = '13601';
 const EL_MONTE = '13602';
 
+// Coordenadas aproximadas del centro de cada comuna — no direcciones reales geocodificadas
+// (no existen todavía, igual que `direccion` es un sector genérico y no una calle real).
+// Sirven para probar el mapa con pines de verdad, en la misma zona real de cada comuna.
+const CENTRO_MELIPILLA = { lat: -33.6857, lng: -71.2166 };
+const CENTRO_SAN_PEDRO = { lat: -33.9068, lng: -71.4569 };
+const CENTRO_TALAGANTE = { lat: -33.6653, lng: -70.9294 };
+const CENTRO_EL_MONTE = { lat: -33.6811, lng: -70.9838 };
+
+// Pequeño desplazamiento (unos cientos de metros) para que dos propiedades de la misma
+// comuna no queden con el pin exactamente superpuesto en el mapa.
+function jitter(centro: { lat: number; lng: number }, i: number) {
+  const offset = i * 0.004;
+  return { lat: centro.lat + offset, lng: centro.lng - offset };
+}
+
 const FOTOS = ['/demo-fotos/foto-1.svg', '/demo-fotos/foto-2.svg', '/demo-fotos/foto-3.svg', '/demo-fotos/foto-4.svg'];
 
-// Video público de muestra (cortometraje libre de Blender Foundation) — sirve para
-// probar que el reproductor funciona, no es una visita real a la propiedad.
-const VIDEO_DEMO = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+// Video de relleno propio (5s, generado con ffmpeg — fondo de marca + texto), servido
+// por el propio frontend igual que las fotos de relleno. Reemplaza al cortometraje
+// público que se usaba antes (Big Buck Bunny): servía para probar el reproductor, pero
+// no tenía nada que ver con el rubro ni con la identidad visual del sitio.
+const VIDEO_DEMO = '/demo-video/demo-video.mp4';
 
 const DEMO_PROPERTIES = [
   {
     slug: 'demo-casa-melipilla-centro',
     comunaId: MELIPILLA,
+    ...jitter(CENTRO_MELIPILLA, 0),
     tipoOperacion: 'VENTA',
     tipoPropiedad: 'CASA',
     destacada: true,
@@ -59,6 +77,7 @@ const DEMO_PROPERTIES = [
   {
     slug: 'demo-depto-melipilla-plaza',
     comunaId: MELIPILLA,
+    ...jitter(CENTRO_MELIPILLA, 1),
     tipoOperacion: 'ARRIENDO',
     tipoPropiedad: 'DEPARTAMENTO',
     destacada: false,
@@ -74,6 +93,7 @@ const DEMO_PROPERTIES = [
   {
     slug: 'demo-parcela-melipilla-rural',
     comunaId: MELIPILLA,
+    ...jitter(CENTRO_MELIPILLA, 2),
     tipoOperacion: 'VENTA',
     tipoPropiedad: 'PARCELA',
     destacada: true,
@@ -86,6 +106,7 @@ const DEMO_PROPERTIES = [
   {
     slug: 'demo-oficina-melipilla-centro',
     comunaId: MELIPILLA,
+    ...jitter(CENTRO_MELIPILLA, 3),
     tipoOperacion: 'ARRIENDO',
     tipoPropiedad: 'OFICINA',
     destacada: false,
@@ -98,6 +119,7 @@ const DEMO_PROPERTIES = [
   {
     slug: 'demo-local-melipilla-avenida',
     comunaId: MELIPILLA,
+    ...jitter(CENTRO_MELIPILLA, 4),
     tipoOperacion: 'VENTA',
     tipoPropiedad: 'LOCAL_COMERCIAL',
     destacada: false,
@@ -109,6 +131,7 @@ const DEMO_PROPERTIES = [
   {
     slug: 'demo-casa-san-pedro-vista-cerro',
     comunaId: SAN_PEDRO,
+    ...jitter(CENTRO_SAN_PEDRO, 0),
     tipoOperacion: 'VENTA',
     tipoPropiedad: 'CASA',
     destacada: false,
@@ -123,6 +146,7 @@ const DEMO_PROPERTIES = [
   {
     slug: 'demo-parcela-san-pedro-agricola',
     comunaId: SAN_PEDRO,
+    ...jitter(CENTRO_SAN_PEDRO, 1),
     tipoOperacion: 'VENTA',
     tipoPropiedad: 'PARCELA',
     destacada: false,
@@ -134,6 +158,7 @@ const DEMO_PROPERTIES = [
   {
     slug: 'demo-depto-talagante-centro',
     comunaId: TALAGANTE,
+    ...jitter(CENTRO_TALAGANTE, 0),
     tipoOperacion: 'ARRIENDO',
     tipoPropiedad: 'DEPARTAMENTO',
     destacada: true,
@@ -149,6 +174,7 @@ const DEMO_PROPERTIES = [
   {
     slug: 'demo-bodega-talagante-industrial',
     comunaId: TALAGANTE,
+    ...jitter(CENTRO_TALAGANTE, 1),
     tipoOperacion: 'ARRIENDO',
     tipoPropiedad: 'BODEGA',
     destacada: false,
@@ -160,6 +186,7 @@ const DEMO_PROPERTIES = [
   {
     slug: 'demo-casa-el-monte-rio',
     comunaId: EL_MONTE,
+    ...jitter(CENTRO_EL_MONTE, 0),
     tipoOperacion: 'VENTA',
     tipoPropiedad: 'CASA',
     destacada: false,
@@ -192,14 +219,15 @@ async function main() {
   });
 
   for (const { fotos, ...p } of DEMO_PROPERTIES) {
+    // update y create comparten los mismos datos a propósito: la vez pasada que
+    // update() traía una lista angosta de campos a mano (solo estado + videoUrl), un
+    // campo nuevo en DEMO_PROPERTIES (comunaId, y ahora lat/lng) quedaba silenciosamente
+    // sin sincronizar en las filas que ya existían de una corrida anterior del seed.
+    const data = { ...p, estado: 'PUBLICADA' as const, videoUrl: 'videoUrl' in p ? p.videoUrl : null };
     const property = await prisma.property.upsert({
       where: { slug: p.slug },
-      update: { estado: 'PUBLICADA', videoUrl: 'videoUrl' in p ? p.videoUrl : null },
-      create: {
-        ...p,
-        estado: 'PUBLICADA',
-        publicadorId: publicador.id,
-      },
+      update: data,
+      create: { ...data, publicadorId: publicador.id },
     });
 
     // Re-sembrar fotos desde cero es más simple que hacer upsert foto por foto.
