@@ -10,15 +10,17 @@
     <h1>{{ formatTipoPropiedad(p.tipoPropiedad) }} en {{ p.comuna.nombre }}</h1>
     <p class="ficha__region">{{ p.comuna.region.nombre }}{{ p.direccion ? ' · ' + p.direccion : '' }}</p>
 
-    @if (p.fotos.length > 0) {
-      <app-photo-slider [fotos]="p.fotos" class="ficha__galeria" />
-    } @else if (!p.videoUrl) {
-      <div class="ficha__sin-fotos">Sin fotos todavía</div>
-    }
+    <div class="ficha__media" [class.ficha__media--dual]="p.fotos.length > 0 && p.videoUrl">
+      @if (p.fotos.length > 0) {
+        <app-photo-slider [fotos]="p.fotos" class="ficha__galeria" />
+      } @else if (!p.videoUrl) {
+        <div class="ficha__sin-fotos">Sin fotos todavía</div>
+      }
 
-    @if (p.videoUrl) {
-      <video class="ficha__video" [src]="p.videoUrl" controls preload="metadata"></video>
-    }
+      @if (p.videoUrl) {
+        <video class="ficha__video" [src]="p.videoUrl" controls preload="metadata"></video>
+      }
+    </div>
 
     <p class="ficha__precio">{{ formatPrecio(p) }}</p>
 
@@ -47,6 +49,10 @@
     </ul>
 
     <p class="ficha__descripcion">{{ p.descripcion }}</p>
+
+    @if (p.lat !== null && p.lng !== null) {
+      <app-property-map [lat]="p.lat" [lng]="p.lng" class="ficha__mapa" />
+    }
 
     <div class="ficha__contacto">
       <p>Publica: <strong>{{ p.publicador.name }}</strong></p>

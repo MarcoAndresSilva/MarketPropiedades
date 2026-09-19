@@ -1,5 +1,5 @@
 .ficha {
-  max-width: 800px;
+  max-width: 900px;
   margin: 0 auto;
   padding: 24px 16px 60px;
 }
@@ -20,10 +20,31 @@
   margin-top: 4px;
 }
 
+// En mobile siempre apilado (una columna) — en desktop, foto y video lado a lado
+// cuando existen ambos, para aprovechar el ancho en vez de dejar la mitad de la
+// pantalla vacía debajo de una sola columna angosta.
+.ficha__media {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin: 16px 0;
+}
+
+.ficha__media--dual {
+  @media (min-width: 640px) {
+    grid-template-columns: 1fr 1fr;
+    align-items: start;
+  }
+}
+
 .ficha__galeria {
   display: block;
-  margin: 16px 0;
+  margin: 0;
   max-width: 500px;
+
+  .ficha__media--dual & {
+    max-width: none;
+  }
 }
 
 .ficha__sin-fotos {
@@ -32,7 +53,7 @@
   justify-content: center;
   aspect-ratio: 3 / 2;
   max-width: 500px;
-  margin: 16px 0;
+  margin: 0;
   border-radius: 10px;
   background: var(--surface-2);
   color: var(--text-subtle);
@@ -43,9 +64,13 @@
   display: block;
   width: 100%;
   max-width: 500px;
-  margin: 16px 0;
+  margin: 0;
   border-radius: 10px;
   background: #000;
+
+  .ficha__media--dual & {
+    max-width: none;
+  }
 }
 
 .ficha__precio {
@@ -69,6 +94,11 @@
 .ficha__descripcion {
   white-space: pre-line;
   line-height: 1.6;
+  margin-bottom: 24px;
+}
+
+.ficha__mapa {
+  display: block;
   margin-bottom: 24px;
 }
 
