@@ -4,9 +4,10 @@
   padding: 24px 16px 60px;
 }
 
-// Card flotante que se superpone al borde inferior del hero — mismo patrón que un
-// buscador integrado de portal real (comuna + operación + tipo en una sola fila),
-// en vez de un formulario plano suelto debajo.
+// Card destacada con sombra, como un buscador integrado de portal real (comuna +
+// operación + tipo en una sola fila) en vez de un formulario plano suelto. Sin
+// margen negativo hacia el hero: los dots del carrusel viven en su propia franja con
+// espacio propio (L-18) y superponerse ahí los deja apretados contra la card.
 .search-bar {
   position: relative;
   z-index: 1;
@@ -14,7 +15,7 @@
   flex-wrap: wrap;
   gap: 12px;
   align-items: end;
-  margin: -28px 12px 32px;
+  margin: 8px 12px 32px;
   padding: 16px;
   background: var(--surface);
   border: 1px solid var(--border);
