@@ -3,10 +3,13 @@ import { DecimalPipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PropertiesService } from '../../core/properties.service';
 import { Property } from '../../core/property.model';
-import { formatPrecio, formatTipoPropiedad } from '../../core/format.util';
+import { formatPrecio, formatTipoPropiedad, truncarEnPalabra } from '../../core/format.util';
 import { buildWhatsappUrl } from '../../core/whatsapp.util';
 import { PhotoSliderComponent } from './photo-slider.component';
 import { PropertyMapComponent } from './property-map.component';
+import { SeoService } from '../../core/seo.service';
+import { cloudinaryImageUrl } from '../../core/cloudinary.util';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-property-detail',
@@ -17,6 +20,7 @@ import { PropertyMapComponent } from './property-map.component';
 export class PropertyDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly properties = inject(PropertiesService);
+  private readonly seo = inject(SeoService);
 
   readonly property = signal<Property | null>(null);
   readonly notFound = signal(false);
@@ -32,8 +36,44 @@ export class PropertyDetailComponent implements OnInit {
     }
 
     this.properties.findBySlug(slug).subscribe({
-      next: (property) => this.property.set(property),
+      next: (property) => {
+        this.property.set(property);
+        this.setSeo(property);
+      },
       error: () => this.notFound.set(true),
+    });
+  }
+
+  private setSeo(p: Property): void {
+    const titulo = `${this.formatTipoPropiedad(p.tipoPropiedad)} en ${p.comuna.nombre}`;
+    const precio = this.formatPrecio(p);
+    const descripcion = truncarEnPalabra(`${titulo} — ${precio}. ${p.descripcion}`, 157);
+    const path = `/propiedad/${p.slug}`;
+
+    let image: string | undefined;
+    if (p.fotos.length > 0) {
+      const url = cloudinaryImageUrl(p.fotos[0].cloudinaryPublicId, 1200, 630);
+      image = url.startsWith('http') ? url : `${environment.siteUrl}${url}`;
+    }
+
+    this.seo.setPage({ title: titulo, description: descripcion, path, image });
+
+    this.seo.setJsonLd({
+      '@context': 'https://schema.org',
+      '@type': 'RealEstateListing',
+      name: titulo,
+      description: p.descripcion,
+      url: `${environment.siteUrl}${path}`,
+      ...(image ? { image } : {}),
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: p.comuna.nombre,
+        addressRegion: p.comuna.region.nombre,
+        addressCountry: 'CL',
+      },
+      ...(p.lat !== null && p.lng !== null
+        ? { geo: { '@type': 'GeoCoordinates', latitude: p.lat, longitude: p.lng } }
+        : {}),
     });
   }
 

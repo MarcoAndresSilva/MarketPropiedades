@@ -574,3 +574,47 @@ servido como archivo estático desde `public/demo-video/`, igual que las fotos.
 **Verificado visualmente vía Playwright:** capturas en desktop (foto y video lado a lado),
 mobile (apilados) y en una ficha con solo foto (columna única, sin espacio vacío), confirmando los
 tres casos del layout condicional.
+
+### Fase 17 — SEO: meta tags, JSON-LD, robots.txt y sitemap dinámico
+
+**Decisión — `SeoService` centraliza title, meta description, Open Graph, Twitter Card y
+canonical.** Usa `Title`/`Meta` de Angular (corren también durante SSR, así que el HTML que recibe
+un crawler o el bot de previsualización de WhatsApp ya trae estos tags — no dependen de que se
+ejecute JavaScript en el navegador). El canonical y el JSON-LD no tienen soporte nativo en `Meta`,
+así que se manejan a mano contra el `DOCUMENT` inyectado.
+
+**Decisión — la ficha de propiedad arma su meta description y su Open Graph a partir de datos
+reales de esa propiedad, no un texto genérico repetido en todas las fichas.** Título, precio,
+comuna y las primeras líneas de la descripción real arman una meta description dinámica; la
+primera foto (si existe) se usa como `og:image`/`twitter:image` en tamaño 1200x630 — ninguna
+imagen de relleno inventada para esto, si la propiedad no tiene fotos simplemente no hay imagen.
+
+**Decisión — JSON-LD `RealEstateListing` con dirección y coordenadas reales cuando existen.**
+`comuna`/`región` van en `address` siempre (son datos reales); `geo` (`GeoCoordinates`) solo se
+agrega si la propiedad tiene `lat`/`lng` — mismo criterio que el mapa (Fase 15): no inventar
+precisión que no existe.
+
+**Decisión — `sitemap.xml` se genera en cada request, no en build time.** El catálogo es
+`RenderMode.Server` precisamente porque cambia sin un nuevo deploy (Fase 8/9) — un sitemap
+generado una vez en el build quedaría desactualizado apenas se publicara una propiedad nueva. La
+ruta se agrega directo en `server.ts` (antes del handler catch-all de Angular), pide todas las
+páginas de `GET /properties` al backend y arma el XML con las URLs reales — si el backend no
+responde, el sitemap sale igual con las rutas estáticas (`/`, `/publicar`) en vez de devolver un
+500 al crawler.
+
+**Decisión — `robots.txt` sí es estático.** A diferencia del sitemap, su contenido no depende de
+qué propiedades existen — vive como archivo plano en `public/`, sin necesidad de generarlo por
+request.
+
+**Bug real: el servidor SSR devolvía 400 en local sin `NG_ALLOWED_HOSTS`.** Ya documentado en la
+Fase 8 (validación de `Host` contra una lista blanca, mitigación de CVE-2026-27739) — volvió a
+aparecer acá al levantar el build de producción a mano en un puerto distinto al de `ng serve`
+durante la verificación. Confirma por qué esa variable de entorno es indispensable en cualquier
+entorno que no sea el dev server de Angular.
+
+**Verificado con un build real, no solo con el dev server:** `ng build --configuration
+development` completo, servido con `node dist/frontend/server/server.mjs` contra el backend real,
+confirmando con `curl` que el HTML devuelto por el servidor (antes de cualquier JavaScript del
+navegador) ya trae title, meta description, Open Graph, canonical y JSON-LD — en el catálogo y en
+una ficha real. `sitemap.xml` se verificó con las 10 propiedades reales del seed, no con datos de
+prueba inventados para la ocasión.

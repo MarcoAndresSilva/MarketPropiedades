@@ -26,3 +26,12 @@ const TIPO_PROPIEDAD_LABEL: Record<Property['tipoPropiedad'], string> = {
 export function formatTipoPropiedad(tipo: Property['tipoPropiedad']): string {
   return TIPO_PROPIEDAD_LABEL[tipo];
 }
+
+/** Corta en el último espacio antes de `max` — para no partir una palabra a la mitad
+ * en una meta description (ej. no terminar en "...cerca de colegios y lo"). */
+export function truncarEnPalabra(texto: string, max: number): string {
+  if (texto.length <= max) return texto;
+  const cortado = texto.slice(0, max);
+  const ultimoEspacio = cortado.lastIndexOf(' ');
+  return (ultimoEspacio > 0 ? cortado.slice(0, ultimoEspacio) : cortado).trimEnd() + '…';
+}

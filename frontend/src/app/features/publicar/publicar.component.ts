@@ -1,6 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { BUSINESS_WHATSAPP } from '../../core/business-contact';
 import { buildWhatsappUrl } from '../../core/whatsapp.util';
+import { SeoService } from '../../core/seo.service';
 
 interface PasoPublicacion {
   numero: number;
@@ -34,11 +35,22 @@ const PASOS: PasoPublicacion[] = [
   templateUrl: './publicar.component.html',
   styleUrl: './publicar.component.scss',
 })
-export class PublicarComponent {
+export class PublicarComponent implements OnInit {
+  private readonly seo = inject(SeoService);
+
   readonly pasos = PASOS;
 
   protected readonly contactoUrl = buildWhatsappUrl(
     BUSINESS_WHATSAPP,
     'Hola, tengo una propiedad y me gustaría publicarla en Market Propiedades.',
   );
+
+  ngOnInit(): void {
+    this.seo.setPage({
+      title: 'Cómo publicar tu propiedad',
+      description:
+        'Publica tu casa, departamento o parcela en Market Propiedades. Te contamos el proceso paso a paso: contáctanos por WhatsApp, armamos tu ficha y recibes los contactos directo.',
+      path: '/publicar',
+    });
+  }
 }

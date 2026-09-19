@@ -4,6 +4,8 @@ import { PropertiesService } from '../../core/properties.service';
 import { CatalogFilters, Comuna, Property, TipoOperacion, TipoPropiedad } from '../../core/property.model';
 import { PropertyCardComponent } from './property-card.component';
 import { HeroCarouselComponent } from './hero-carousel.component';
+import { SeoService } from '../../core/seo.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   selector: 'app-catalog',
@@ -13,6 +15,7 @@ import { HeroCarouselComponent } from './hero-carousel.component';
 })
 export class CatalogComponent implements OnInit {
   private readonly properties = inject(PropertiesService);
+  private readonly seo = inject(SeoService);
 
   readonly items = signal<Property[]>([]);
   readonly total = signal(0);
@@ -25,6 +28,28 @@ export class CatalogComponent implements OnInit {
   tipoPropiedad: TipoPropiedad | '' = '';
 
   ngOnInit(): void {
+    this.seo.setPage({
+      title: 'Propiedades en venta y arriendo en Melipilla',
+      description:
+        'Casas, departamentos, parcelas y locales en Melipilla y alrededores. Contacta directo por WhatsApp al dueño o la corredora, sin intermediarios.',
+      path: '/',
+    });
+    this.seo.setJsonLd({
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'Organization',
+          name: 'Market Propiedades',
+          url: environment.siteUrl,
+        },
+        {
+          '@type': 'WebSite',
+          name: 'Market Propiedades',
+          url: environment.siteUrl,
+        },
+      ],
+    });
+
     this.load();
     this.properties.findComunasConPropiedades().subscribe({
       next: (comunas) => this.comunas.set(comunas),
