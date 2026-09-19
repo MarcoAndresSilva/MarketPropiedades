@@ -618,3 +618,18 @@ confirmando con `curl` que el HTML devuelto por el servidor (antes de cualquier 
 navegador) ya trae title, meta description, Open Graph, canonical y JSON-LD — en el catálogo y en
 una ficha real. `sitemap.xml` se verificó con las 10 propiedades reales del seed, no con datos de
 prueba inventados para la ocasión.
+
+### Fase 18 — Skip-link de accesibilidad
+
+**Decisión — un solo skip-link global en `app.ts`, no uno por página.** `<a href="#main-content"
+class="skip-link">` es el primer elemento del documento (antes del header), oculto hasta que
+recibe foco de teclado — permite saltar la navegación repetitiva del header directo al contenido
+principal. Cada página (`CatalogComponent`, `PropertyDetailComponent`, `PublicarComponent`)
+declara su propio `<main id="main-content" tabindex="-1">`, así el mismo link funciona sin
+importar en qué ruta esté el usuario. `tabindex="-1"` permite que el `<main>` reciba foco por
+programa al saltar — sin eso, algunos lectores de pantalla no anuncian correctamente que el foco
+se movió, aunque la página haga scroll visualmente hasta ahí.
+
+**Verificado con interacción real de teclado vía Playwright:** el primer `Tab` del documento
+enfoca el skip-link (confirmado leyendo `document.activeElement`, no solo mirando la captura), y
+activarlo con `Enter` mueve el foco real a `#main-content` — no solo un scroll visual sin foco.
