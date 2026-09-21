@@ -37,6 +37,14 @@ export class PropertiesController {
     return this.properties.findAllForAdmin();
   }
 
+  // Después de 'admin/all' a propósito: si fuera antes, ':id' matchearía "all" como un
+  // id cualquiera y esta ruta se comería a la de arriba.
+  @UseGuards(JwtAuthGuard)
+  @Get('admin/:id')
+  findOneForAdmin(@Param('id') id: string) {
+    return this.properties.findOneForAdmin(id);
+  }
+
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() dto: CreatePropertyDto) {

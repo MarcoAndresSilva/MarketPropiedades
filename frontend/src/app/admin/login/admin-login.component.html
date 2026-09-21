@@ -1,0 +1,24 @@
+<main class="admin-login">
+  <form class="admin-login__card" (ngSubmit)="submit()">
+    <h1>Panel de administración</h1>
+    <p class="admin-login__subtitle">Market Propiedades</p>
+
+    <label class="admin-login__field">
+      Correo
+      <input type="email" name="email" [(ngModel)]="email" required autocomplete="username" />
+    </label>
+
+    <label class="admin-login__field">
+      Contraseña
+      <input type="password" name="password" [(ngModel)]="password" required autocomplete="current-password" />
+    </label>
+
+    @if (error()) {
+      <p class="admin-login__error" role="alert">Correo o contraseña incorrectos.</p>
+    }
+
+    <button type="submit" [disabled]="loading()">
+      {{ loading() ? 'Entrando…' : 'Entrar' }}
+    </button>
+  </form>
+</main>

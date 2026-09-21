@@ -2,6 +2,7 @@ import {
   IsBoolean,
   IsEnum,
   IsInt,
+  IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
@@ -14,7 +15,11 @@ import {
 import { EstadoPublicacion, TipoOperacion, TipoPropiedad } from '../../generated/prisma/enums';
 
 export class CreatePropertyDto {
+  // IsNotEmpty además de IsString: un <select> del panel sin tocar manda '' (string
+  // vacío, no undefined) - IsString solo no lo rechaza, y ese id vacío llegaba hasta
+  // Prisma, donde fallaba como violación de FK (500 críptico) en vez de un 400 claro.
   @IsString()
+  @IsNotEmpty()
   publicadorId: string;
 
   @IsEnum(TipoOperacion)
@@ -32,6 +37,7 @@ export class CreatePropertyDto {
   destacada?: boolean;
 
   @IsString()
+  @IsNotEmpty()
   comunaId: string;
 
   @IsOptional()

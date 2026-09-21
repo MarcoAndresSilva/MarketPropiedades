@@ -1,0 +1,164 @@
+.admin--form {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+
+.admin__volver {
+  display: inline-block;
+  margin-bottom: 12px;
+  color: var(--text-muted);
+  text-decoration: none;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 20px;
+}
+
+fieldset {
+  // <fieldset> trae un min-width: min-content implícito del navegador que puede
+  // forzar overflow horizontal en mobile - se anula explícitamente.
+  min-width: 0;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 18px 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  legend {
+    padding: 0 6px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+}
+
+.form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  // Sin esto, un hijo flex no se achica más allá de su ancho de contenido por
+  // defecto (min-width: auto) - en mobile, un <select> con una opción larga
+  // empujaba todo el formulario a scroll horizontal.
+  min-width: 0;
+
+  input,
+  select,
+  textarea {
+    width: 100%;
+    padding: 9px 10px;
+    font-size: 0.92rem;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--surface);
+    color: var(--text);
+    font-family: inherit;
+    box-sizing: border-box;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}
+
+.form__asterisco {
+  color: var(--danger);
+}
+
+.form__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
+}
+
+.form__checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.form__hint {
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 0.85rem;
+}
+
+.form__error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.88rem;
+}
+
+.form__fotos {
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 0;
+  margin: 0;
+
+  li {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
+  }
+
+  img {
+    width: 120px;
+    height: 82px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+  }
+
+  button {
+    background: none;
+    border: none;
+    color: var(--danger);
+    cursor: pointer;
+    font-size: 0.78rem;
+    padding: 0;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.form__video-preview {
+  max-width: 320px;
+  border-radius: 8px;
+}
+
+.btn {
+  align-self: flex-start;
+  padding: 11px 24px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+
+  &:hover:not(:disabled) {
+    background: var(--accent-hover);
+  }
+
+  &:disabled {
+    opacity: 0.7;
+    cursor: default;
+  }
+}

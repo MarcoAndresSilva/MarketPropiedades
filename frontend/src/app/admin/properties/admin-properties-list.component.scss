@@ -1,0 +1,165 @@
+.admin {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 24px 60px;
+}
+
+.admin__header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  h1 {
+    margin: 0;
+  }
+}
+
+.admin__user {
+  margin: 4px 0 0;
+  color: var(--text-muted);
+  font-size: 0.88rem;
+}
+
+.admin__actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+
+  &:hover {
+    background: var(--accent-hover);
+  }
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+
+  &:hover {
+    background: var(--surface-2);
+  }
+}
+
+.table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+// La tabla scrollea horizontal dentro de su propio contenedor en mobile (nunca la
+// página completa) - este aviso evita que se sienta como que la tabla "se corta" sin
+// más razón, ya que ninguna columna deja ver que sigue habiendo más a la derecha.
+.table-hint {
+  display: none;
+  margin: 8px 0 0;
+  color: var(--text-subtle);
+  font-size: 0.78rem;
+  text-align: center;
+
+  @media (max-width: 640px) {
+    display: block;
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+th {
+  color: var(--text-subtle);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: var(--surface-2);
+}
+
+tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.badge--publicada {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.badge--borrador {
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+
+.badge--pausada {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.badge--cerrada {
+  background: var(--surface-3);
+  color: var(--text-subtle);
+}
+
+.admin__row-actions {
+  display: flex;
+  gap: 12px;
+
+  a {
+    color: var(--accent);
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+.link-danger {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--danger);
+  cursor: pointer;
+  font-size: 0.9rem;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

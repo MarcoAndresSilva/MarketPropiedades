@@ -1,4 +1,8 @@
 <a href="#main-content" class="skip-link">Saltar al contenido principal</a>
-<app-header />
+@if (!esAdmin()) {
+  <app-header />
+}
 <router-outlet />
-<app-footer />
+@if (!esAdmin()) {
+  <app-footer />
+}

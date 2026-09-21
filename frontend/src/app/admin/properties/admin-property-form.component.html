@@ -1,0 +1,197 @@
+<main id="main-content" tabindex="-1" class="admin admin--form">
+  <a routerLink="/admin/propiedades" class="admin__volver">← Volver al listado</a>
+  <h1>{{ esEdicion ? 'Editar propiedad' : 'Nueva propiedad' }}</h1>
+
+  @if (loading()) {
+    <p role="status">Cargando…</p>
+  } @else {
+    <form class="form" (ngSubmit)="guardar()">
+      <fieldset>
+        <legend>Datos básicos</legend>
+        <p class="form__hint">Los campos con <span class="form__asterisco">*</span> son obligatorios.</p>
+
+        <label class="form__field">
+          Publicador <span class="form__asterisco">*</span>
+          <select name="publicadorId" [(ngModel)]="model.publicadorId" required>
+            <option value="" disabled>Selecciona un publicador</option>
+            @for (p of publishers(); track p.id) {
+              <option [value]="p.id">{{ p.name }} ({{ p.role === 'CORREDORA' ? 'Corredora' : 'Persona' }})</option>
+            }
+          </select>
+        </label>
+
+        <label class="form__field">
+          Comuna <span class="form__asterisco">*</span>
+          <select name="comunaId" [(ngModel)]="model.comunaId" required>
+            <option value="" disabled>Selecciona una comuna</option>
+            @for (c of comunas(); track c.id) {
+              <option [value]="c.id">{{ c.nombre }} — {{ c.region.nombre }}</option>
+            }
+          </select>
+        </label>
+
+        <label class="form__field">
+          Operación <span class="form__asterisco">*</span>
+          <select name="tipoOperacion" [(ngModel)]="model.tipoOperacion" required>
+            <option value="" disabled>Selecciona</option>
+            <option value="VENTA">Venta</option>
+            <option value="ARRIENDO">Arriendo</option>
+          </select>
+        </label>
+
+        <label class="form__field">
+          Tipo de propiedad <span class="form__asterisco">*</span>
+          <select name="tipoPropiedad" [(ngModel)]="model.tipoPropiedad" required>
+            <option value="" disabled>Selecciona</option>
+            <option value="CASA">Casa</option>
+            <option value="DEPARTAMENTO">Departamento</option>
+            <option value="PARCELA">Parcela</option>
+            <option value="TERRENO">Terreno</option>
+            <option value="OFICINA">Oficina</option>
+            <option value="LOCAL_COMERCIAL">Local comercial</option>
+            <option value="BODEGA">Bodega</option>
+          </select>
+        </label>
+
+        <label class="form__field">
+          Estado
+          <select name="estado" [(ngModel)]="model.estado" required>
+            <option value="BORRADOR">Borrador</option>
+            <option value="PUBLICADA">Publicada</option>
+            <option value="PAUSADA">Pausada</option>
+            <option value="CERRADA">Cerrada</option>
+          </select>
+        </label>
+
+        <label class="form__checkbox">
+          <input type="checkbox" name="destacada" [(ngModel)]="model.destacada" />
+          Destacada
+        </label>
+
+        <label class="form__field">
+          Dirección (sector, no es pública tal cual)
+          <input type="text" name="direccion" [(ngModel)]="model.direccion" maxlength="200" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Precio</legend>
+
+        @if (model.tipoOperacion === 'VENTA') {
+          <label class="form__field">
+            Precio en UF
+            <input type="number" name="precioUf" [(ngModel)]="model.precioUf" min="0" step="0.01" />
+          </label>
+        } @else if (model.tipoOperacion === 'ARRIENDO') {
+          <label class="form__field">
+            Precio mensual en CLP
+            <input type="number" name="precioClp" [(ngModel)]="model.precioClp" min="0" step="1000" />
+          </label>
+        } @else {
+          <p class="form__hint">Selecciona una operación para ingresar el precio.</p>
+        }
+      </fieldset>
+
+      <fieldset>
+        <legend>Detalles</legend>
+
+        <div class="form__grid">
+          <label class="form__field">
+            M² construidos
+            <input type="number" name="m2Construidos" [(ngModel)]="model.m2Construidos" min="0" />
+          </label>
+          <label class="form__field">
+            M² de terreno
+            <input type="number" name="m2Terreno" [(ngModel)]="model.m2Terreno" min="0" />
+          </label>
+          <label class="form__field">
+            Dormitorios
+            <input type="number" name="dormitorios" [(ngModel)]="model.dormitorios" min="0" />
+          </label>
+          <label class="form__field">
+            Baños
+            <input type="number" name="banos" [(ngModel)]="model.banos" min="0" />
+          </label>
+          <label class="form__field">
+            Estacionamientos
+            <input type="number" name="estacionamientos" [(ngModel)]="model.estacionamientos" min="0" />
+          </label>
+          <label class="form__field">
+            Bodegas
+            <input type="number" name="bodegas" [(ngModel)]="model.bodegas" min="0" />
+          </label>
+          <label class="form__field">
+            Gastos comunes (CLP)
+            <input type="number" name="gastosComunesClp" [(ngModel)]="model.gastosComunesClp" min="0" />
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Descripción</legend>
+        <label class="form__field">
+          Descripción (mínimo 20 caracteres) <span class="form__asterisco">*</span>
+          <textarea
+            name="descripcion"
+            [(ngModel)]="model.descripcion"
+            rows="6"
+            minlength="20"
+            maxlength="4000"
+            required
+          ></textarea>
+        </label>
+      </fieldset>
+
+      @if (esEdicion) {
+        <fieldset>
+          <legend>Fotos</legend>
+
+          @if (fotos().length > 0) {
+            <ul class="form__fotos">
+              @for (foto of fotos(); track foto.id) {
+                <li>
+                  <img [src]="cloudinaryImageUrl(foto.cloudinaryPublicId, 160, 110)" alt="" />
+                  <button type="button" (click)="eliminarFoto(foto.id)">Eliminar</button>
+                </li>
+              }
+            </ul>
+          }
+
+          <label class="form__field">
+            Agregar fotos
+            <input type="file" accept="image/*" multiple (change)="onFotosSeleccionadas($event)" [disabled]="uploadingFoto()" />
+          </label>
+          @if (uploadingFoto()) {
+            <p role="status">Subiendo foto…</p>
+          }
+        </fieldset>
+
+        <fieldset>
+          <legend>Video</legend>
+
+          @if (videoUrl()) {
+            <video [src]="videoUrl()" controls preload="metadata" class="form__video-preview"></video>
+          }
+
+          <label class="form__field">
+            {{ videoUrl() ? 'Reemplazar video' : 'Agregar video' }}
+            <input type="file" accept="video/*" (change)="onVideoSeleccionado($event)" [disabled]="uploadingVideo()" />
+          </label>
+          @if (uploadingVideo()) {
+            <p role="status">Subiendo video…</p>
+          }
+        </fieldset>
+      } @else {
+        <p class="form__hint">Guarda la propiedad primero para poder agregarle fotos y video.</p>
+      }
+
+      @if (error()) {
+        <p class="form__error" role="alert">{{ error() }}</p>
+      }
+
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">
+        {{ saving() ? 'Guardando…' : 'Guardar' }}
+      </button>
+    </form>
+  }
+</main>

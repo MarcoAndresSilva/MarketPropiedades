@@ -1,0 +1,53 @@
+<main id="main-content" tabindex="-1" class="admin">
+  <header class="admin__header">
+    <div>
+      <h1>Propiedades</h1>
+      @if (auth.currentUser(); as user) {
+        <p class="admin__user">{{ user.name }} · {{ user.email }}</p>
+      }
+    </div>
+    <div class="admin__actions">
+      <a routerLink="/admin/propiedades/nueva" class="btn btn--primary">+ Nueva propiedad</a>
+      <button type="button" class="btn btn--ghost" (click)="auth.logout()">Cerrar sesión</button>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p role="status">Cargando…</p>
+  } @else if (error()) {
+    <p role="alert">No se pudo cargar el listado. Intenta de nuevo más tarde.</p>
+  } @else if (items().length === 0) {
+    <p>Todavía no hay propiedades cargadas.</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Estado</th>
+            <th>Tipo</th>
+            <th>Comuna</th>
+            <th>Precio</th>
+            <th>Publicador</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of items(); track p.id) {
+            <tr>
+              <td><span class="badge" [class]="'badge--' + p.estado.toLowerCase()">{{ p.estado }}</span></td>
+              <td>{{ formatTipoPropiedad(p.tipoPropiedad) }} · {{ p.tipoOperacion === 'VENTA' ? 'Venta' : 'Arriendo' }}</td>
+              <td>{{ p.comuna.nombre }}</td>
+              <td>{{ formatPrecio(p) }}</td>
+              <td>{{ p.publicador.name }}</td>
+              <td class="admin__row-actions">
+                <a [routerLink]="['/admin/propiedades', p.id, 'editar']">Editar</a>
+                <button type="button" class="link-danger" (click)="eliminar(p)">Eliminar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="table-hint">← Desliza para ver todas las columnas →</p>
+  }
+</main>

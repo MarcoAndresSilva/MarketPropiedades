@@ -633,3 +633,122 @@ se movió, aunque la página haga scroll visualmente hasta ahí.
 **Verificado con interacción real de teclado vía Playwright:** el primer `Tab` del documento
 enfoca el skip-link (confirmado leyendo `document.activeElement`, no solo mirando la captura), y
 activarlo con `Enter` mueve el foco real a `#main-content` — no solo un scroll visual sin foco.
+
+### Fase 19 — Lighthouse en CI
+
+**Decisión — un job nuevo (`lighthouse`) que levanta el stack completo de verdad, no un
+directorio estático.** El catálogo, la ficha y `/publicar` son SSR real (Fase 8/9) — auditar un
+build estático no tendría sentido acá. El job levanta un Postgres real como `services:`, corre
+las migraciones y ambos seeds, prende el backend, compila el frontend y prende el servidor SSR
+compilado, recién ahí corre Lighthouse contra las tres URLs reales.
+
+**Bug real: auditar con el build de `development` infla artificialmente el tamaño del JS.** La
+primera corrida de prueba usó `build:dev` (mismo comando usado en el resto del proyecto para
+probar features) — resultado: 0.36-0.51 de performance, con "Minify JavaScript" como hallazgo
+grande. `development` tiene `optimization: false` a propósito (Fase 2, para depurar más fácil) —
+correcto para desarrollar, pero audita un bundle que ningún usuario real va a recibir. Se agregó
+una configuración `ci` nueva en `angular.json` (composable: `ng build --configuration
+production,ci`) que aplica las optimizaciones de producción pero reemplaza `environment.ts` por
+uno que apunta al backend local del job, no al de producción real — el CI nunca debe pegarle a
+producción durante una auditoría.
+
+**Bug real: el servidor Express no comprimía las respuestas.** Con el build ya optimizado, el
+hallazgo más grande de Lighthouse pasó a ser "Enable text compression" (~7s). Se agregó
+`compression()` como middleware en `server.ts`, antes de cualquier otra ruta — gzip/brotli vía
+`Accept-Encoding` es soporte universal en cualquier navegador real, no había ninguna razón para
+no comprimir por defecto.
+
+**Decisión — `performance` en nivel `warn`, el resto (`accessibility`, `best-practices`, `seo`)
+en `error`.** El puntaje de performance varía más entre corridas (throttling de CPU emulado,
+carga variable del runner compartido de CI) — bloquear el pipeline por una fluctuación de
+performance sería más ruido que señal. Los otros tres puntajes son bastante más estables corrida
+a corrida, así que sí vale la pena que bloqueen un merge si bajan del umbral.
+
+**Verificado con las tres páginas auditadas de verdad, no solo con la config aplicada:**
+performance 0.85–0.93, accesibilidad 0.92–0.95, buenas prácticas 0.96–1.0, SEO 1.0 en las tres
+— catálogo, `/publicar` y una ficha real, contra el backend y Postgres corriendo de verdad.
+
+### Fase 20 — Panel de administración
+
+**Decisión — el panel deja de ser opcional: sin él, cargar una propiedad real significa entrar a
+mano con Postman contra el backend.** El MVP curado (§1) asume que un admin carga las propiedades
+— pero nunca se había construido la herramienta para hacerlo. No es una feature más del roadmap:
+es requisito para poder operar el negocio con contenido real, independiente de que el documento de
+alcance original no la detallara explícitamente.
+
+**Decisión — `/admin/**` es `RenderMode.Client`, la decisión de la Fase 9 recién implementada.**
+Un panel detrás de login no lo indexa nadie y nadie lo visita con mala señal esperando un preview
+rápido — renderizarlo en servidor solo agregaría latencia sin ningún beneficio real. `header` y
+`footer` del sitio público (con el link de "publicar tu propiedad", el toggle de tema del portal)
+tampoco se muestran ahí — `App` calcula `esAdmin` a partir de `Router.events` y los oculta con
+`@if`, porque son parte de la identidad del catálogo público, no de una herramienta interna.
+
+**Decisión — JWT en `localStorage`, revalidado en cada 401, no un guard que valide el token
+contra el backend en cada navegación.** `authGuard` solo comprueba que exista un token guardado
+(barato, sin round-trip) — si el token venció o la cuenta fue borrada, el `JwtStrategy` del
+backend (Fase 12) lo rechaza en la primera request real, y un interceptor HTTP captura ese 401 y
+cierra la sesión ahí mismo. Confiar en el borde real (la respuesta del backend) es más simple y
+igual de correcto que duplicar la validación del lado del cliente.
+
+**Decisión — nuevo endpoint `GET /comunas` (protegido, las 346 comunas), distinto de
+`GET /properties/comunas` (público, solo las que ya tienen propiedades).** El selector del
+formulario de admin necesita poder elegir *cualquier* comuna del país, incluida la primera
+propiedad en una zona nueva — el endpoint público existente filtra exactamente lo contrario a
+propósito (Fase 13). Se armó como un módulo (`LocationsModule`) separado de `PropertiesModule`
+porque `Comuna` no es un concepto de propiedades, es un catálogo de ubicación aparte.
+
+**Decisión — crear primero, subir fotos/video después — nunca antes de que la propiedad
+exista.** El formulario de "nueva propiedad" no muestra la sección de fotos/video: al guardar,
+redirige a la misma pantalla en modo edición (ahora con id real). Permitir subir fotos antes de
+guardar dejaría archivos huérfanos en Cloudinary si el usuario nunca completa el guardado — más
+simple no generar ese estado que limpiarlo después.
+
+**Decisión — subida de fotos en cola secuencial, no en paralelo.** Cada foto pide su propia firma
+al backend (Fase 14 — timestamps de firma vencen en minutos) y se sube una por una: la siguiente
+solo arranca cuando la anterior terminó de subirse a Cloudinary y quedó registrada con
+`POST /properties/:id/fotos`. Más lento que en paralelo para varias fotos, pero evita condiciones
+de carrera en el campo `orden` (cada foto necesita saber cuántas van antes que ella).
+
+**Verificado de punta a punta con Playwright contra el backend real:** entrar a una ruta
+`/admin/*` sin sesión redirige a `/admin/login`; login real con la cuenta admin sembrada; el
+listado carga las 10 propiedades reales; el selector de comuna trae las 346 reales y el de
+publicador la corredora demo real; crear una propiedad de prueba la agrega de verdad al listado
+(11 filas) y redirige a edición; el header/footer público no aparece en ninguna pantalla de admin.
+
+**Cloudinary con cuenta real, verificado con una subida real.** Con las credenciales reales ya
+configuradas (`CLOUDINARY_CLOUD_NAME`/`API_KEY`/`API_SECRET` del plan free), se subió una foto de
+prueba desde el panel y quedó de verdad en la cuenta de Cloudinary — `secure_url` real devuelta,
+`PropertyFoto` registrada contra la propiedad, y la imagen visible en la ficha con la transformación
+`c_fill,w_,h_,q_auto,f_auto` (Fase 6). La foto y el archivo de prueba se borraron después (tanto de
+Cloudinary como de la base) para no dejar contenido de prueba en la cuenta real ni en el seed de
+demo.
+
+**Bug real: el mensaje de error del formulario era siempre el mismo, sin importar qué había
+fallado de verdad.** Cualquier error (un campo vacío, un id inválido, la red caída) mostraba la
+misma frase genérica — así que un campo obligatorio sin marcar visualmente y un error genérico se
+combinaban para hacer imposible saber qué corregir. Se agregaron dos cosas: asteriscos visibles en
+los campos obligatorios del formulario, y un manejo de error que lee `error.error.message` (el
+array de mensajes que devuelve `class-validator` en un 400) y lo muestra tal cual, en vez de una
+frase fija — "no se pudo guardar" pasó a ser "publicadorId should not be empty · descripcion must
+be longer than or equal to 20 characters", nombrando el campo real.
+
+**Bug real: `publicadorId`/`comunaId` vacíos pasaban la validación y llegaban a Prisma.** Un
+`<select>` de Angular sin tocar manda `''` (string vacío, no `undefined`) — `@IsString()` sin
+`@IsNotEmpty()` no rechaza eso, así que el string vacío llegaba hasta la base y fallaba como
+violación de foreign key (un 500 críptico) en vez de un 400 claro y legible. Se agregó
+`@IsNotEmpty()` a ambos campos en `CreatePropertyDto`.
+
+**Bug real: el formulario de admin tenía scroll horizontal en mobile.** Causa clásica de
+flexbox: los hijos de un contenedor `flex-direction: column` (`.form__field`) no se achican más
+allá de su ancho de contenido por defecto (`min-width: auto` implícito) — un `<select>` con una
+opción larga empujaba todo el formulario fuera del viewport. Se corrigió con `min-width: 0` en
+`.form__field` y en `fieldset` (que además trae su propio `min-width: min-content` del navegador),
+más `width: 100%` explícito en los `input`/`select`/`textarea`. La tabla del listado, que ya
+scrolleaba correctamente dentro de su propio contenedor (`overflow-x: auto`, sin arrastrar la
+página completa), sumó un aviso de texto en mobile para que no se sienta como que "se corta" sin
+razón.
+
+**Verificado con Playwright en viewport mobile real (390px):** sin overflow horizontal en el
+formulario después del fix (antes sí lo había, confirmado con
+`document.documentElement.scrollWidth`); el mensaje de error de un guardado vacío nombra los 5
+campos reales que faltan, no una frase genérica.

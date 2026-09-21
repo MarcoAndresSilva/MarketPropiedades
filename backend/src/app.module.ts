@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { PropertiesModule } from './properties/properties.module';
 import { UploadsModule } from './uploads/uploads.module';
+import { LocationsModule } from './locations/locations.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UploadsModule } from './uploads/uploads.module';
     UsersModule,
     PropertiesModule,
     UploadsModule,
+    LocationsModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

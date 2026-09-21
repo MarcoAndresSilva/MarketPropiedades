@@ -80,6 +80,14 @@ export class PropertiesService {
     });
   }
 
+  async findOneForAdmin(id: string) {
+    const property = await this.prisma.property.findUnique({ where: { id }, include: LIST_INCLUDE });
+    if (!property) {
+      throw new NotFoundException('Propiedad no encontrada.');
+    }
+    return property;
+  }
+
   async update(id: string, dto: UpdatePropertyDto) {
     await this.findOneOrThrow(id);
     return this.prisma.property.update({ where: { id }, data: dto, include: LIST_INCLUDE });
