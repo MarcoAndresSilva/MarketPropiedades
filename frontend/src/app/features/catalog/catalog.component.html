@@ -43,7 +43,12 @@
   <h1 id="catalogo-grid">Propiedades en Melipilla y alrededores</h1>
 
   @if (loading()) {
-    <p role="status">Cargando propiedades…</p>
+    <p role="status" class="sr-only">Cargando propiedades…</p>
+    <div class="catalog__grid" aria-hidden="true">
+      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+        <app-property-card-skeleton />
+      }
+    </div>
   } @else if (error()) {
     <p role="alert">No se pudo cargar el catálogo. Intenta de nuevo más tarde.</p>
   } @else if (items().length === 0) {
@@ -51,8 +56,10 @@
   } @else {
     <p class="catalog__total">{{ total() }} propiedad{{ total() === 1 ? '' : 'es' }} encontrada{{ total() === 1 ? '' : 's' }}</p>
     <div class="catalog__grid">
-      @for (property of items(); track property.id) {
-        <app-property-card [property]="property" />
+      @for (property of items(); track property.id; let i = $index) {
+        <div [appRevealOnScroll]="(i % 6) * 60">
+          <app-property-card [property]="property" />
+        </div>
       }
     </div>
   }

@@ -8,19 +8,23 @@
   (focusout)="resume()"
 >
   @for (slide of slides; track $index; let i = $index) {
-    @if (i === currentIndex()) {
+    <div
+      class="hero__slide-wrap"
+      [class.hero__slide-wrap--active]="i === currentIndex()"
+      [attr.aria-hidden]="i === currentIndex() ? null : 'true'"
+    >
       @if (slide.kind === 'valor') {
         <div class="hero__slide" [class]="'hero__slide--' + slide.tone">
           <h2>{{ slide.title }}</h2>
           <p>{{ slide.text }}</p>
-          <a href="#catalogo-grid" class="hero__cta">Ver propiedades</a>
+          <a href="#catalogo-grid" class="hero__cta" [attr.tabindex]="i === currentIndex() ? null : '-1'">Ver propiedades</a>
         </div>
       } @else {
-        <a class="hero__banner" [href]="slide.href ?? '#catalogo-grid'">
+        <a class="hero__banner" [href]="slide.href ?? '#catalogo-grid'" [attr.tabindex]="i === currentIndex() ? null : '-1'">
           <img [src]="slide.imageUrl" [alt]="slide.alt" />
         </a>
       }
-    }
+    </div>
   }
 </section>
 

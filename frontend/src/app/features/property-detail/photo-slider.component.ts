@@ -1,4 +1,4 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, input, signal } from '@angular/core';
 import { PropertyFoto } from '../../core/property.model';
 import { cloudinaryImageUrl } from '../../core/cloudinary.util';
 
@@ -10,8 +10,6 @@ import { cloudinaryImageUrl } from '../../core/cloudinary.util';
 export class PhotoSliderComponent {
   readonly fotos = input.required<PropertyFoto[]>();
   readonly currentIndex = signal(0);
-
-  readonly currentFoto = computed(() => this.fotos()[this.currentIndex()]);
 
   readonly cloudinaryImageUrl = cloudinaryImageUrl;
 

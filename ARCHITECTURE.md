@@ -752,3 +752,47 @@ razón.
 formulario después del fix (antes sí lo había, confirmado con
 `document.documentElement.scrollWidth`); el mensaje de error de un guardado vacío nombra los 5
 campos reales que faltan, no una frase genérica.
+
+### Fase 21 — Capa de movimiento: scroll-reveal, crossfade y skeleton loading
+
+**Decisión — la "vida" que le faltaba al sitio es sobre todo un problema de fotos reales, no de
+animación.** Investigación real contra portales en producción (Compass, TocToc, Rightmove) antes
+de construir nada: Compass mantiene su interfaz deliberadamente en blanco y negro porque la
+fotografía de la propiedad aporta todo el color — ningún portal grande depende de animaciones de
+chrome para sentirse vivo, dependen de fotos reales grandes. El sitio sigue con SVG de relleno
+(Fase 17), así que ninguna animación agregada acá resuelve eso de fondo — se documenta para no
+repetir la pregunta más adelante. Lo que sí se puede cerrar sin depender de fotos reales es la
+brecha real de movimiento: scroll-reveal, transiciones de foto, y estados de carga con esqueleto,
+todos ausentes hasta ahora.
+
+**Decisión — `RevealOnScrollDirective` propia, sin librería.** Un `IntersectionObserver` nativo +
+una clase CSS (`.reveal` / `.reveal--visible`) — mismo criterio que ya se usó para no meter Swiper
+en los sliders. Se aplica con un delay creciente (`--reveal-delay`) para escalonar tarjetas del
+catálogo y pasos de `/publicar`, en vez de que todos aparezcan de golpe. SSR-safe
+(`isPlatformBrowser`, igual que el autoplay del hero) y `disconnect()` apenas se revela una vez —
+no vuelve a observar de ida y vuelta si el usuario hace scroll arriba y abajo.
+
+**Decisión — crossfade real (opacidad superpuesta) en el hero y el slider de fotos, no un corte
+seco reemplazando el `src`/contenido.** Ambos componentes pasaron de "renderizar solo el slide
+activo" a "renderizar todos los slides superpuestos (`position: absolute`) y alternar opacidad" —
+el slide/foto inactivo queda con `pointer-events: none`, `aria-hidden="true"` y `tabindex="-1"` en
+sus links, para que no reciba clicks ni foco de teclado mientras es invisible.
+
+**Decisión — estados de carga con skeleton, no texto plano "Cargando…".** Nuevo
+`PropertyCardSkeletonComponent`, mismas proporciones que la tarjeta real (foto 3:2 + líneas de
+texto) con un pulso sutil. El `<p role="status">` sigue existiendo para un lector de pantalla,
+pero visualmente oculto (`.sr-only`) — el esqueleto es la señal visual, el texto es la señal para
+accesibilidad, cada uno resuelve la mitad del problema.
+
+**Decisión — todo el movimiento nuevo respeta `prefers-reduced-motion`.** Cada transición/animación
+nueva (reveal, crossfade, hover, skeleton) vive dentro de `@media (prefers-reduced-motion:
+no-preference)` — quien pidió menos movimiento al sistema operativo ve el contenido de inmediato,
+sin esperar una transición que no va a correr, y sin perder ninguna sombra o color que no dependa
+de desplazamiento.
+
+**Verificado con datos reales, no solo visualmente:** se leyó `getComputedStyle(...).opacity` de
+verdad durante las transiciones — las tarjetas fuera de pantalla arrancan en `0` y llegan a `1`
+tras el scroll; a mitad de una transición de hero se confirmaron dos slides con opacidades
+intermedias simultáneas (una subiendo, otra bajando — crossfade real, no una sustitución
+instantánea); con `reducedMotion: 'reduce'` emulado en el navegador, la opacidad inicial de una
+card es `1` de entrada, confirmando que el guard funciona.

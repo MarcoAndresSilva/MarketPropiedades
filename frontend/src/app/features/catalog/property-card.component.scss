@@ -7,11 +7,10 @@
   text-decoration: none;
   color: inherit;
   background: var(--surface);
-  transition: box-shadow 0.15s ease, transform 0.15s ease;
+  transition: box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 
   &:hover {
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
-    transform: translateY(-2px);
+    box-shadow: 0 12px 28px -8px rgba(36, 31, 26, 0.18);
   }
 }
 
@@ -21,6 +20,27 @@
   aspect-ratio: 3 / 2;
   object-fit: cover;
   background: var(--surface-2);
+}
+
+// El movimiento (elevar la card, acercar la foto) queda solo si el sistema no pidió
+// menos animación - la sombra de arriba sí se mantiene siempre, es solo color/tamaño,
+// no desplazamiento.
+@media (prefers-reduced-motion: no-preference) {
+  .card {
+    transition-property: box-shadow, transform;
+
+    &:hover {
+      transform: translateY(-4px);
+    }
+  }
+
+  .card__photo {
+    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .card:hover .card__photo {
+    transform: scale(1.04);
+  }
 }
 
 .card__photo--placeholder {

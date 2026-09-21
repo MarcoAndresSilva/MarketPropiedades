@@ -1,0 +1,55 @@
+@keyframes skeleton-pulse {
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+.skeleton-card {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  background: var(--surface);
+}
+
+.skeleton-card__photo {
+  aspect-ratio: 3 / 2;
+  background: var(--surface-2);
+}
+
+.skeleton-card__body {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.skeleton-card__line {
+  height: 12px;
+  border-radius: 4px;
+  background: var(--surface-2);
+}
+
+.skeleton-card__line--tipo {
+  width: 55%;
+}
+
+.skeleton-card__line--comuna {
+  width: 40%;
+}
+
+.skeleton-card__line--precio {
+  width: 65%;
+  height: 18px;
+  margin-top: 4px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .skeleton-card__photo,
+  .skeleton-card__line {
+    animation: skeleton-pulse 1.6s ease-in-out infinite;
+  }
+}

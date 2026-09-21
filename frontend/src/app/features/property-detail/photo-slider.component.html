@@ -5,11 +5,17 @@
   [attr.aria-label]="'Galería de fotos, imagen ' + (currentIndex() + 1) + ' de ' + fotos().length"
   (keydown)="onKeydown($event)"
 >
-  <img
-    class="slider__image"
-    [src]="cloudinaryImageUrl(currentFoto().cloudinaryPublicId, 900, 600)"
-    alt="Foto de la propiedad"
-  />
+  <div class="slider__stage">
+    @for (foto of fotos(); track foto.id; let i = $index) {
+      <img
+        class="slider__image"
+        [class.slider__image--active]="i === currentIndex()"
+        [src]="cloudinaryImageUrl(foto.cloudinaryPublicId, 900, 600)"
+        [alt]="i === currentIndex() ? 'Foto de la propiedad' : ''"
+        [attr.aria-hidden]="i === currentIndex() ? null : 'true'"
+      />
+    }
+  </div>
 
   @if (fotos().length > 1) {
     <button type="button" class="slider__nav slider__nav--prev" (click)="prev()" aria-label="Foto anterior">‹</button>

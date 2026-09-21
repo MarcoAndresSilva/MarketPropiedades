@@ -3,13 +3,15 @@ import { FormsModule } from '@angular/forms';
 import { PropertiesService } from '../../core/properties.service';
 import { CatalogFilters, Comuna, Property, TipoOperacion, TipoPropiedad } from '../../core/property.model';
 import { PropertyCardComponent } from './property-card.component';
+import { PropertyCardSkeletonComponent } from './property-card-skeleton.component';
 import { HeroCarouselComponent } from './hero-carousel.component';
 import { SeoService } from '../../core/seo.service';
 import { environment } from '../../../environments/environment';
+import { RevealOnScrollDirective } from '../../core/reveal-on-scroll.directive';
 
 @Component({
   selector: 'app-catalog',
-  imports: [PropertyCardComponent, HeroCarouselComponent, FormsModule],
+  imports: [PropertyCardComponent, PropertyCardSkeletonComponent, HeroCarouselComponent, FormsModule, RevealOnScrollDirective],
   templateUrl: './catalog.component.html',
   styleUrl: './catalog.component.scss',
 })

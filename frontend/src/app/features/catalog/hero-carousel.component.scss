@@ -1,7 +1,31 @@
 .hero {
+  position: relative;
   border-radius: 12px;
   overflow: hidden;
   min-height: 220px;
+}
+
+// Todos los slides quedan montados y superpuestos (position: absolute) — cambiar de
+// slide es un crossfade de opacidad, no un corte seco reemplazando el contenido del
+// DOM. El slide inactivo queda con pointer-events: none y aria-hidden/tabindex="-1"
+// en el HTML para que no reciba clicks ni foco de teclado mientras está invisible.
+.hero__slide-wrap {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.hero__slide-wrap--active {
+  position: relative;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hero__slide-wrap {
+    transition: opacity 0.5s ease;
+  }
 }
 
 .hero__slide {
@@ -10,6 +34,7 @@
   flex-direction: column;
   gap: 10px;
   align-items: flex-start;
+  height: 100%;
   min-height: 220px;
   box-sizing: border-box;
 

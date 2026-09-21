@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { BUSINESS_WHATSAPP } from '../../core/business-contact';
 import { buildWhatsappUrl } from '../../core/whatsapp.util';
 import { SeoService } from '../../core/seo.service';
+import { RevealOnScrollDirective } from '../../core/reveal-on-scroll.directive';
 
 interface PasoPublicacion {
   numero: number;
@@ -32,6 +33,7 @@ const PASOS: PasoPublicacion[] = [
 
 @Component({
   selector: 'app-publicar',
+  imports: [RevealOnScrollDirective],
   templateUrl: './publicar.component.html',
   styleUrl: './publicar.component.scss',
 })

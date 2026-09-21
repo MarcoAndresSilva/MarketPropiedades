@@ -9,8 +9,8 @@
   </header>
 
   <ol class="publicar__pasos">
-    @for (paso of pasos; track paso.numero) {
-      <li class="paso">
+    @for (paso of pasos; track paso.numero; let i = $index) {
+      <li class="paso" [appRevealOnScroll]="i * 120">
         <div class="paso__icono" aria-hidden="true">
           @switch (paso.numero) {
             @case (1) {

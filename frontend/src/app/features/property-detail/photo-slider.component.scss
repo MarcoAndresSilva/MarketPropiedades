@@ -11,11 +11,33 @@
   }
 }
 
-.slider__image {
-  display: block;
+// Igual que el hero: todas las fotos quedan montadas y superpuestas, cambiar de foto
+// es un crossfade de opacidad en vez de reemplazar el src de golpe (que se veía como
+// un parpadeo/corte seco, sobre todo con fotos de tamaños o tonos distintos).
+.slider__stage {
+  position: relative;
   width: 100%;
   aspect-ratio: 3 / 2;
+}
+
+.slider__image {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
+  opacity: 0;
+}
+
+.slider__image--active {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .slider__image {
+    transition: opacity 0.4s ease;
+  }
 }
 
 .slider__nav {
