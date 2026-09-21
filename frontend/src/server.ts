@@ -5,6 +5,7 @@ import {
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express from 'express';
+import compression from 'compression';
 import { join } from 'node:path';
 import { environment } from './environments/environment';
 
@@ -12,6 +13,12 @@ const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+
+// Sin esto, Express manda el HTML/JS/CSS sin comprimir — Lighthouse lo marcó como el
+// hallazgo de performance más grande del sitio (~7s de "Enable text compression" en
+// las tres páginas auditadas). gzip/brotli via Accept-Encoding es soporte universal en
+// cualquier navegador real, no hay ninguna razón para no comprimir por defecto.
+app.use(compression());
 
 // sitemap.xml se genera en cada request, no en build time: el catálogo cambia cuando
 // alguien publica una propiedad, sin un nuevo deploy (mismo motivo por el que el

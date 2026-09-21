@@ -15,6 +15,14 @@ Thumbs.db
 # Docker
 postgres-data/
 
+# Reportes locales de Lighthouse CI (se generan al correr `npx @lhci/cli autorun`)
+.lighthouseci/
+
+# Perfiles temporales de Chrome que a veces quedan sueltos en la raíz del repo al
+# correr Lighthouse localmente en WSL (chrome-launcher lee una variable de entorno de
+# Windows y arma un directorio con el path literal, con barras invertidas y todo).
+C:*lighthouse.*
+
 # Audios/notas de voz de trabajo (contenido personal, no pertenece al repo)
 *.ogg
 *.opus

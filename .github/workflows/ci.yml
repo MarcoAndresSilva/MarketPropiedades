@@ -39,3 +39,71 @@ jobs:
           cache-dependency-path: frontend/package-lock.json
       - run: npm ci
       - run: npm run build
+
+  lighthouse:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: market
+          POSTGRES_PASSWORD: market
+          POSTGRES_DB: market_propiedades
+        ports:
+          - 5434:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgresql://market:market@localhost:5434/market_propiedades?schema=public
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+          cache-dependency-path: |
+            backend/package-lock.json
+            frontend/package-lock.json
+
+      # El catálogo, la ficha y /publicar son SSR real (Fase 8/9) - Lighthouse necesita
+      # auditar un servidor vivo con datos reales de verdad, no un directorio estático.
+      - name: Preparar y levantar el backend
+        working-directory: backend
+        env:
+          PORT: 3002
+          FRONTEND_URL: http://localhost:4000
+          JWT_SECRET: ci-secret-no-usar-en-produccion
+        run: |
+          npm ci
+          npx prisma generate
+          npx prisma migrate deploy
+          npm run seed
+          npm run seed:demo
+          nohup npm run start:dev > /tmp/backend.log 2>&1 &
+
+      - name: Build y levantar el servidor SSR del frontend
+        working-directory: frontend
+        env:
+          NG_ALLOWED_HOSTS: localhost
+          PORT: 4000
+        run: |
+          npm ci
+          npm run build:ci
+          nohup node dist/frontend/server/server.mjs > /tmp/frontend.log 2>&1 &
+
+      - name: Esperar a que ambos servidores respondan
+        run: |
+          for i in $(seq 1 30); do curl -sf http://localhost:3002/properties > /dev/null && break; sleep 2; done
+          for i in $(seq 1 30); do curl -sf http://localhost:4000/ > /dev/null && break; sleep 2; done
+
+      - name: Lighthouse CI
+        run: npx --yes @lhci/cli@0.15.1 autorun
+
+      - name: Logs de los servidores (si algo falló)
+        if: failure()
+        run: |
+          echo "--- backend ---"; cat /tmp/backend.log || true
+          echo "--- frontend ---"; cat /tmp/frontend.log || true

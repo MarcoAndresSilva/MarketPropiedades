@@ -6,6 +6,7 @@
     "start": "ng serve --port 4202",
     "build": "ng build",
     "build:dev": "ng build --configuration development",
+    "build:ci": "ng build --configuration production,ci",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "serve:ssr:frontend": "node dist/frontend/server/server.mjs"
@@ -21,6 +22,7 @@
     "@angular/platform-server": "^22.1.0",
     "@angular/router": "^22.1.0",
     "@angular/ssr": "^22.1.8",
+    "compression": "^1.8.2",
     "express": "^5.1.0",
     "leaflet": "^1.9.4",
     "rxjs": "~7.8.0",
@@ -30,6 +32,7 @@
     "@angular/build": "^22.1.8",
     "@angular/cli": "^22.1.8",
     "@angular/compiler-cli": "^22.1.0",
+    "@types/compression": "^1.8.1",
     "@types/express": "^5.0.1",
     "@types/leaflet": "^1.9.22",
     "@types/node": "^20.17.19",
