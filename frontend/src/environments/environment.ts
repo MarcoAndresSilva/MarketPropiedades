@@ -2,5 +2,5 @@
 export const environment = {
   apiUrl: 'https://market-propiedades-api.onrender.com',
   siteUrl: 'https://marketpropiedades.cl',
-  cloudinaryCloudName: 'CAMBIAR-EN-PRODUCCION',
+  cloudinaryCloudName: 'zzqgeun6',
 };
