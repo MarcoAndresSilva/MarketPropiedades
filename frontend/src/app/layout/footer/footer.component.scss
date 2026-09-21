@@ -69,4 +69,19 @@
   border-top: 1px solid var(--border);
   color: var(--text-subtle);
   font-size: 0.8rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+// Deliberadamente discreto: es el acceso de Marco al panel, no un link de navegación
+// para cualquier visitante — mismo color/tamaño que el copyright, sin destacar.
+.site-footer__admin {
+  color: inherit;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
 }

@@ -796,3 +796,74 @@ tras el scroll; a mitad de una transición de hero se confirmaron dos slides con
 intermedias simultáneas (una subiendo, otra bajando — crossfade real, no una sustitución
 instantánea); con `reducedMotion: 'reduce'` emulado en el navegador, la opacidad inicial de una
 card es `1` de entrada, confirmando que el guard funciona.
+
+### Fase 22 — Deploy real a producción (Neon + Render + Netlify)
+
+**Decisión — el backend en Render usa la connection string *pooled* de Neon en runtime, pero la
+*directa* (sin pooler) para correr las migraciones.** Neon recomienda la conexión directa para
+`prisma migrate deploy` porque el pooler (PgBouncer en modo transacción) puede interferir con los
+prepared statements que usa Prisma durante una migración — para tráfico normal de la app, en
+cambio, la pooled es la correcta.
+
+**Bug real: `NODE_ENV=production` como variable de entorno en Render rompe el build de NestJS.**
+`npm ci` respeta `NODE_ENV=production` salteándose las devDependencies — ahí vive `@nestjs/cli`,
+que provee el comando `nest` que usa `npm run build`. El build fallaba con `sh: 1: nest: not
+found`. Se corrigió el Build Command a `npm ci --include=dev && npx prisma generate && npm run
+build` — fuerza la instalación de devDependencies sin importar `NODE_ENV`, sin afectar el runtime
+(que ya corre JavaScript compilado en `dist/`, no necesita esas herramientas).
+
+**Decisión — `siteUrl` apunta al subdominio de Netlify (`market-propiedades.netlify.app`),
+todavía no al dominio real.** El dominio `marketpropiedades.cl` no está comprado/conectado aún —
+dejar `siteUrl` (usado en canonical, JSON-LD y el `Sitemap:` de `robots.txt`) apuntando a un
+dominio que no sirve nada rompería exactamente lo que se construyó en la Fase 17. Cambiar ese
+valor y volver a desplegar el día que exista el dominio real.
+
+**Decisión — el panel de administración necesitaba un punto de entrada real, no solo una URL de
+memoria.** `/admin/login` no tenía ningún link que llevara ahí desde el sitio público. Se agregó
+un link discreto junto al copyright del footer (`Acceso administrador`) — mismo tamaño/color que
+el texto de copyright, a propósito: es la puerta de entrada del admin, no un link de navegación
+para cualquier visitante.
+
+**Verificado contra la infraestructura real, no solo localmente:** `prisma migrate deploy` aplicó
+las 3 migraciones contra Neon; el seed real (346 comunas, 16 regiones, la cuenta admin) se
+confirmó contando filas reales (`Comunas: 346`, `Regiones: 16`, `Usuarios: 1`, `Propiedades: 0` —
+nunca se corrió el seed de demo contra producción). El backend en Render se probó con `curl` real:
+`/` responde 200, `/properties` devuelve el catálogo real vacío, `/comunas` devuelve 401 sin
+token, y `/auth/login` con las credenciales reales devuelve un JWT válido.
+
+**Bug real: el frontend en Netlify quedó desplegado como sitio estático puro, sin SSR — la home
+daba 404.** El log del deploy mostró `0 new function(s) to upload`: Netlify nunca generó la
+función que ejecuta el servidor SSR. Causa real, confirmada contra el código fuente del paquete
+`@netlify/angular-runtime` (no contra documentación de terceros, que dio información contradictoria
+e incluso un nombre de paquete inventado en el camino — se verificó cada afirmación contra `npm
+view` antes de actuar): el plugin de Netlify solo reemplaza automáticamente `server.ts` por su
+propia versión compatible si detecta que es *exactamente* el archivo por defecto del scaffold de
+Angular. Nuestro `server.ts` traía dos cambios propios (compresión gzip, la ruta de
+`GET /sitemap.xml`) — al no coincidir con el default, Netlify no generó ninguna función SSR y sirvió
+solo los archivos estáticos de `browser/` (por eso `robots.txt`/`favicon.ico` sí respondían 200,
+pero `/` no).
+
+**Decisión — `server.ts` vuelve a ser exactamente el default del scaffold; `sitemap.xml` se muda a
+una Netlify Function aparte.** En vez de pelear con la detección de Netlify, se saca toda
+personalización de `server.ts` — así el plugin lo reemplaza sin problema por su propia función SSR
+compatible (requiere `@netlify/angular-runtime` instalado como devDependency, para que el
+compilador de Angular pueda resolver los imports que el plugin inyecta). La lógica de
+`sitemap.xml` se movió tal cual a `netlify/functions/sitemap.mts`, una Netlify Function
+independiente con `export const config = { path: '/sitemap.xml' }` — se registra sola en esa ruta,
+sin necesitar un redirect en `netlify.toml`.
+
+**Decisión — la compresión gzip que se había agregado en la Fase 19 no se repone en ningún
+lado.** No hace falta: el edge de Netlify comprime las respuestas automáticamente según el
+`Accept-Encoding` del navegador, sin importar si el origen (la función SSR) la comprime o no. Sigue
+siendo relevante para cualquier despliegue Node genérico sin CDN por delante (por eso se documenta
+acá en vez de borrarse sin dejar rastro) — el job de Lighthouse en CI, que audita nuestro propio
+`server.mjs` compilado y no el resultado real en Netlify, puede volver a marcar "Enable text
+compression" como hallazgo; queda en nivel `warn`, no bloquea el pipeline, y no representa el
+comportamiento real en producción.
+
+**Verificado sin confiar en documentación de terceros a ciegas:** cada afirmación se contrastó
+contra el registro real de npm (`npm view <paquete> version`) antes de instalar nada — un nombre de
+paquete sugerido por una búsqueda (`@netlify/plugin-angular`) no existía. La función del sitemap se
+probó importándola y ejecutándola directo con `tsx` contra el backend real de producción, no solo
+revisando que compilara: devolvió `200`, `content-type: application/xml`, y el XML real con las
+rutas estáticas (sin propiedades todavía, coherente con el estado real de la base).

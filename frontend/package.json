@@ -32,6 +32,8 @@
     "@angular/build": "^22.1.8",
     "@angular/cli": "^22.1.8",
     "@angular/compiler-cli": "^22.1.0",
+    "@netlify/angular-runtime": "^4.0.0",
+    "@netlify/functions": "^6.0.0",
     "@types/compression": "^1.8.1",
     "@types/express": "^5.0.1",
     "@types/leaflet": "^1.9.22",
