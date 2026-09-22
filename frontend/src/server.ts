@@ -10,7 +10,12 @@ import { join } from 'node:path';
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
-const angularApp = new AngularNodeAppEngine();
+// trustProxyHeaders: true porque Render (donde vive este puente temporal) es un proxy
+// real de confianza que agrega X-Forwarded-Proto/X-Forwarded-For - sin esto Angular
+// tira warnings y no confía en esos headers. OJO: este cambio hay que revertirlo al
+// volver a Netlify (ver ARCHITECTURE.md) - un server.ts personalizado le impide a
+// Netlify auto-detectar y reemplazarlo por su propia función SSR compatible.
+const angularApp = new AngularNodeAppEngine({ trustProxyHeaders: true });
 
 /**
  * Example Angular API endpoints can be defined here.

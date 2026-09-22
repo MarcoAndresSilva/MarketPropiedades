@@ -867,3 +867,35 @@ paquete sugerido por una búsqueda (`@netlify/plugin-angular`) no existía. La f
 probó importándola y ejecutándola directo con `tsx` contra el backend real de producción, no solo
 revisando que compilara: devolvió `200`, `content-type: application/xml`, y el XML real con las
 rutas estáticas (sin propiedades todavía, coherente con el estado real de la base).
+
+### Fase 23 — CORS con múltiples orígenes (puente temporal por Render)
+
+**Decisión — `FRONTEND_URL` acepta una lista separada por comas, no un solo string.** El plan de
+Netlify quedó bloqueado por límite de créditos del team hasta el próximo ciclo de facturación —
+mientras tanto, el frontend se despliega también como un segundo Web Service en Render (temporal,
+se vuelve a Netlify apenas se desbloquee). `app.enableCors({ origin: ... })` solo aceptaba un
+origen fijo — con dos frontends reales corriendo a la vez (Netlify + el puente de Render), hacía
+falta que el backend confiara en ambos sin elegir uno. Se parsea `FRONTEND_URL` como CSV y se pasa
+como arreglo a `enableCors`, que sí soporta una lista de orígenes permitidos.
+
+**Verificado con los tres casos reales, no solo que compilara:** con `FRONTEND_URL` seteado a dos
+orígenes, un request `OPTIONS` con cada uno de esos dos orígenes en el header `Origin` devuelve el
+`Access-Control-Allow-Origin` correcto y espejado; un tercer origen no listado no recibe ese header
+en absoluto — sigue bloqueado como antes.
+
+**Decisión temporal — `server.ts` vuelve a personalizarse con `trustProxyHeaders: true`, a
+propósito, sabiendo que rompe la detección de Netlify de la Fase 22.** Render (el proxy real que
+sirve el puente temporal) agrega headers `X-Forwarded-Proto`/`X-Forwarded-For`, que Angular 22
+ignora por defecto (mismo hardening de seguridad que la validación de `Host` — no confiar en
+headers de proxy salvo que se declare explícitamente). Verificado contra los tipos reales
+instalados de `@angular/ssr/node` (no contra documentación de terceros): `trustProxyHeaders` es una
+opción real del constructor de `AngularNodeAppEngine`. Se acepta romper temporalmente el auto-swap
+de Netlify porque el puente en Render es más urgente ahora mismo — **hay que revertir este cambio
+al volver a Netlify**, junto con la decisión de la Fase 22.
+
+**Decisión — se cargó el seed de demo (10 propiedades) contra la base de producción real,
+autorizado explícitamente para poder mostrarle el sitio a Julián hoy.** Mismo seed ya usado en
+desarrollo — fotos SVG de relleno, video propio generado con `ffmpeg`, nada que se haga pasar por
+contenido real. Julián necesita ver el catálogo poblado para poder decidir qué va a mandar como
+material real (fotos de propiedades, contenido para el carrusel del hero) — mostrarle el catálogo
+vacío no le habría dado esa referencia.
