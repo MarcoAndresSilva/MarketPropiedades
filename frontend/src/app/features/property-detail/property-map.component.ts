@@ -40,7 +40,12 @@ export class PropertyMapComponent implements AfterViewInit, OnDestroy {
   async ngAfterViewInit(): Promise<void> {
     if (!this.isBrowser) return;
 
-    const L = await import('leaflet');
+    // Leaflet es CommonJS puro (sin build ESM) - en dev el bundler aplana sus funciones
+    // directo sobre el namespace del import() dinámico, pero en el build de producción
+    // (esbuild) quedan colgando de `.default`. Este fallback cubre ambos casos sin
+    // depender de cuál interop aplicó el bundler.
+    const leafletModule = await import('leaflet');
+    const L = (leafletModule as unknown as { default?: typeof Leaflet }).default ?? leafletModule;
 
     // Fix conocido de Leaflet + bundlers: `Icon.Default._getIconUrl` SIEMPRE antepone
     // una ruta auto-detectada (vía un truco de CSS) delante de la URL configurada, así

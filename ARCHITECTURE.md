@@ -899,3 +899,24 @@ desarrollo — fotos SVG de relleno, video propio generado con `ffmpeg`, nada qu
 contenido real. Julián necesita ver el catálogo poblado para poder decidir qué va a mandar como
 material real (fotos de propiedades, contenido para el carrusel del hero) — mostrarle el catálogo
 vacío no le habría dado esa referencia.
+
+### Fase 24 — Interop CommonJS/ESM de Leaflet en el bundle de producción
+
+**Decisión — el import dinámico de `leaflet` en `PropertyMapComponent` resuelve tanto `.default`
+como el propio namespace, en vez de asumir uno de los dos.** `leaflet` es un paquete CommonJS puro
+(su `package.json` solo declara `"main"`, sin campo `"module"` ni build ESM). `ng serve` y el build
+de producción (`ng build`, esbuild) aplican interop distinto sobre un `import()` dinámico de un
+paquete CJS: en desarrollo el namespace queda aplanado (`L.icon` existe directo), pero en el bundle
+de producción del navegador queda envuelto bajo `L.default` — `L.icon` ahí es `undefined` y revienta
+en tiempo de ejecución (`TypeError: t.icon is not a function`), solo contra el bundle real, nunca
+contra el servidor de desarrollo. Se resuelve con
+`const L = (leafletModule as unknown as { default?: typeof Leaflet }).default ?? leafletModule;`,
+que cubre ambos casos sin depender de qué interop haya aplicado el bundler activo.
+
+**Verificado contra el bundle real, no contra `ng serve`:** se corrió `ng build` (configuración de
+producción, la misma que despliega Render) y se levantó `dist/frontend/server/server.mjs` en local
+apuntando a la API real de producción. Antes del fix, Playwright reproducía el mismo
+`TypeError: t.icon is not a function` en consola y el contenedor del mapa quedaba vacío. Después del
+fix, la misma carga real trae los 12 tiles de OpenStreetMap y los íconos del marcador con `200`, y
+el DOM del mapa queda poblado — no bastaba con que compilara, hacía falta el build de producción
+real para ver la falla en primer lugar.
