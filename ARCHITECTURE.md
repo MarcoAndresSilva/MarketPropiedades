@@ -920,3 +920,131 @@ apuntando a la API real de producción. Antes del fix, Playwright reproducía el
 fix, la misma carga real trae los 12 tiles de OpenStreetMap y los íconos del marcador con `200`, y
 el DOM del mapa queda poblado — no bastaba con que compilara, hacía falta el build de producción
 real para ver la falla en primer lugar.
+
+### Fase 25 — Rebrand a Habbi: paleta y nombre de marca
+
+**Decisión — la marca pasa de "Market Propiedades" a "Habbi", siguiendo el mockup de home que
+entregó el socio.** Se adopta su paleta (navy `#07162B`, violeta `#4B35FF`, verde `#38B59C`,
+lavanda `#EEEAFE`), que reemplaza la terracota de la Fase 8.
+
+**Decisión — Plus Jakarta Sans para todo, Fraunces sale del sitio.** El render final de la home
+usa una sans geométrica en negrita también para los títulos; un serif rompía el parecido de forma
+visible. Plus Jakarta Sans ya era la fuente del cuerpo y es casi idéntica a la del render, así que
+los títulos pasan a esa misma familia en peso 700 con tracking negativo. Se elimina además una
+familia completa de la descarga de Google Fonts.
+
+**Decisión — el verde de marca no se usa como color de texto.** `#38B59C` sobre blanco da 2.5:1 de
+contraste, bajo el mínimo AA de 4.5:1. Queda como `--brand-green` solo para rellenos e íconos, y
+`--success` usa una variante más oscura del mismo tono (`#1A7D69`, 5.0:1). En tema oscuro, el
+violeta se aclara (`#8B7DFF`, 5.4:1 sobre la superficie) por la misma razón. El mockup solo define
+tema claro; el oscuro se deriva de la misma paleta en vez de eliminar la preferencia del sistema
+que ya respetaba el sitio.
+
+**Decisión — el nombre visible vive en una sola constante (`core/brand.ts`), pero los nombres de
+infraestructura no se renombran.** Títulos, meta tags, JSON-LD y mensajes pre-armados de WhatsApp
+leen `BRAND_NAME`. Los servicios de Render/Netlify, la carpeta de Cloudinary y el email del admin
+siguen como `market-propiedades`: renombrarlos rompe URLs ya desplegadas y archivos ya subidos, y
+el visitante nunca los ve.
+
+**Decisión — logo provisorio como componente (`LogoComponent`), no como imagen.** Mientras llega
+el archivo definitivo, se reproduce el del render: la "H" es un SVG propio (dos muros y un techo
+en V como travesaño, con una ventana en violeta) y "abbi" es texto real en Plus Jakarta Sans 800,
+con el punto de la "i" reemplazado por un círculo violeta (se usa la "ı" sin punto). Así escala con
+`font-size`, se adapta al tema oscuro con `currentColor`, y se reemplaza en un solo lugar cuando
+llegue el logo real.
+
+**Decisión — íconos propios (`IconComponent`) con trazos copiados de Lucide, no la librería.** El
+render usa íconos de línea del estilo de Lucide. Se copian solo los ~25 que el sitio usa (licencia
+ISC, lo permite) en un componente con `@switch`, en vez de instalar `lucide-angular`: son pocos, no
+suman peso de más, y evitan depender de que ese paquete declare soporte para cada versión mayor de
+Angular (el mismo problema de `peerDependencies` que ya apareció con `@nestjs/throttler` en la
+Fase 4). Dentro del `@switch` los elementos llevan el prefijo `svg:` para que Angular los cree en el
+namespace de SVG.
+
+**Decisión — header del render con menú colapsable bajo 1180px, y las secciones aún no
+construidas llevan a una página "próximamente".** El menú (Comprar, Arrendar, Proyectos,
+Servicios, Cómo publicar — "Blog" se reemplazó porque no hay artículos) más Favoritos, Iniciar
+sesión y el CTA no entran en una sola línea bajo ~1180px, así que bajo ese ancho todo pasa a un
+botón hamburguesa. Las rutas de Proyectos, Servicios, Favoritos e Iniciar sesión todavía no tienen
+su pantalla: en vez de links rotos entre una etapa y la siguiente, `ProximamenteComponent` muestra
+un texto honesto por ruta (`data` en `app.routes.ts`) y también sirve de 404 para cualquier ruta
+desconocida. `/comprar` y `/arrendar` reutilizan el catálogo con la operación fijada desde `data`.
+El toggle de tema se mantiene, como un botón chico junto a Favoritos.
+
+**Decisión — `.container`, `.btn` y `.eyebrow` como clases globales en `_base.scss`.** Son las
+piezas que repiten todas las secciones del render (ancho de contenido, botón píldora en sus tres
+variantes, rótulo en mayúsculas espaciadas); como clases globales se escriben una vez en vez de
+copiarse en cada componente.
+
+**Decisión — favoritos en `localStorage`, sin cuenta de comprador.** El comprador no tiene cuenta
+en Habbi (decisión de producto: no se vende nada dentro del sitio, así que una cuenta solo le
+pondría una barrera). `FavoritesService` guarda solo los slugs en el navegador y la futura página
+de favoritos pedirá los datos frescos a la API, para no mostrar un precio o estado viejo. El botón
+del corazón vive fuera del `<a>` de la card: un botón dentro de un link es HTML inválido y rompe la
+navegación por teclado.
+
+**Decisión — badge "Arriendo" con la variante oscura del verde de marca.** El badge es texto
+blanco chico; con `#38B59C` daba 2.5:1. Se usa `#1A7D69` (5.0:1), el mismo tono que `--success`.
+El título de la card se arma como "Tipo en Comuna" hasta que las propiedades tengan un título
+propio (campo nuevo en el backend, etapa 1).
+
+**Decisión — la home es un componente nuevo (`HomeComponent`) calcado del render; el catálogo pasa a
+ser la página de listado.** `/` muestra hero con buscador, destacadas, beneficios, marketing y CTA;
+el catálogo con filtros queda en `/propiedades`, `/comprar` y `/arrendar`. El carrusel de mensajes
+del hero anterior (Fase 10) se elimina: el render define un hero fijo con foto.
+
+**Decisión — el buscador navega, no busca.** `SearchBoxComponent` arma la URL del listado con los
+filtros como query params (`/arrendar?precioMin=400000&precioMax=600000`), así cada búsqueda tiene
+URL propia: se puede compartir, guardar o volver atrás. Los tramos de precio cambian con la
+pestaña: UF en Comprar, CLP en Arrendar (la misma convención del schema). El backend descarta los
+parámetros que todavía no conoce (`whitelist: true`), así que el frontend puede mandarlos antes de
+que el filtro de precio exista en la API.
+
+**Decisión — ningún dato inventado del render llega al sitio.** El render traía cifras de ejemplo
+("12.4K visualizaciones", "286 clics a WhatsApp") y afirmaciones que no son ciertas todavía
+("propiedades en todo Chile", "usuarios verificados"). Se mantuvo el diseño de cada pieza con
+texto real: la tarjeta de métricas nombra lo que reporta una campaña sin cifras, y los beneficios
+hablan de Melipilla y alrededores y de fichas revisadas por el equipo.
+
+**Decisión — imágenes de marca provisorias de Unsplash, optimizadas a WebP.** Las fotos del render
+son generadas con IA y vienen con el texto encima, en baja resolución: no se pueden recortar. Hasta
+recibir los originales se usan fotos con licencia Unsplash (uso comercial libre, sin atribución
+obligatoria) elegidas por parecido: casa moderna al atardecer para el hero (`G48h926L2qo`),
+atardecer de Santiago con la cordillera para el CTA (`JM2mzeuwblg`) y casa con piscina para
+marketing (`4iEuIV8_84k`). Se sirven desde `public/marca/` en 960 y 1920 px (`srcset`), 30–165 KB
+cada una; la del hero con `fetchpriority="high"` porque es el LCP de la página.
+
+**Decisión — la barra del buscador y sus acciones usan el violeta de marca fijo.** La barra es
+blanca en ambos temas (va sobre la foto), así que la pestaña activa y el botón no toman el
+`--accent` aclarado del tema oscuro, que con texto blanco perdía contraste.
+
+**Decisión — piezas compartidas a estilos globales y la composición de marketing a su propio
+componente.** Los estilos de la home superaban el presupuesto de 4 kB por componente. En vez de
+subir el límite, la card de vidrio, el encabezado de sección y el botón grande pasaron a
+`_base.scss` (las van a usar otras páginas), y la composición decorativa de marketing (casa,
+celular, logos, tarjeta de métricas) a `MarketingVisualComponent`.
+
+### Fase 26 — Backend de la etapa 1: título, rol Inmobiliaria, verificación de correo y rango de precio
+
+**Decisión — `Property.titulo` propio y obligatorio, en una migración escrita a mano.** El render
+muestra títulos como "Casa familiar con jardín en Peñaflor"; armarlo desde tipo + comuna no alcanza.
+Agregar la columna `NOT NULL` de una fallaría sobre las filas existentes, así que la migración la
+agrega nullable, la completa con el texto que el frontend usaba hasta ahora ("Casa en Melipilla",
+con el mismo mapeo de tipos) y recién después la deja `NOT NULL` — la base de producción ya tiene
+propiedades y así no hay paso manual al desplegar. El DTO lo exige entre 5 y 120 caracteres.
+
+**Decisión — rol `INMOBILIARIA` y `User.emailVerificadoAt` desde ya, antes del registro público.**
+Los tres tipos de anunciante definidos con el socio son propietario (`PERSONA`), corredora e
+inmobiliaria; el comprador no tiene cuenta. El campo de verificación queda listo para el flujo de
+registro; las cuentas existentes se marcan como verificadas en la misma migración porque las creó
+el equipo a mano.
+
+**Decisión — rango de precio contra `precioUf` o `precioClp` según la operación, e ignorado sin
+ella.** Venta se guarda en UF y arriendo en CLP, así que `precioMin`/`precioMax` van contra una
+columna u otra (`precioWhere`, con test unitario). Si no viene `tipoOperacion`, el rango se ignora
+en vez de adivinar la unidad: "4000" puede ser UF o pesos. El buscador de la home siempre manda la
+operación, porque los tramos cambian con la pestaña.
+
+**Decisión — "Comuna o ciudad" sigue siendo un `<select>`, no un autocompletado.** Se evaluó para
+esta etapa, pero el catálogo cubre 4 comunas: la misma razón de la Fase 14 sigue vigente. El
+autocompletado se justifica cuando haya muchas comunas con propiedades.
