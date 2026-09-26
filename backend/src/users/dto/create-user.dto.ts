@@ -20,9 +20,9 @@ export class CreateUserDto {
   @Matches(/^\+[1-9]\d{7,14}$/)
   whatsapp?: string;
 
-  // Se crea siempre como publicador (persona o corredora) — cuentas ADMIN solo por seed.
-  @IsIn([Role.PERSONA, Role.CORREDORA])
-  role: typeof Role.PERSONA | typeof Role.CORREDORA;
+  // Se crea siempre como publicador (persona, corredora o inmobiliaria) — ADMIN solo por seed.
+  @IsIn([Role.PERSONA, Role.CORREDORA, Role.INMOBILIARIA])
+  role: typeof Role.PERSONA | typeof Role.CORREDORA | typeof Role.INMOBILIARIA;
 
   @IsOptional()
   @IsString()

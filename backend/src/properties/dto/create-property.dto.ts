@@ -28,6 +28,13 @@ export class CreatePropertyDto {
   @IsEnum(TipoPropiedad)
   tipoPropiedad: TipoPropiedad;
 
+  // Título visible de la ficha y la card ("Casa familiar con jardín en Peñaflor").
+  @IsString()
+  @IsNotEmpty()
+  @MinLength(5)
+  @MaxLength(120)
+  titulo: string;
+
   @IsOptional()
   @IsEnum(EstadoPublicacion)
   estado?: EstadoPublicacion;

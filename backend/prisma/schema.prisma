@@ -42,17 +42,20 @@ model Comuna {
 
 enum Role {
   ADMIN
-  PERSONA
+  PERSONA // propietario particular
   CORREDORA
+  INMOBILIARIA // desarrolla proyectos; publica propiedades y (más adelante) proyectos
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  name         String // nombre de contacto (persona) o nombre de la agencia (corredora)
-  whatsapp     String? // formato E.164, ej. "+56912345678" — contacto de sus fichas, link wa.me
-  role         Role     @default(ADMIN)
+  id                String    @id @default(cuid())
+  email             String    @unique
+  passwordHash      String
+  name              String // nombre de contacto (persona) o nombre de la agencia (corredora)
+  whatsapp          String? // formato E.164, ej. "+56912345678" — contacto de sus fichas, link wa.me
+  role              Role      @default(ADMIN)
+  // null = correo sin verificar. Lo llena el flujo de registro público de anunciantes.
+  emailVerificadoAt DateTime?
 
   corredoraProfile CorredoraProfile?
   properties       Property[]
@@ -104,6 +107,8 @@ model Property {
   publicadorId String
   publicador   User   @relation(fields: [publicadorId], references: [id])
 
+  // Título visible en cards y ficha ("Casa familiar con jardín en Peñaflor").
+  titulo        String        @db.VarChar(120)
   tipoOperacion TipoOperacion
   tipoPropiedad TipoPropiedad
   destacada     Boolean       @default(false)

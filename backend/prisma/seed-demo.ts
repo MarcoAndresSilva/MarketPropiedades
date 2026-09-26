@@ -58,6 +58,7 @@ const VIDEO_DEMO = '/demo-video/demo-video.mp4';
 const DEMO_PROPERTIES = [
   {
     slug: 'demo-casa-melipilla-centro',
+    titulo: 'Casa familiar con patio en el centro de Melipilla',
     comunaId: MELIPILLA,
     ...jitter(CENTRO_MELIPILLA, 0),
     tipoOperacion: 'VENTA',
@@ -76,6 +77,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-depto-melipilla-plaza',
+    titulo: 'Departamento luminoso cerca de la plaza',
     comunaId: MELIPILLA,
     ...jitter(CENTRO_MELIPILLA, 1),
     tipoOperacion: 'ARRIENDO',
@@ -92,6 +94,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-parcela-melipilla-rural',
+    titulo: 'Parcela rural en Melipilla',
     comunaId: MELIPILLA,
     ...jitter(CENTRO_MELIPILLA, 2),
     tipoOperacion: 'VENTA',
@@ -105,6 +108,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-oficina-melipilla-centro',
+    titulo: 'Oficina en pleno centro de Melipilla',
     comunaId: MELIPILLA,
     ...jitter(CENTRO_MELIPILLA, 3),
     tipoOperacion: 'ARRIENDO',
@@ -118,6 +122,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-local-melipilla-avenida',
+    titulo: 'Local comercial sobre avenida principal',
     comunaId: MELIPILLA,
     ...jitter(CENTRO_MELIPILLA, 4),
     tipoOperacion: 'VENTA',
@@ -130,6 +135,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-casa-san-pedro-vista-cerro',
+    titulo: 'Casa con vista a los cerros en San Pedro',
     comunaId: SAN_PEDRO,
     ...jitter(CENTRO_SAN_PEDRO, 0),
     tipoOperacion: 'VENTA',
@@ -145,6 +151,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-parcela-san-pedro-agricola',
+    titulo: 'Parcela agrícola con pozo en San Pedro',
     comunaId: SAN_PEDRO,
     ...jitter(CENTRO_SAN_PEDRO, 1),
     tipoOperacion: 'VENTA',
@@ -157,6 +164,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-depto-talagante-centro',
+    titulo: 'Departamento a pasos de la estación de Talagante',
     comunaId: TALAGANTE,
     ...jitter(CENTRO_TALAGANTE, 0),
     tipoOperacion: 'ARRIENDO',
@@ -173,6 +181,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-bodega-talagante-industrial',
+    titulo: 'Bodega industrial en Talagante',
     comunaId: TALAGANTE,
     ...jitter(CENTRO_TALAGANTE, 1),
     tipoOperacion: 'ARRIENDO',
@@ -185,6 +194,7 @@ const DEMO_PROPERTIES = [
   },
   {
     slug: 'demo-casa-el-monte-rio',
+    titulo: 'Casa con árboles frutales cerca del río en El Monte',
     comunaId: EL_MONTE,
     ...jitter(CENTRO_EL_MONTE, 0),
     tipoOperacion: 'VENTA',
