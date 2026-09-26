@@ -17,7 +17,7 @@
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 14px;
-  box-shadow: 0 12px 28px -12px rgba(36, 31, 26, 0.22);
+  box-shadow: 0 12px 28px -12px rgba(7, 22, 43, 0.22);
 
   h1 {
     font-size: 1.4rem;
@@ -25,10 +25,8 @@
   }
 }
 
-.admin-login__subtitle {
-  margin: -8px 0 4px;
-  color: var(--text-muted);
-  font-size: 0.9rem;
+.admin-login__logo {
+  font-size: 1.8rem;
 }
 
 .admin-login__field {

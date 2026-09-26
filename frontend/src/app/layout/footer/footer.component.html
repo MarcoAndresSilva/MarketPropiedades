@@ -1,28 +1,39 @@
 <footer class="site-footer">
-  <div class="site-footer__top">
+  <div class="container site-footer__top">
     <div class="site-footer__brand">
-      <svg class="site-footer__mark" viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          fill-rule="evenodd"
-          clip-rule="evenodd"
-          d="M12 2.3 L20.6 9.3 V14.6 C20.6 19.2 16.9 22.2 12 22.2 C7.1 22.2 3.4 19.2 3.4 14.6 V9.3 L12 2.3 Z M12 8.1 A2.6 2.6 0 1 0 12.01 8.1 Z"
-        />
-      </svg>
-      <div>
-        <p class="site-footer__nombre">Market Propiedades</p>
-        <p class="site-footer__tagline">Portal inmobiliario de Melipilla, con contacto directo por WhatsApp.</p>
-      </div>
+      <app-logo class="site-footer__logo" />
+      <p class="site-footer__tagline">
+        Propiedades en movimiento. Portal inmobiliario de Melipilla y alrededores, con contacto directo por
+        WhatsApp y marketing para cada propiedad.
+      </p>
     </div>
 
-    <nav class="site-footer__nav" aria-label="Enlaces del sitio">
-      <a routerLink="/">Propiedades</a>
-      <a routerLink="/publicar">¿Quieres publicar tu propiedad?</a>
-      <a [href]="contactoUrl" target="_blank" rel="noopener">Contacto por WhatsApp</a>
+    <nav class="site-footer__col" aria-label="Explora">
+      <p class="site-footer__heading">Explora</p>
+      <a routerLink="/comprar">Comprar</a>
+      <a routerLink="/arrendar">Arrendar</a>
+      <a routerLink="/proyectos">Proyectos</a>
+      <a routerLink="/favoritos">Favoritos</a>
     </nav>
+
+    <nav class="site-footer__col" aria-label="Para anunciantes">
+      <p class="site-footer__heading">Anunciantes</p>
+      <a routerLink="/publicar">Cómo publicar</a>
+      <a routerLink="/servicios">Servicios de marketing</a>
+    </nav>
+
+    <div class="site-footer__col">
+      <p class="site-footer__heading">Contacto</p>
+      <a [href]="contactoUrl" target="_blank" rel="noopener" class="site-footer__whatsapp">
+        <app-icon name="message-circle" />
+        Escríbenos por WhatsApp
+      </a>
+    </div>
   </div>
 
-  <p class="site-footer__copyright">
-    © {{ anio }} Market Propiedades.
+  <div class="container site-footer__bottom">
+    <p>© {{ anio }} Habbi. Todos los derechos reservados.</p>
+    <!-- Discreto a propósito: es la entrada del equipo al panel, no navegación para visitantes. -->
     <a routerLink="/admin/login" class="site-footer__admin">Acceso administrador</a>
-  </p>
+  </div>
 </footer>

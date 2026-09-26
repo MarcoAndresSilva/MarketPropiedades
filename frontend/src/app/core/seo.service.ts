@@ -2,6 +2,7 @@ import { DOCUMENT } from '@angular/common';
 import { Injectable, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { environment } from '../../environments/environment';
+import { BRAND_NAME } from './brand';
 
 export interface SeoPageData {
   title: string;
@@ -24,14 +25,14 @@ export class SeoService {
 
   setPage(data: SeoPageData): void {
     const url = `${environment.siteUrl}${data.path}`;
-    const fullTitle = `${data.title} | Market Propiedades`;
+    const fullTitle = `${data.title} | ${BRAND_NAME}`;
 
     this.title.setTitle(fullTitle);
 
     this.meta.updateTag({ name: 'description', content: data.description });
 
     this.meta.updateTag({ property: 'og:type', content: 'website' });
-    this.meta.updateTag({ property: 'og:site_name', content: 'Market Propiedades' });
+    this.meta.updateTag({ property: 'og:site_name', content: BRAND_NAME });
     this.meta.updateTag({ property: 'og:title', content: fullTitle });
     this.meta.updateTag({ property: 'og:description', content: data.description });
     this.meta.updateTag({ property: 'og:url', content: url });

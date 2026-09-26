@@ -1,69 +1,176 @@
 .site-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 16px 24px;
-  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 50;
   background: var(--surface);
-  flex-wrap: wrap;
+  border-bottom: 1px solid var(--border);
 }
 
-.site-header__right {
+.site-header__bar {
   display: flex;
   align-items: center;
-  gap: 16px;
-}
-
-.site-header__publicar {
-  font-size: 0.88rem;
-  font-weight: 600;
-  color: var(--accent);
-  text-decoration: none;
-  white-space: nowrap;
-
-  &:hover {
-    text-decoration: underline;
-  }
+  gap: 32px;
+  min-height: 76px;
 }
 
 .site-header__brand {
   display: inline-flex;
-  align-items: center;
-  gap: 9px;
-  font-family: 'Fraunces', Georgia, serif;
-  font-weight: 600;
-  font-size: 1.3rem;
-  color: var(--text);
   text-decoration: none;
+  font-size: 2.3rem;
+  flex-shrink: 0;
 }
 
-.site-header__mark {
-  width: 26px;
-  height: 26px;
-  fill: var(--accent);
-  flex-shrink: 0;
+.site-header__nav {
+  display: flex;
+  gap: 36px;
+  margin-left: 40px;
+
+  a {
+    color: var(--text);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    white-space: nowrap;
+
+    &:hover,
+    &.is-active {
+      color: var(--accent);
+    }
+  }
+}
+
+.site-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-left: auto;
+}
+
+.site-header__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text);
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+
+  app-icon {
+    width: 1.05em;
+    height: 1.05em;
+  }
+
+  &:hover,
+  &.is-active {
+    color: var(--accent);
+  }
 }
 
 .theme-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   border: 1px solid var(--border);
-  background: var(--surface-2);
-  color: var(--text);
+  background: transparent;
+  color: var(--text-muted);
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition:
+    color 0.15s ease,
+    border-color 0.15s ease;
 
-  &:hover {
-    background: var(--surface-3);
+  app-icon {
+    width: 17px;
+    height: 17px;
   }
 
-  svg {
-    width: 18px;
-    height: 18px;
+  &:hover {
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+}
+
+.site-header__burger {
+  display: none;
+  margin-left: auto;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text);
+  cursor: pointer;
+
+  app-icon {
+    width: 22px;
+    height: 22px;
+  }
+}
+
+// Bajo 1180px el menú completo ya no entra en una línea junto a las acciones:
+// se colapsa todo en el botón hamburguesa.
+@media (max-width: 1180px) {
+  .site-header__nav,
+  .site-header__actions {
+    display: none;
+  }
+
+  .site-header__burger {
+    display: inline-flex;
+  }
+
+  .site-header__bar {
+    min-height: 64px;
+  }
+
+  .site-header__brand {
+    font-size: 1.6rem;
+  }
+}
+
+.menu-mobile {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  padding: 8px 0 20px;
+
+  .container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  a:not(.btn) {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    font-weight: 500;
+    text-decoration: none;
+
+    &.is-active {
+      color: var(--accent);
+    }
+  }
+}
+
+.menu-mobile__footer {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+
+  .btn {
+    flex: 1;
+  }
+
+  .theme-toggle {
+    width: 44px;
+    height: 44px;
   }
 }

@@ -18,11 +18,14 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+// Títulos en la misma familia que el cuerpo, en negrita y con tracking cerrado —
+// es lo que da el look geométrico del render de marca de Habbi.
 h1,
 h2,
 h3 {
-  font-family: 'Fraunces', Georgia, serif;
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
   margin: 0;
 }
 
@@ -94,5 +97,144 @@ input {
   .reveal--visible {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Piezas del sistema de diseño de Habbi reutilizadas en varias páginas.
+// ---------------------------------------------------------------------------
+
+// Ancho de contenido del render de marca (~1240px útiles a 1440px de pantalla).
+.container {
+  width: 100%;
+  max-width: 1288px;
+  margin: 0 auto;
+  padding: 0 24px;
+
+  @media (max-width: 640px) {
+    padding: 0 16px;
+  }
+}
+
+// Botón píldora: primario violeta, claro (blanco sobre foto) y fantasma.
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 10px 24px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-decoration: none;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease,
+    border-color 0.15s ease;
+
+  app-icon {
+    width: 1.1em;
+    height: 1.1em;
+  }
+}
+
+.btn--primary {
+  background: var(--accent);
+  color: var(--accent-contrast);
+
+  &:hover {
+    background: var(--accent-hover);
+  }
+}
+
+.btn--light {
+  background: #ffffff;
+  color: #07162b;
+
+  &:hover {
+    background: #eef1f7;
+  }
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border-strong);
+
+  &:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+}
+
+// Rótulo en mayúsculas espaciadas sobre los títulos de sección ("PROPIEDADES DESTACADAS").
+.eyebrow {
+  margin: 0 0 12px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.eyebrow--light {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.btn--lg {
+  min-height: 56px;
+  padding: 14px 32px;
+  font-size: 1rem;
+}
+
+// Card de vidrio esmerilado sobre foto (hero y CTA).
+.glass {
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 20px;
+  background: rgba(20, 28, 48, 0.42);
+  backdrop-filter: blur(14px) saturate(120%);
+  color: #ffffff;
+}
+
+.glass__icon {
+  width: 30px;
+  height: 30px;
+}
+
+// Encabezado de sección: rótulo a la izquierda y link "Ver todas →" a la derecha.
+.section-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  .eyebrow {
+    margin: 0;
+  }
+}
+
+.section-head__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--accent);
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+
+  app-icon {
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    text-decoration: underline;
   }
 }
