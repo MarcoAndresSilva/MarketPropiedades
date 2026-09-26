@@ -1048,3 +1048,41 @@ operación, porque los tramos cambian con la pestaña.
 **Decisión — "Comuna o ciudad" sigue siendo un `<select>`, no un autocompletado.** Se evaluó para
 esta etapa, pero el catálogo cubre 4 comunas: la misma razón de la Fase 14 sigue vigente. El
 autocompletado se justifica cuando haya muchas comunas con propiedades.
+
+### Fase 27 — Listado, favoritos y servicios (etapa 2, parte pública)
+
+**Decisión — los filtros del listado viven en la URL y se aplican al cambiarlos.** `/comprar`,
+`/arrendar` y `/propiedades` comparten `CatalogComponent`. Cambiar un select navega con el query
+param nuevo (`queryParamsHandling: 'merge'`) y la lista se recarga desde la suscripción a
+`queryParamMap`, nunca desde el select. Así la pantalla, el botón "atrás" y un link compartido
+siempre muestran lo mismo. No hay botón "Buscar": con pocos filtros y resultados rápidos, un paso
+extra solo agrega fricción.
+
+**Decisión — ordenar por precio, igual que el rango, exige la operación.** `orden=precio_asc|desc`
+va contra `precioUf` o `precioClp` según la operación (`ordenBy`, con tests); sin operación se
+ignora y se usa el orden por defecto (destacadas primero, después lo más reciente, con `createdAt`
+como desempate para que la paginación sea estable). En `/propiedades` el filtro de precio y las
+opciones de orden por precio aparecen recién al elegir venta o arriendo. Cambiar de operación
+limpia el rango y el orden, porque un tramo en UF no significa nada en pesos.
+
+**Decisión — "Ver más" en vez de páginas numeradas.** El listado carga de a 12 y suma más al final.
+Con el volumen actual (decenas de propiedades), una paginación numerada sería más navegación que
+contenido.
+
+**Decisión — la página de favoritos se renderiza solo en el navegador.** Los favoritos están en
+`localStorage` (el comprador no tiene cuenta), así que el servidor no puede saber cuáles mostrar:
+con SSR saldría "no tienes favoritos" y un salto al hidratar. `/favoritos` es
+`RenderMode.Client`, pide los datos frescos de cada slug y quita de la lista las propiedades que
+ya no están publicadas, avisándolo. El contador del header aparece recién después del primer render
+en el navegador (`afterNextRender`), para que el HTML del servidor y el de la hidratación coincidan.
+
+**Decisión — Servicios muestra planes y packs sin precios.** Los precios siguen en discusión con el
+socio (la propuesta de planes y el modelo de negocio traen rangos que difieren varias veces), así
+que cada opción lleva a cotizar por WhatsApp con un mensaje que nombra el plan o pack. Los
+contenidos salen de esos documentos: Plan Gratis (hasta 3 propiedades) y Pro (desde la 4ª), y los
+packs Contenido, Reel, Potencia y Acelera. Se explicita que el presupuesto de Meta Ads va aparte
+de los honorarios, un principio comercial del modelo de negocio.
+
+**Decisión — opciones de búsqueda compartidas en `core/search-options.ts`.** Los tramos de precio
+por operación y la lista de tipos los usaban el buscador de la home y el listado; ahora están en un
+solo lugar.
