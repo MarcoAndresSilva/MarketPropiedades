@@ -81,6 +81,7 @@ export interface CatalogFilters {
   /** En UF para VENTA, en CLP para ARRIENDO (misma convención que el precio guardado). */
   precioMin?: number;
   precioMax?: number;
+  orden?: 'recientes' | 'precio_asc' | 'precio_desc';
   page?: number;
   pageSize?: number;
 }

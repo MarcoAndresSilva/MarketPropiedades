@@ -17,6 +17,7 @@ export class PropertiesService {
     if (filters.dormitoriosMin) params = params.set('dormitoriosMin', filters.dormitoriosMin);
     if (filters.precioMin) params = params.set('precioMin', filters.precioMin);
     if (filters.precioMax) params = params.set('precioMax', filters.precioMax);
+    if (filters.orden && filters.orden !== 'recientes') params = params.set('orden', filters.orden);
     if (filters.page) params = params.set('page', filters.page);
     if (filters.pageSize) params = params.set('pageSize', filters.pageSize);
 

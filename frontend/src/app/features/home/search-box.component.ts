@@ -4,43 +4,9 @@ import { Router } from '@angular/router';
 import { PropertiesService } from '../../core/properties.service';
 import { Comuna } from '../../core/property.model';
 import { IconComponent } from '../../core/icon.component';
+import { RANGOS_PRECIO, RangoPrecio, TIPOS_PROPIEDAD } from '../../core/search-options';
 
 type Pestana = 'comprar' | 'arrendar' | 'proyecto';
-
-interface RangoPrecio {
-  label: string;
-  min?: number;
-  max?: number;
-}
-
-// Tramos de precio según la convención chilena del resto del sitio: venta en UF,
-// arriendo en CLP. Cambian con la pestaña activa.
-const RANGOS: Record<'comprar' | 'arrendar', RangoPrecio[]> = {
-  comprar: [
-    { label: 'Hasta UF 2.000', max: 2000 },
-    { label: 'UF 2.000 – 4.000', min: 2000, max: 4000 },
-    { label: 'UF 4.000 – 6.000', min: 4000, max: 6000 },
-    { label: 'UF 6.000 – 10.000', min: 6000, max: 10000 },
-    { label: 'Más de UF 10.000', min: 10000 },
-  ],
-  arrendar: [
-    { label: 'Hasta $400.000', max: 400000 },
-    { label: '$400.000 – $600.000', min: 400000, max: 600000 },
-    { label: '$600.000 – $900.000', min: 600000, max: 900000 },
-    { label: '$900.000 – $1.500.000', min: 900000, max: 1500000 },
-    { label: 'Más de $1.500.000', min: 1500000 },
-  ],
-};
-
-const TIPOS = [
-  { value: 'CASA', label: 'Casa' },
-  { value: 'DEPARTAMENTO', label: 'Departamento' },
-  { value: 'PARCELA', label: 'Parcela' },
-  { value: 'TERRENO', label: 'Terreno' },
-  { value: 'OFICINA', label: 'Oficina' },
-  { value: 'LOCAL_COMERCIAL', label: 'Local comercial' },
-  { value: 'BODEGA', label: 'Bodega' },
-];
 
 // Buscador del hero: pestañas Comprar / Arrendar / Proyecto + comuna, tipo y rango de
 // precio. No busca por su cuenta: navega a la página de listado con los filtros como
@@ -60,11 +26,11 @@ export class SearchBoxComponent implements OnInit {
     { id: 'arrendar', label: 'Arrendar' },
     { id: 'proyecto', label: 'Proyecto' },
   ];
-  protected readonly tipos = TIPOS;
+  protected readonly tipos = TIPOS_PROPIEDAD;
 
   protected readonly pestana = signal<Pestana>('comprar');
   protected readonly comunas = signal<Pick<Comuna, 'id' | 'nombre'>[]>([]);
-  protected readonly rangos = computed(() => (this.pestana() === 'arrendar' ? RANGOS.arrendar : RANGOS.comprar));
+  protected readonly rangos = computed(() => RANGOS_PRECIO[this.pestana() === 'arrendar' ? 'ARRIENDO' : 'VENTA']);
 
   protected comunaId = '';
   protected tipoPropiedad = '';

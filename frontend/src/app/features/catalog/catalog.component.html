@@ -1,64 +1,130 @@
-<main id="main-content" tabindex="-1" class="catalog">
-  <form class="search-bar" (ngSubmit)="buscar()" aria-label="Buscar propiedades">
-    @if (comunas().length > 0) {
-      <label class="search-bar__field">
-        <span class="search-bar__label">Comuna</span>
-        <select name="comunaId" [(ngModel)]="comunaId">
-          <option value="">Todas las comunas</option>
-          @for (comuna of comunas(); track comuna.id) {
-            <option [value]="comuna.id">{{ comuna.nombre }}</option>
-          }
+<main id="main-content" tabindex="-1" class="container catalog">
+  <header class="page-head">
+    <p class="eyebrow">{{ textos().eyebrow }}</p>
+    <h1>{{ textos().titulo }} en Melipilla y alrededores</h1>
+    <p>{{ textos().bajada }}</p>
+  </header>
+
+  <form class="filtros" aria-label="Filtrar propiedades" (submit)="$event.preventDefault()">
+    @if (!operacionFija) {
+      <label class="filtro">
+        <span class="filtro__label">Operación</span>
+        <select [ngModel]="filtros().tipoOperacion ?? ''" name="operacion" (ngModelChange)="cambiarOperacion($event)">
+          <option value="">Venta y arriendo</option>
+          <option value="VENTA">Venta</option>
+          <option value="ARRIENDO">Arriendo</option>
         </select>
       </label>
     }
 
-    <label class="search-bar__field">
-      <span class="search-bar__label">Operación</span>
-      <select name="tipoOperacion" [(ngModel)]="tipoOperacion">
-        <option value="">Comprar o arrendar</option>
-        <option value="VENTA">Comprar</option>
-        <option value="ARRIENDO">Arrendar</option>
+    <label class="filtro">
+      <span class="filtro__label">Comuna</span>
+      <select [ngModel]="filtros().comunaId ?? ''" name="comuna" (ngModelChange)="cambiar({ comuna: $event || null })">
+        <option value="">Todas las comunas</option>
+        @for (c of comunas(); track c.id) {
+          <option [value]="c.id">{{ c.nombre }}</option>
+        }
       </select>
     </label>
 
-    <label class="search-bar__field">
-      <span class="search-bar__label">Tipo</span>
-      <select name="tipoPropiedad" [(ngModel)]="tipoPropiedad">
+    <label class="filtro">
+      <span class="filtro__label">Tipo</span>
+      <select [ngModel]="filtros().tipoPropiedad ?? ''" name="tipo" (ngModelChange)="cambiar({ tipo: $event || null })">
         <option value="">Todos los tipos</option>
-        <option value="CASA">Casa</option>
-        <option value="DEPARTAMENTO">Departamento</option>
-        <option value="PARCELA">Parcela</option>
-        <option value="TERRENO">Terreno</option>
-        <option value="OFICINA">Oficina</option>
-        <option value="LOCAL_COMERCIAL">Local comercial</option>
-        <option value="BODEGA">Bodega</option>
+        @for (t of tipos; track t.value) {
+          <option [value]="t.value">{{ t.label }}</option>
+        }
       </select>
     </label>
 
-    <button type="submit" class="search-bar__submit">Buscar</button>
+    <label class="filtro">
+      <span class="filtro__label">Precio</span>
+      <select
+        [ngModel]="rangoSeleccionado()"
+        name="precio"
+        (ngModelChange)="cambiarRango($event)"
+        [disabled]="!operacion()"
+        [attr.title]="operacion() ? null : 'Elige venta o arriendo para filtrar por precio'"
+      >
+        <option value="">{{ operacion() ? 'Cualquier precio' : 'Elige venta o arriendo' }}</option>
+        @for (r of rangos(); track r.label; let i = $index) {
+          <option [value]="'' + i">{{ r.label }}</option>
+        }
+      </select>
+    </label>
+
+    <label class="filtro">
+      <span class="filtro__label">Dormitorios</span>
+      <select [ngModel]="'' + (filtros().dormitoriosMin ?? '')" name="dormitorios" (ngModelChange)="cambiar({ dormitorios: $event || null })">
+        <option value="">Cualquiera</option>
+        @for (d of dormitoriosOpciones; track d) {
+          <option [value]="'' + d">{{ d }} o más</option>
+        }
+      </select>
+    </label>
   </form>
 
-  <h1 id="catalogo-grid">Propiedades en Melipilla y alrededores</h1>
+  <div class="resultados-bar">
+    <p class="resultados-bar__total" role="status">
+      @if (!loading()) {
+        {{ total() }} {{ total() === 1 ? 'propiedad' : 'propiedades' }}
+      }
+      @if (hayFiltros()) {
+        <button type="button" class="resultados-bar__limpiar" (click)="limpiar()">Limpiar filtros</button>
+      }
+    </p>
+
+    <label class="orden">
+      <span>Ordenar por</span>
+      <select [ngModel]="filtros().orden ?? 'recientes'" name="orden" (ngModelChange)="cambiar({ orden: $event === 'recientes' ? null : $event })">
+        <option value="recientes">Destacadas y recientes</option>
+        @if (operacion()) {
+          <option value="precio_asc">Menor precio</option>
+          <option value="precio_desc">Mayor precio</option>
+        }
+      </select>
+    </label>
+  </div>
 
   @if (loading()) {
-    <p role="status" class="sr-only">Cargando propiedades…</p>
-    <div class="catalog__grid" aria-hidden="true">
-      @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+    <p class="sr-only">Cargando propiedades…</p>
+    <div class="property-grid" aria-hidden="true">
+      @for (i of [1, 2, 3, 4, 5, 6, 7, 8]; track i) {
         <app-property-card-skeleton />
       }
     </div>
   } @else if (error()) {
-    <p role="alert">No se pudo cargar el catálogo. Intenta de nuevo más tarde.</p>
+    <div class="empty-state" role="alert">
+      <app-icon name="house" [strokeWidth]="1.6" />
+      <h2>No pudimos cargar las propiedades</h2>
+      <p>Revisa tu conexión e inténtalo de nuevo en unos minutos.</p>
+    </div>
   } @else if (items().length === 0) {
-    <p>No hay propiedades publicadas con esos filtros todavía.</p>
-  } @else {
-    <p class="catalog__total">{{ total() }} propiedad{{ total() === 1 ? '' : 'es' }} encontrada{{ total() === 1 ? '' : 's' }}</p>
-    <div class="catalog__grid">
-      @for (property of items(); track property.id; let i = $index) {
-        <div [appRevealOnScroll]="(i % 6) * 60">
-          <app-property-card [property]="property" />
-        </div>
+    <div class="empty-state">
+      <app-icon name="search" [strokeWidth]="1.6" />
+      <h2>No hay propiedades con estos filtros</h2>
+      <p>Prueba con otra comuna o un rango de precio más amplio.</p>
+      @if (hayFiltros()) {
+        <button type="button" class="btn btn--primary" (click)="limpiar()">Limpiar filtros</button>
+      } @else {
+        <a routerLink="/" class="btn btn--primary">Volver al inicio</a>
       }
     </div>
+  } @else {
+    <ul class="property-grid" role="list">
+      @for (property of items(); track property.id; let i = $index) {
+        <li [appRevealOnScroll]="(i % 4) * 60">
+          <app-property-card [property]="property" />
+        </li>
+      }
+    </ul>
+
+    @if (hayMas()) {
+      <div class="catalog__mas">
+        <button type="button" class="btn btn--ghost" (click)="verMas()" [disabled]="loadingMore()">
+          {{ loadingMore() ? 'Cargando…' : 'Ver más propiedades' }}
+        </button>
+      </div>
+    }
   }
 </main>

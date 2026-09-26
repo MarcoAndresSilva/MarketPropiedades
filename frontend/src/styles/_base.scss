@@ -238,3 +238,60 @@ input {
     text-decoration: underline;
   }
 }
+
+// Encabezado de las páginas internas (listados, favoritos, proyectos, servicios):
+// rótulo + título + bajada, con el mismo aire que las secciones de la home.
+.page-head {
+  padding-top: 48px;
+  padding-bottom: 28px;
+
+  h1 {
+    margin: 0 0 10px;
+    font-size: clamp(1.9rem, 1.4rem + 1.8vw, 2.7rem);
+    letter-spacing: -0.03em;
+  }
+
+  p:not(.eyebrow) {
+    max-width: 640px;
+    margin: 0;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+}
+
+// Grilla de cards de propiedad: 4 columnas en desktop, 1 en celular.
+.property-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+// Estado vacío de una página (sin favoritos, sin resultados).
+.empty-state {
+  padding: 56px 24px;
+  border: 1px dashed var(--border-strong);
+  border-radius: 16px;
+  text-align: center;
+  color: var(--text-muted);
+
+  app-icon {
+    width: 40px;
+    height: 40px;
+    color: var(--accent);
+  }
+
+  h2 {
+    margin: 14px 0 8px;
+    color: var(--text);
+    font-size: 1.25rem;
+  }
+
+  p {
+    max-width: 420px;
+    margin: 0 auto 22px;
+    line-height: 1.6;
+  }
+}
