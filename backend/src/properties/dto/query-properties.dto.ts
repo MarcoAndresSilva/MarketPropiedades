@@ -1,6 +1,9 @@
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import { IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
 import { TipoOperacion, TipoPropiedad } from '../../generated/prisma/enums';
+
+export const ORDENES = ['recientes', 'precio_asc', 'precio_desc'] as const;
+export type Orden = (typeof ORDENES)[number];
 
 // Filtros del catálogo público — siempre sobre propiedades PUBLICADA (ver service).
 export class QueryPropertiesDto {
@@ -35,6 +38,12 @@ export class QueryPropertiesDto {
   @IsNumber()
   @Min(0)
   precioMax?: number;
+
+  // "recientes" deja las destacadas primero (posición pagada). Ordenar por precio, igual
+  // que el rango, necesita la operación para saber si comparar UF o CLP.
+  @IsOptional()
+  @IsIn(ORDENES)
+  orden: Orden = 'recientes';
 
   @IsOptional()
   @Type(() => Number)

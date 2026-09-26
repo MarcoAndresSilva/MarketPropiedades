@@ -25,6 +25,18 @@ export function precioWhere(query: Pick<QueryPropertiesDto, 'tipoOperacion' | 'p
   return query.tipoOperacion === TipoOperacion.VENTA ? { precioUf: rango } : { precioClp: rango };
 }
 
+// Por precio solo con operación (la columna depende de ella, igual que en precioWhere);
+// sin operación, o en "recientes", las destacadas van primero y después lo más nuevo.
+// `createdAt` al final desempata para que la paginación sea estable.
+export function ordenBy(query: Pick<QueryPropertiesDto, 'tipoOperacion' | 'orden'>) {
+  if (query.tipoOperacion && query.orden !== 'recientes') {
+    const direccion = query.orden === 'precio_asc' ? ('asc' as const) : ('desc' as const);
+    const columna = query.tipoOperacion === TipoOperacion.VENTA ? 'precioUf' : 'precioClp';
+    return [{ [columna]: { sort: direccion, nulls: 'last' as const } }, { createdAt: 'desc' as const }];
+  }
+  return [{ destacada: 'desc' as const }, { createdAt: 'desc' as const }];
+}
+
 @Injectable()
 export class PropertiesService {
   constructor(private readonly prisma: PrismaService) {}
@@ -53,7 +65,7 @@ export class PropertiesService {
       this.prisma.property.findMany({
         where,
         include: LIST_INCLUDE,
-        orderBy: [{ destacada: 'desc' }, { createdAt: 'desc' }],
+        orderBy: ordenBy(query),
         skip: (query.page - 1) * query.pageSize,
         take: query.pageSize,
       }),

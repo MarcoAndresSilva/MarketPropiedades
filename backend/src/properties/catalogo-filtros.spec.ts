@@ -1,4 +1,4 @@
-import { precioWhere } from './properties.service';
+import { ordenBy, precioWhere } from './properties.service';
 import { TipoOperacion } from '../generated/prisma/enums';
 
 describe('precioWhere', () => {
@@ -20,5 +20,23 @@ describe('precioWhere', () => {
 
   it('no filtra si no viene ningún extremo del rango', () => {
     expect(precioWhere({ tipoOperacion: TipoOperacion.VENTA })).toEqual({});
+  });
+});
+
+describe('ordenBy', () => {
+  it('ordena venta por precio en UF', () => {
+    expect(ordenBy({ tipoOperacion: TipoOperacion.VENTA, orden: 'precio_asc' })[0]).toEqual({
+      precioUf: { sort: 'asc', nulls: 'last' },
+    });
+  });
+
+  it('ordena arriendo por precio en CLP, de mayor a menor', () => {
+    expect(ordenBy({ tipoOperacion: TipoOperacion.ARRIENDO, orden: 'precio_desc' })[0]).toEqual({
+      precioClp: { sort: 'desc', nulls: 'last' },
+    });
+  });
+
+  it('sin operación no ordena por precio: destacadas primero', () => {
+    expect(ordenBy({ orden: 'precio_asc' })[0]).toEqual({ destacada: 'desc' });
   });
 });
