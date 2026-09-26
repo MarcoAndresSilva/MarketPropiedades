@@ -1,0 +1,197 @@
+// Composición del render: foto de la casa, un celular encima con un "reel", los
+// logos de Instagram/Facebook flotando y la tarjeta de métricas a la derecha.
+:host {
+  display: block;
+}
+
+.marketing__visual {
+  position: relative;
+  height: 400px;
+}
+
+.marketing__casa {
+  position: absolute;
+  top: 40px;
+  left: 0;
+  width: 72%;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+}
+
+.marketing__phone {
+  position: absolute;
+  top: 10px;
+  left: 26%;
+  width: 150px;
+  height: 300px;
+  padding: 8px;
+  border-radius: 28px;
+  background: #0b1220;
+  box-shadow: 0 30px 50px -20px rgba(7, 22, 43, 0.55);
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 30% center;
+    border-radius: 21px;
+  }
+}
+
+.marketing__play {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.85);
+  transform: translate(-50%, -50%);
+
+  span {
+    margin-left: 4px;
+    border-top: 9px solid transparent;
+    border-bottom: 9px solid transparent;
+    border-left: 14px solid #0b1220;
+  }
+}
+
+.social {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+
+  svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.social--ig {
+  top: -12px;
+  left: 47%;
+  background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fd5949 45%, #d6249f 60%, #285aeb 90%);
+}
+
+.social--fb {
+  top: -12px;
+  left: 62%;
+  background: #1877f2;
+}
+
+.reporte {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 250px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+
+  ul {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  strong {
+    display: block;
+    font-size: 0.95rem;
+  }
+
+  span:not(.reporte__icon) {
+    color: var(--text-muted);
+    font-size: 0.8rem;
+    line-height: 1.35;
+  }
+}
+
+.reporte__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 18px;
+  font-size: 0.9rem;
+  font-weight: 600;
+
+  app-icon {
+    color: var(--accent);
+  }
+}
+
+.reporte__icon {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+
+  app-icon {
+    width: 17px;
+    height: 17px;
+  }
+}
+
+@media (max-width: 640px) {
+  .marketing__visual {
+    height: 320px;
+  }
+
+  .marketing__casa {
+    width: 100%;
+    height: 220px;
+    top: 60px;
+  }
+
+  .marketing__phone {
+    top: 30px;
+    left: 8%;
+    width: 120px;
+    height: 240px;
+  }
+
+  .reporte {
+    top: 110px;
+    width: 200px;
+    padding: 16px;
+
+    li span:not(.reporte__icon) {
+      display: none;
+    }
+  }
+
+  .social--ig {
+    top: 0;
+    left: 44%;
+  }
+
+  .social--fb {
+    top: 0;
+    left: 60%;
+  }
+}

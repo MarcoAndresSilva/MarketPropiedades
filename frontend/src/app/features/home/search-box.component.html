@@ -1,0 +1,61 @@
+<div class="search">
+  <div class="search__tabs" role="tablist" aria-label="Qué buscas">
+    @for (p of pestanas; track p.id) {
+      <button
+        type="button"
+        role="tab"
+        class="search__tab"
+        [class.is-active]="pestana() === p.id"
+        [attr.aria-selected]="pestana() === p.id"
+        (click)="elegir(p.id)"
+      >
+        {{ p.label }}
+      </button>
+    }
+  </div>
+
+  <form class="search__bar" (ngSubmit)="buscar()" role="search" aria-label="Buscar propiedades">
+    <label class="search__field">
+      <app-icon name="map-pin" [strokeWidth]="1.8" />
+      <span class="sr-only">Comuna</span>
+      <select name="comuna" [(ngModel)]="comunaId">
+        <option value="">Comuna o ciudad</option>
+        @for (c of comunas(); track c.id) {
+          <option [value]="c.id">{{ c.nombre }}</option>
+        }
+      </select>
+      <app-icon class="search__chevron" name="chevron-down" />
+    </label>
+
+    @if (pestana() !== 'proyecto') {
+      <label class="search__field">
+        <app-icon name="house" [strokeWidth]="1.8" />
+        <span class="sr-only">Tipo de propiedad</span>
+        <select name="tipo" [(ngModel)]="tipoPropiedad">
+          <option value="">Tipo de propiedad</option>
+          @for (t of tipos; track t.value) {
+            <option [value]="t.value">{{ t.label }}</option>
+          }
+        </select>
+        <app-icon class="search__chevron" name="chevron-down" />
+      </label>
+
+      <label class="search__field">
+        <app-icon name="circle-dollar-sign" [strokeWidth]="1.8" />
+        <span class="sr-only">Rango de precio</span>
+        <select name="rango" [(ngModel)]="rango">
+          <option value="">Rango de precio</option>
+          @for (r of rangos(); track r.label; let i = $index) {
+            <option [value]="i">{{ r.label }}</option>
+          }
+        </select>
+        <app-icon class="search__chevron" name="chevron-down" />
+      </label>
+    }
+
+    <button type="submit" class="btn btn--primary search__submit">
+      <app-icon name="search" />
+      Buscar
+    </button>
+  </form>
+</div>

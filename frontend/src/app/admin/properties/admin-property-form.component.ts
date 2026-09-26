@@ -28,6 +28,7 @@ interface FormModel {
   estacionamientos: number | null;
   bodegas: number | null;
   gastosComunesClp: number | null;
+  titulo: string;
   descripcion: string;
 }
 
@@ -48,6 +49,7 @@ const MODELO_VACIO: FormModel = {
   estacionamientos: null,
   bodegas: null,
   gastosComunesClp: null,
+  titulo: '',
   descripcion: '',
 };
 
@@ -115,6 +117,7 @@ export class AdminPropertyFormComponent implements OnInit {
           estacionamientos: p.estacionamientos,
           bodegas: p.bodegas,
           gastosComunesClp: p.gastosComunesClp,
+          titulo: p.titulo,
           descripcion: p.descripcion,
         };
         this.fotos.set(p.fotos);
@@ -151,6 +154,7 @@ export class AdminPropertyFormComponent implements OnInit {
       estacionamientos: this.model.estacionamientos,
       bodegas: this.model.bodegas,
       gastosComunesClp: this.model.gastosComunesClp,
+      titulo: this.model.titulo.trim(),
       descripcion: this.model.descripcion,
       videoUrl: this.videoUrl(),
     };

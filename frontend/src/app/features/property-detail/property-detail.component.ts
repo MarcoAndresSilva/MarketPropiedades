@@ -10,6 +10,7 @@ import { PropertyMapComponent } from './property-map.component';
 import { SeoService } from '../../core/seo.service';
 import { cloudinaryImageUrl } from '../../core/cloudinary.util';
 import { environment } from '../../../environments/environment';
+import { BRAND_NAME } from '../../core/brand';
 
 @Component({
   selector: 'app-property-detail',
@@ -45,7 +46,7 @@ export class PropertyDetailComponent implements OnInit {
   }
 
   private setSeo(p: Property): void {
-    const titulo = `${this.formatTipoPropiedad(p.tipoPropiedad)} en ${p.comuna.nombre}`;
+    const titulo = p.titulo;
     const precio = this.formatPrecio(p);
     const descripcion = truncarEnPalabra(`${titulo} — ${precio}. ${p.descripcion}`, 157);
     const path = `/propiedad/${p.slug}`;
@@ -78,12 +79,12 @@ export class PropertyDetailComponent implements OnInit {
   }
 
   whatsappContactoUrl(property: Property): string {
-    const texto = `Hola, me interesa la propiedad "${this.formatTipoPropiedad(property.tipoPropiedad)} en ${property.comuna.nombre}" que vi en Market Propiedades.`;
+    const texto = `Hola, me interesa la propiedad "${property.titulo}" que vi en ${BRAND_NAME}.`;
     return buildWhatsappUrl(property.publicador.whatsapp ?? '', texto);
   }
 
   whatsappAgendarUrl(property: Property): string {
-    const texto = `Hola, quiero agendar una visita a la propiedad "${this.formatTipoPropiedad(property.tipoPropiedad)} en ${property.comuna.nombre}" que vi en Market Propiedades.`;
+    const texto = `Hola, quiero agendar una visita a la propiedad "${property.titulo}" que vi en ${BRAND_NAME}.`;
     return buildWhatsappUrl(property.publicador.whatsapp ?? '', texto);
   }
 }

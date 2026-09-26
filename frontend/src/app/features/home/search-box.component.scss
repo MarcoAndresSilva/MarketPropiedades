@@ -1,0 +1,125 @@
+// Pestañas + barra blanca del render: pestañas tipo "ficha" pegadas sobre la barra,
+// la activa en violeta; tres campos con ícono y chevron, y el botón Buscar.
+.search__tabs {
+  display: flex;
+  gap: 8px;
+  padding-left: 12px;
+}
+
+.search__tab {
+  min-width: 118px;
+  padding: 13px 22px;
+  border: 0;
+  border-radius: 12px 12px 0 0;
+  background: #ffffff;
+  color: #07162b;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+
+  // La barra es blanca en ambos temas: el violeta va fijo, no el --accent aclarado
+  // del tema oscuro (con texto blanco perdería contraste).
+  &.is-active {
+    background: #4b35ff;
+    color: #ffffff;
+    font-weight: 600;
+  }
+}
+
+.search__bar {
+  display: flex;
+  gap: 16px;
+  padding: 14px;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 24px 50px -20px rgba(7, 22, 43, 0.45);
+  // Anillo translúcido del render alrededor de la barra.
+  outline: 8px solid rgba(255, 255, 255, 0.14);
+}
+
+.search__field {
+  position: relative;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  color: #07162b;
+
+  > app-icon:first-child {
+    position: absolute;
+    left: 16px;
+    width: 22px;
+    height: 22px;
+    pointer-events: none;
+  }
+
+  select {
+    width: 100%;
+    height: 56px;
+    padding: 0 44px 0 50px;
+    border: 1px solid #e6e8ee;
+    border-radius: 10px;
+    background: #ffffff;
+    color: #07162b;
+    font: inherit;
+    font-size: 0.92rem;
+    appearance: none;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #cfd4de;
+    }
+  }
+}
+
+.search__chevron {
+  position: absolute;
+  right: 16px;
+  width: 18px;
+  height: 18px;
+  pointer-events: none;
+  color: #667085;
+}
+
+.search__submit {
+  flex: 0 0 auto;
+  min-width: 190px;
+  height: 56px;
+  border-radius: 10px;
+  background: #4b35ff;
+  color: #ffffff;
+  font-size: 1rem;
+
+  &:hover {
+    background: #3a24e6;
+  }
+}
+
+@media (max-width: 900px) {
+  .search__bar {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .search__submit {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .search__tabs {
+    padding-left: 0;
+    gap: 4px;
+  }
+
+  .search__tab {
+    flex: 1;
+    min-width: 0;
+    padding: 12px 8px;
+  }
+
+  .search__field select {
+    height: 52px;
+  }
+}

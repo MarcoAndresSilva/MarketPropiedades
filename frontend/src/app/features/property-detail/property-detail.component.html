@@ -7,7 +7,7 @@
   <main id="main-content" tabindex="-1" class="ficha">
     <a routerLink="/" class="ficha__volver">← Volver al catálogo</a>
 
-    <h1>{{ formatTipoPropiedad(p.tipoPropiedad) }} en {{ p.comuna.nombre }}</h1>
+    <h1>{{ p.titulo }}</h1>
     <p class="ficha__region">{{ p.comuna.region.nombre }}{{ p.direccion ? ' · ' + p.direccion : '' }}</p>
 
     <div class="ficha__media" [class.ficha__media--dual]="p.fotos.length > 0 && p.videoUrl">

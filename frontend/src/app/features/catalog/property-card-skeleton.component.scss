@@ -10,13 +10,13 @@
 
 .skeleton-card {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 14px;
   overflow: hidden;
   background: var(--surface);
 }
 
 .skeleton-card__photo {
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 16 / 11;
   background: var(--surface-2);
 }
 

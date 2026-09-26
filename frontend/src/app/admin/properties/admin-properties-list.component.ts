@@ -43,7 +43,7 @@ export class AdminPropertiesListComponent implements OnInit {
   }
 
   eliminar(property: Property): void {
-    if (!confirm(`¿Eliminar "${this.formatTipoPropiedad(property.tipoPropiedad)} en ${property.comuna.nombre}"? Esta acción no se puede deshacer.`)) {
+    if (!confirm(`¿Eliminar "${property.titulo}"? Esta acción no se puede deshacer.`)) {
       return;
     }
     this.properties.remove(property.id).subscribe(() => this.load());

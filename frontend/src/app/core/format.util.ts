@@ -35,3 +35,19 @@ export function truncarEnPalabra(texto: string, max: number): string {
   const ultimoEspacio = cortado.lastIndexOf(' ');
   return (ultimoEspacio > 0 ? cortado.slice(0, ultimoEspacio) : cortado).trimEnd() + '…';
 }
+
+// Nombre corto de región para la línea de ubicación de las cards ("Melipilla, RM"),
+// como en el render de marca. Las que no están acá ya son cortas en el catálogo oficial.
+const REGION_CORTA: Record<number, string> = {
+  13: 'RM',
+  6: "O'Higgins",
+  11: 'Aysén',
+  12: 'Magallanes',
+  8: 'Biobío',
+};
+
+export function formatUbicacion(comuna: Pick<Property['comuna'], 'nombre' | 'regionId' | 'region'>): string {
+  const region = REGION_CORTA[comuna.regionId] ?? comuna.region?.nombre;
+  return region ? `${comuna.nombre}, ${region}` : comuna.nombre;
+}
+

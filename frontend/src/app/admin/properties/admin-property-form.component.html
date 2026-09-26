@@ -130,6 +130,18 @@
       <fieldset>
         <legend>Descripción</legend>
         <label class="form__field">
+          Título (5 a 120 caracteres) <span class="form__asterisco">*</span>
+          <input
+            type="text"
+            name="titulo"
+            [(ngModel)]="model.titulo"
+            minlength="5"
+            maxlength="120"
+            placeholder="Ej: Casa familiar con jardín en Melipilla"
+            required
+          />
+        </label>
+        <label class="form__field">
           Descripción (mínimo 20 caracteres) <span class="form__asterisco">*</span>
           <textarea
             name="descripcion"

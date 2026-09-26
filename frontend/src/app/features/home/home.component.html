@@ -1,0 +1,125 @@
+<main id="main-content" tabindex="-1">
+  <!-- HERO -->
+  <section class="hero" aria-labelledby="hero-title">
+    <img
+      class="hero__bg"
+      src="/marca/hero-casa-1920.webp"
+      srcset="/marca/hero-casa-960.webp 960w, /marca/hero-casa-1920.webp 1920w"
+      sizes="100vw"
+      alt=""
+      fetchpriority="high"
+    />
+    <div class="container hero__inner">
+      <div class="hero__top">
+        <div class="hero__copy">
+          <p class="eyebrow eyebrow--light">Propiedades en movimiento</p>
+          <h1 id="hero-title">Encuentra<br />tu próxima<br />propiedad</h1>
+          <p class="hero__lead">
+            Compra, arrienda o invierte con el respaldo de una plataforma que potencia cada propiedad con
+            marketing digital.
+          </p>
+        </div>
+
+        <aside class="glass hero__card" aria-label="Servicios de marketing">
+          <app-icon class="glass__icon" name="chart-no-axes-column-increasing" [strokeWidth]="2.4" />
+          <h2>Más visibilidad para tu propiedad</h2>
+          <p>Fotografía, video y campañas en Meta Ads para llegar a más interesados.</p>
+          <a routerLink="/servicios" class="btn btn--light">
+            Conoce nuestros servicios
+            <app-icon name="arrow-right" />
+          </a>
+        </aside>
+      </div>
+
+      <app-search-box class="hero__search" />
+    </div>
+  </section>
+
+  <!-- DESTACADAS -->
+  <section class="destacadas container" aria-labelledby="destacadas-title">
+    <div class="section-head">
+      <h2 id="destacadas-title" class="eyebrow">Propiedades destacadas</h2>
+      <a routerLink="/propiedades" class="section-head__link">
+        Ver todas las propiedades
+        <app-icon name="arrow-right" />
+      </a>
+    </div>
+
+    @if (loading()) {
+      <p role="status" class="sr-only">Cargando propiedades…</p>
+      <div class="destacadas__grid" aria-hidden="true">
+        @for (i of [1, 2, 3, 4]; track i) {
+          <app-property-card-skeleton />
+        }
+      </div>
+    } @else if (destacadas().length > 0) {
+      <ul class="destacadas__grid" role="list">
+        @for (property of destacadas(); track property.id; let i = $index) {
+          <li [appRevealOnScroll]="i * 80">
+            <app-property-card [property]="property" />
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="destacadas__vacio">Muy pronto vas a ver aquí las primeras propiedades publicadas.</p>
+    }
+  </section>
+
+  <!-- BENEFICIOS -->
+  <section class="beneficios" aria-label="Por qué Habbi">
+    <ul class="container beneficios__list" role="list">
+      @for (b of beneficios; track b.titulo; let i = $index) {
+        <li class="beneficio" [appRevealOnScroll]="i * 80">
+          <span class="beneficio__icon"><app-icon [name]="b.icono" [strokeWidth]="1.8" /></span>
+          <h3>{{ b.titulo }}</h3>
+          <p>{{ b.texto }}</p>
+        </li>
+      }
+    </ul>
+  </section>
+
+  <!-- MARKETING -->
+  <section class="marketing container" aria-labelledby="marketing-title">
+    <div class="marketing__copy" [appRevealOnScroll]="0">
+      <p class="eyebrow">Servicios de marketing inmobiliario</p>
+      <h2 id="marketing-title">Potencia tu propiedad<br />y <span class="marketing__accent">llega más lejos</span></h2>
+      <p class="marketing__lead">
+        Fotografía profesional, video, contenido para redes sociales y campañas en Meta Ads para generar más
+        visitas y contactos reales.
+      </p>
+      <a routerLink="/servicios" class="btn btn--primary btn--lg">
+        Conoce nuestros servicios
+        <app-icon name="arrow-right" />
+      </a>
+    </div>
+
+    <app-marketing-visual [appRevealOnScroll]="120" />
+  </section>
+
+  <!-- CTA -->
+  <section class="container" aria-labelledby="cta-title">
+    <div class="cta" [appRevealOnScroll]="0">
+      <img
+        class="cta__bg"
+        src="/marca/cta-santiago-1920.webp"
+        srcset="/marca/cta-santiago-960.webp 960w, /marca/cta-santiago-1920.webp 1920w"
+        sizes="(max-width: 1288px) 100vw, 1240px"
+        alt=""
+        loading="lazy"
+      />
+      <div class="cta__copy">
+        <p class="eyebrow eyebrow--light">Publica tu propiedad</p>
+        <h2 id="cta-title">Es el momento<br />de mover tu propiedad</h2>
+        <p>Súmate a Habbi y aumenta tus oportunidades de venta o arriendo con nuestras herramientas de marketing.</p>
+        <a routerLink="/publicar" class="btn btn--light btn--lg">
+          Publica ahora
+          <app-icon name="arrow-right" />
+        </a>
+      </div>
+      <div class="glass cta__card" aria-hidden="true">
+        <app-icon class="glass__icon" name="trending-up" [strokeWidth]="2.4" />
+        <p>Más exposición<br />Más contactos<br />Más oportunidades</p>
+      </div>
+    </div>
+  </section>
+</main>

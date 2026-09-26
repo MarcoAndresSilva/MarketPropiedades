@@ -15,7 +15,10 @@ export class PropertiesService {
     if (filters.tipoOperacion) params = params.set('tipoOperacion', filters.tipoOperacion);
     if (filters.tipoPropiedad) params = params.set('tipoPropiedad', filters.tipoPropiedad);
     if (filters.dormitoriosMin) params = params.set('dormitoriosMin', filters.dormitoriosMin);
+    if (filters.precioMin) params = params.set('precioMin', filters.precioMin);
+    if (filters.precioMax) params = params.set('precioMax', filters.precioMax);
     if (filters.page) params = params.set('page', filters.page);
+    if (filters.pageSize) params = params.set('pageSize', filters.pageSize);
 
     return this.http.get<PaginatedProperties>(this.baseUrl, { params });
   }

@@ -34,13 +34,14 @@ export interface Publicador {
   id: string;
   name: string;
   whatsapp: string | null;
-  role: 'ADMIN' | 'PERSONA' | 'CORREDORA';
+  role: 'ADMIN' | 'PERSONA' | 'CORREDORA' | 'INMOBILIARIA';
 }
 
 export interface Property {
   id: string;
   slug: string;
   estado: 'BORRADOR' | 'PUBLICADA' | 'PAUSADA' | 'CERRADA';
+  titulo: string;
   tipoOperacion: TipoOperacion;
   tipoPropiedad: TipoPropiedad;
   destacada: boolean;
@@ -77,5 +78,9 @@ export interface CatalogFilters {
   tipoOperacion?: TipoOperacion;
   tipoPropiedad?: TipoPropiedad;
   dormitoriosMin?: number;
+  /** En UF para VENTA, en CLP para ARRIENDO (misma convención que el precio guardado). */
+  precioMin?: number;
+  precioMax?: number;
   page?: number;
+  pageSize?: number;
 }

@@ -1,45 +1,50 @@
+// Card del render de marca: foto arriba con badge y corazón, precio en negrita con el
+// tipo a la derecha, título, fila de íconos (dorm/baños/m²) y ubicación.
 .card {
-  display: block;
   position: relative;
+  height: 100%;
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: 14px;
   overflow: hidden;
-  text-decoration: none;
-  color: inherit;
   background: var(--surface);
-  transition: box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: var(--shadow-sm);
+  transition:
+    box-shadow 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 
-  &:hover {
-    box-shadow: 0 12px 28px -8px rgba(36, 31, 26, 0.18);
+  @media (prefers-reduced-motion: no-preference) {
+    &:hover {
+      box-shadow: var(--shadow);
+      transform: translateY(-2px);
+    }
   }
+}
+
+.card__link {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  color: inherit;
+  text-decoration: none;
+}
+
+.card__media {
+  overflow: hidden;
 }
 
 .card__photo {
   display: block;
   width: 100%;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 16 / 11;
   object-fit: cover;
   background: var(--surface-2);
-}
 
-// El movimiento (elevar la card, acercar la foto) queda solo si el sistema no pidió
-// menos animación - la sombra de arriba sí se mantiene siempre, es solo color/tamaño,
-// no desplazamiento.
-@media (prefers-reduced-motion: no-preference) {
-  .card {
-    transition-property: box-shadow, transform;
+  @media (prefers-reduced-motion: no-preference) {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 
-    &:hover {
-      transform: translateY(-4px);
+    .card:hover & {
+      transform: scale(1.04);
     }
-  }
-
-  .card__photo {
-    transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  }
-
-  .card:hover .card__photo {
-    transform: scale(1.04);
   }
 }
 
@@ -48,54 +53,144 @@
   align-items: center;
   justify-content: center;
   color: var(--text-subtle);
-  font-size: 0.85rem;
+
+  app-icon {
+    width: 48px;
+    height: 48px;
+  }
 }
 
 .card__badge {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 14px;
+  left: 14px;
+  padding: 5px 14px;
+  border-radius: 999px;
   background: var(--accent);
-  color: var(--accent-contrast);
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  padding: 3px 9px;
-  border-radius: 4px;
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+// El verde de marca (#38B59C) da 2.5:1 con texto blanco; se usa la variante oscura del
+// mismo tono (5.0:1), igual que --success en el tema claro.
+.card__badge--green {
+  background: #1a7d69;
+}
+
+.card__fav {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(7, 22, 43, 0.35);
+  color: #ffffff;
+  backdrop-filter: blur(6px);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+
+  app-icon {
+    width: 19px;
+    height: 19px;
+  }
+
+  &:hover {
+    background: rgba(7, 22, 43, 0.55);
+  }
+
+  &.is-active {
+    color: #ff5a7a;
+
+    ::ng-deep svg {
+      fill: currentColor;
+    }
+  }
 }
 
 .card__body {
-  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px 18px;
+  flex: 1;
+}
+
+.card__top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.card__precio {
+  margin: 0;
+  white-space: nowrap;
+  font-size: 1.12rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.card__precio-sufijo {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.95rem;
 }
 
 .card__tipo {
   margin: 0;
   font-size: 0.78rem;
-  color: var(--text-subtle);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
+  color: var(--text-muted);
+  text-align: right;
+  min-width: 0;
 }
 
-.card__comuna {
-  margin: 4px 0 0;
+.card__titulo {
+  margin: 0;
+  font-size: 1rem;
   font-weight: 600;
-}
-
-.card__precio {
-  margin: 6px 0 0;
-  font-family: 'Fraunces', Georgia, serif;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--accent);
+  letter-spacing: -0.01em;
+  line-height: 1.3;
 }
 
 .card__specs {
-  list-style: none;
   display: flex;
-  gap: 12px;
-  margin: 12px 0 0;
+  gap: 18px;
+  margin: 2px 0 0;
   padding: 0;
+  list-style: none;
   font-size: 0.85rem;
   color: var(--text-muted);
+
+  li {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  app-icon {
+    width: 18px;
+    height: 18px;
+    color: var(--text);
+  }
+}
+
+.card__ubicacion {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: auto 0 0;
+  padding-top: 4px;
+  font-size: 0.82rem;
+  color: var(--text-muted);
+
+  app-icon {
+    width: 16px;
+    height: 16px;
+  }
 }

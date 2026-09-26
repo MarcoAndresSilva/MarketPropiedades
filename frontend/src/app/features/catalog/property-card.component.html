@@ -1,34 +1,67 @@
-<a class="card" [routerLink]="['/propiedad', property().slug]">
-  @if (property().fotos.length > 0) {
-    <img
-      class="card__photo"
-      [src]="cloudinaryImageUrl(property().fotos[0].cloudinaryPublicId)"
-      [alt]="formatTipoPropiedad(property().tipoPropiedad) + ' en ' + property().comuna.nombre"
-      loading="lazy"
-    />
-  } @else {
-    <div class="card__photo card__photo--placeholder" aria-hidden="true">Sin fotos todavía</div>
-  }
+<article class="card">
+  <a class="card__link" [routerLink]="['/propiedad', property().slug]">
+    <div class="card__media">
+      @if (property().fotos.length > 0) {
+        <img
+          class="card__photo"
+          [src]="cloudinaryImageUrl(property().fotos[0].cloudinaryPublicId, 640, 440)"
+          [alt]="titulo()"
+          loading="lazy"
+        />
+      } @else {
+        <div class="card__photo card__photo--placeholder" aria-hidden="true">
+          <app-icon name="house" [strokeWidth]="1.5" />
+        </div>
+      }
+    </div>
+
+    <div class="card__body">
+      <div class="card__top">
+        <p class="card__precio">
+          @if (property().tipoOperacion === 'ARRIENDO' && property().precioClp) {
+            {{ precioClp() }} <span class="card__precio-sufijo">/ mes</span>
+          } @else {
+            {{ formatPrecio(property()) }}
+          }
+        </p>
+        <p class="card__tipo">{{ formatTipoPropiedad(property().tipoPropiedad) }}</p>
+      </div>
+
+      <h3 class="card__titulo">{{ titulo() }}</h3>
+
+      @if (property().dormitorios !== null || property().banos !== null || property().m2Construidos !== null) {
+        <ul class="card__specs">
+          @if (property().dormitorios !== null) {
+            <li><app-icon name="bed-double" [strokeWidth]="1.6" /> {{ property().dormitorios }} <span class="sr-only">dormitorios</span></li>
+          }
+          @if (property().banos !== null) {
+            <li><app-icon name="bath" [strokeWidth]="1.6" /> {{ property().banos }} <span class="sr-only">baños</span></li>
+          }
+          @if (property().m2Construidos !== null) {
+            <li><app-icon name="scaling" [strokeWidth]="1.6" /> {{ property().m2Construidos }} m²</li>
+          }
+        </ul>
+      }
+
+      <p class="card__ubicacion"><app-icon name="map-pin" [strokeWidth]="1.6" /> {{ formatUbicacion(property().comuna) }}</p>
+    </div>
+  </a>
 
   @if (property().destacada) {
     <span class="card__badge">Destacada</span>
+  } @else if (property().tipoOperacion === 'ARRIENDO') {
+    <span class="card__badge card__badge--green">Arriendo</span>
   }
 
-  <div class="card__body">
-    <p class="card__tipo">{{ formatTipoPropiedad(property().tipoPropiedad) }} · {{ property().tipoOperacion === 'VENTA' ? 'Venta' : 'Arriendo' }}</p>
-    <p class="card__comuna">{{ property().comuna.nombre }}</p>
-    <p class="card__precio">{{ formatPrecio(property()) }}</p>
-
-    <ul class="card__specs">
-      @if (property().dormitorios !== null) {
-        <li>{{ property().dormitorios }} dorm.</li>
-      }
-      @if (property().banos !== null) {
-        <li>{{ property().banos }} baños</li>
-      }
-      @if (property().m2Construidos !== null) {
-        <li>{{ property().m2Construidos }} m²</li>
-      }
-    </ul>
-  </div>
-</a>
+  <!-- Fuera del <a>: un botón dentro de un link es HTML inválido y rompe el foco. -->
+  <button
+    type="button"
+    class="card__fav"
+    [class.is-active]="esFavorito()"
+    [attr.aria-pressed]="esFavorito()"
+    [attr.aria-label]="(esFavorito() ? 'Quitar de favoritos: ' : 'Guardar en favoritos: ') + titulo()"
+    (click)="favorites.toggle(property().slug)"
+  >
+    <app-icon name="heart" />
+  </button>
+</article>
