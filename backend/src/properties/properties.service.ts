@@ -5,7 +5,7 @@ import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { QueryPropertiesDto } from './dto/query-properties.dto';
 import { CreatePropertyFotoDto } from './dto/create-property-foto.dto';
-import { EstadoPublicacion } from '../generated/prisma/enums';
+import { EstadoPublicacion, TipoOperacion } from '../generated/prisma/enums';
 import { randomSlugSuffix, slugify } from './slug.util';
 
 const LIST_INCLUDE = {
@@ -13,6 +13,17 @@ const LIST_INCLUDE = {
   fotos: { orderBy: { orden: 'asc' as const } },
   publicador: { select: { id: true, name: true, whatsapp: true, role: true } },
 };
+
+// Venta se guarda en UF y arriendo en CLP (convención chilena del schema), así que el rango
+// de precio va contra una columna u otra según la operación. Sin operación el filtro se
+// ignora en vez de adivinar la unidad.
+export function precioWhere(query: Pick<QueryPropertiesDto, 'tipoOperacion' | 'precioMin' | 'precioMax'>) {
+  if (!query.tipoOperacion || (query.precioMin === undefined && query.precioMax === undefined)) {
+    return {};
+  }
+  const rango = { gte: query.precioMin, lte: query.precioMax };
+  return query.tipoOperacion === TipoOperacion.VENTA ? { precioUf: rango } : { precioClp: rango };
+}
 
 @Injectable()
 export class PropertiesService {
@@ -35,6 +46,7 @@ export class PropertiesService {
       tipoOperacion: query.tipoOperacion,
       tipoPropiedad: query.tipoPropiedad,
       dormitorios: query.dormitoriosMin ? { gte: query.dormitoriosMin } : undefined,
+      ...precioWhere(query),
     };
 
     const [items, total] = await Promise.all([
