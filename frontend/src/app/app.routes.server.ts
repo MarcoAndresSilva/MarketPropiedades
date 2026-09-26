@@ -11,6 +11,12 @@ export const serverRoutes: ServerRoute[] = [
     path: 'admin/**',
     renderMode: RenderMode.Client
   },
+  // Los favoritos viven en localStorage: en el servidor no hay forma de saber cuáles
+  // son, así que renderizarla ahí solo mostraría "no tienes favoritos" y un salto.
+  {
+    path: 'favoritos',
+    renderMode: RenderMode.Client
+  },
   {
     path: '**',
     renderMode: RenderMode.Server

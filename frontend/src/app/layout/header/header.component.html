@@ -22,6 +22,9 @@
       <a routerLink="/favoritos" routerLinkActive="is-active" class="site-header__link">
         <app-icon name="heart" />
         Favoritos
+        @if (enNavegador() && favorites.count() > 0) {
+          <span class="site-header__count" [attr.aria-label]="favorites.count() + ' guardadas'">{{ favorites.count() }}</span>
+        }
       </a>
       <a routerLink="/ingresar" routerLinkActive="is-active" class="site-header__link">Iniciar sesión</a>
       <a routerLink="/publicar" class="btn btn--primary site-header__cta">Publica tu propiedad</a>
@@ -47,6 +50,9 @@
         }
         <a routerLink="/favoritos" routerLinkActive="is-active" (click)="cerrarMenu()">
           <app-icon name="heart" /> Favoritos
+          @if (enNavegador() && favorites.count() > 0) {
+            <span class="site-header__count">{{ favorites.count() }}</span>
+          }
         </a>
         <a routerLink="/ingresar" routerLinkActive="is-active" (click)="cerrarMenu()">Iniciar sesión</a>
         <div class="menu-mobile__footer">

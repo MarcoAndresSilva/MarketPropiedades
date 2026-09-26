@@ -4,6 +4,8 @@ import { HomeComponent } from './features/home/home.component';
 import { PropertyDetailComponent } from './features/property-detail/property-detail.component';
 import { PublicarComponent } from './features/publicar/publicar.component';
 import { ProximamenteComponent } from './features/proximamente/proximamente.component';
+import { FavoritosComponent } from './features/favoritos/favoritos.component';
+import { ServiciosComponent } from './features/servicios/servicios.component';
 import { AdminLoginComponent } from './admin/login/admin-login.component';
 import { AdminPropertiesListComponent } from './admin/properties/admin-properties-list.component';
 import { AdminPropertyFormComponent } from './admin/properties/admin-property-form.component';
@@ -24,22 +26,8 @@ export const routes: Routes = [
       texto: 'Muy pronto vas a encontrar aquí los proyectos que corredoras e inmobiliarias están desarrollando en Melipilla y alrededores.',
     },
   },
-  {
-    path: 'servicios',
-    component: ProximamenteComponent,
-    data: {
-      titulo: 'Servicios de marketing inmobiliario',
-      texto: 'Estamos preparando el detalle de nuestros planes y servicios de fotografía, video y campañas en Meta Ads.',
-    },
-  },
-  {
-    path: 'favoritos',
-    component: ProximamenteComponent,
-    data: {
-      titulo: 'Tus favoritos',
-      texto: 'Muy pronto vas a poder guardar las propiedades que te gustan con el corazón de cada ficha.',
-    },
-  },
+  { path: 'servicios', component: ServiciosComponent },
+  { path: 'favoritos', component: FavoritosComponent },
   {
     path: 'ingresar',
     component: ProximamenteComponent,

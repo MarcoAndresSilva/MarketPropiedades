@@ -1,0 +1,82 @@
+<main id="main-content" tabindex="-1">
+  <header class="container page-head servicios__head">
+    <p class="eyebrow">Servicios de marketing inmobiliario</p>
+    <h1>Una plataforma que no solo publica tu propiedad: <span class="acento">te ayuda a moverla</span></h1>
+    <p>Publica gratis y, cuando quieras más alcance, suma contenido profesional y campañas en redes sociales.</p>
+  </header>
+
+  <!-- PASOS -->
+  <section class="container" aria-label="Cómo funciona">
+    <ol class="pasos" role="list">
+      @for (paso of pasos; track paso.titulo; let i = $index) {
+        <li class="paso" [appRevealOnScroll]="i * 80">
+          <span class="paso__numero">{{ i + 1 }}</span>
+          <h2>{{ paso.titulo }}</h2>
+          <p>{{ paso.texto }}</p>
+        </li>
+      }
+    </ol>
+  </section>
+
+  <!-- PLANES -->
+  <section class="container bloque" aria-labelledby="planes-title">
+    <div class="bloque__head">
+      <p class="eyebrow">Planes para publicar</p>
+      <h2 id="planes-title">Empieza gratis, crece con Pro</h2>
+    </div>
+
+    <div class="planes">
+      @for (plan of planes; track plan.nombre; let i = $index) {
+        <article class="plan" [class.plan--destacado]="plan.destacado" [appRevealOnScroll]="i * 100">
+          <p class="plan__etiqueta">{{ plan.etiqueta }}</p>
+          <h3>Plan {{ plan.nombre }}</h3>
+          <p class="plan__bajada">{{ plan.bajada }}</p>
+          <ul role="list">
+            @for (item of plan.incluye; track item) {
+              <li><app-icon name="shield-check" [strokeWidth]="1.8" /> {{ item }}</li>
+            }
+          </ul>
+          @if (plan.destacado) {
+            <a class="btn btn--primary" [href]="cotizar('Plan ' + plan.nombre)" target="_blank" rel="noopener">
+              Cotiza por WhatsApp <app-icon name="arrow-right" />
+            </a>
+          } @else {
+            <a class="btn btn--ghost" routerLink="/publicar">Cómo publicar <app-icon name="arrow-right" /></a>
+          }
+        </article>
+      }
+    </div>
+  </section>
+
+  <!-- PACKS -->
+  <section class="packs-wrap" aria-labelledby="packs-title">
+    <div class="container bloque">
+      <div class="bloque__head">
+        <p class="eyebrow">Packs de marketing</p>
+        <h2 id="packs-title">Contenido y campañas para cada propiedad</h2>
+        <p>
+          En los packs con campaña, el presupuesto de publicidad va aparte de nuestros honorarios: siempre sabes
+          cuánto invertiste en Meta Ads y cuánto en el servicio.
+        </p>
+      </div>
+
+      <div class="packs">
+        @for (pack of packs; track pack.nombre; let i = $index) {
+          <article class="pack" [appRevealOnScroll]="i * 80">
+            <span class="pack__icon"><app-icon [name]="pack.icono" [strokeWidth]="1.8" /></span>
+            <h3>{{ pack.nombre }}</h3>
+            <p class="pack__bajada">{{ pack.bajada }}</p>
+            <ul role="list">
+              @for (item of pack.incluye; track item) {
+                <li>{{ item }}</li>
+              }
+            </ul>
+            <a class="pack__cta" [href]="cotizar(pack.nombre)" target="_blank" rel="noopener">
+              Cotizar <app-icon name="arrow-right" />
+            </a>
+          </article>
+        }
+      </div>
+    </div>
+  </section>
+</main>
