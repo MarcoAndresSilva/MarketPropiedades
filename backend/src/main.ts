@@ -1,10 +1,15 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  // En Render la API está detrás de un proxy: sin esto, Express ve la IP del proxy en
+  // todas las requests y el rate limit (login, consultas, métricas) se compartiría entre
+  // todos los visitantes a la vez. Se confía en un salto: el del proxy de Render.
+  app.set('trust proxy', 1);
   const config = app.get(ConfigService);
 
   // FRONTEND_URL admite varios orígenes separados por coma - hace falta mientras el
