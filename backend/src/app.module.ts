@@ -10,6 +10,9 @@ import { UsersModule } from './users/users.module';
 import { PropertiesModule } from './properties/properties.module';
 import { UploadsModule } from './uploads/uploads.module';
 import { LocationsModule } from './locations/locations.module';
+import { ConsultasModule } from './consultas/consultas.module';
+import { MetricasModule } from './metricas/metricas.module';
+import { ProyectosModule } from './proyectos/proyectos.module';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { LocationsModule } from './locations/locations.module';
     PropertiesModule,
     UploadsModule,
     LocationsModule,
+    ConsultasModule,
+    MetricasModule,
+    ProyectosModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

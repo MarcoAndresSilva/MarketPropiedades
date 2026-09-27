@@ -29,6 +29,7 @@ model Comuna {
   region   Region @relation(fields: [regionId], references: [id])
 
   properties Property[]
+  proyectos  Proyecto[]
 
   @@unique([nombre, regionId])
   @@index([regionId])
@@ -59,6 +60,7 @@ model User {
 
   corredoraProfile CorredoraProfile?
   properties       Property[]
+  proyectos        Proyecto[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -136,6 +138,9 @@ model Property {
   videoUrl String?
   fotos    PropertyFoto[]
 
+  consultas Consulta[]
+  eventos   EventoPropiedad[]
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
@@ -152,4 +157,98 @@ model PropertyFoto {
   orden              Int
 
   @@index([propertyId])
+}
+
+// Consulta enviada desde el formulario de la ficha. Se guarda siempre (aunque después
+// se sume aviso por correo) para que ningún interesado se pierda si falla un envío.
+model Consulta {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  nombre     String   @db.VarChar(100)
+  email      String?  @db.VarChar(200)
+  telefono   String?  @db.VarChar(30)
+  mensaje    String   @db.VarChar(2000)
+  leida      Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([propertyId, createdAt])
+}
+
+enum TipoEvento {
+  VISTA
+  CLIC_WHATSAPP
+  FAVORITO
+}
+
+// Métricas básicas de una ficha. `visitante` es un id anónimo que genera el navegador
+// (no identifica a nadie): sirve para no contar dos veces la misma vista del mismo
+// visitante en el día. Las consultas se cuentan desde la tabla Consulta.
+model EventoPropiedad {
+  id         String     @id @default(cuid())
+  propertyId String
+  property   Property   @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  tipo       TipoEvento
+  visitante  String     @db.VarChar(64)
+  createdAt  DateTime   @default(now())
+
+  @@index([propertyId, tipo])
+  @@index([propertyId, tipo, visitante, createdAt])
+}
+
+enum EtapaProyecto {
+  EN_PLANIFICACION
+  EN_CONSTRUCCION
+  ENTREGA_INMEDIATA
+}
+
+// Proyecto inmobiliario (edificio, condominio, loteo) que una corredora o inmobiliaria
+// desarrolla en la zona. No es una Property: se vende por unidades con precio "desde" y
+// rangos (dormitorios, baños, m²), y tiene una etapa de obra en vez de estar listo.
+model Proyecto {
+  id     String            @id @default(cuid())
+  slug   String            @unique
+  estado EstadoPublicacion @default(BORRADOR)
+
+  publicadorId String
+  publicador   User   @relation(fields: [publicadorId], references: [id])
+
+  nombre      String        @db.VarChar(120)
+  etapa       EtapaProyecto
+  entrega     String?       @db.VarChar(60) // texto libre: "2º semestre 2027"
+  destacado   Boolean       @default(false)
+  comunaId    String
+  comuna      Comuna        @relation(fields: [comunaId], references: [id])
+  direccion   String?
+  lat         Float?
+  lng         Float?
+  descripcion String
+
+  precioDesdeUf  Decimal? @db.Decimal(12, 2)
+  dormitoriosMin Int?
+  dormitoriosMax Int?
+  banosMin       Int?
+  banosMax       Int?
+  m2Min          Float?
+  m2Max          Float?
+  unidades       Int?
+
+  fotos ProyectoFoto[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([comunaId])
+  @@index([publicadorId])
+  @@index([estado, destacado])
+}
+
+model ProyectoFoto {
+  id                 String   @id @default(cuid())
+  proyectoId         String
+  proyecto           Proyecto @relation(fields: [proyectoId], references: [id], onDelete: Cascade)
+  cloudinaryPublicId String
+  orden              Int
+
+  @@index([proyectoId])
 }

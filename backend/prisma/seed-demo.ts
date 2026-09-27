@@ -210,6 +210,29 @@ const DEMO_PROPERTIES = [
   },
 ] as const;
 
+// Un proyecto de ejemplo para ver la sección de Proyectos y la card "Desde UF" en la home.
+// El nombre dice que es de ejemplo: a diferencia de una casa de relleno, un "condominio
+// en construcción" inventado podría leerse como un proyecto real de la zona.
+const DEMO_PROYECTO = {
+  slug: 'demo-proyecto-condominio-ejemplo',
+  nombre: 'Condominio de ejemplo — Melipilla',
+  etapa: 'EN_CONSTRUCCION' as const,
+  entrega: '2º semestre 2027',
+  destacado: true,
+  comunaId: MELIPILLA,
+  ...jitter(CENTRO_MELIPILLA, 3),
+  descripcion:
+    'Proyecto de ejemplo para probar la sección de proyectos: departamentos de 1 a 3 dormitorios con áreas verdes y estacionamiento.',
+  precioDesdeUf: 1700,
+  dormitoriosMin: 1,
+  dormitoriosMax: 3,
+  banosMin: 1,
+  banosMax: 2,
+  m2Min: 45,
+  m2Max: 95,
+  unidades: 48,
+};
+
 async function main() {
   const passwordHash = await argon2.hash('demo12345');
 
@@ -249,7 +272,20 @@ async function main() {
     }
   }
 
-  console.log(`Listo: publicador "${publicador.email}" + ${DEMO_PROPERTIES.length} propiedades PUBLICADA con fotos.`);
+  const proyectoData = { ...DEMO_PROYECTO, estado: 'PUBLICADA' as const };
+  const proyecto = await prisma.proyecto.upsert({
+    where: { slug: DEMO_PROYECTO.slug },
+    update: proyectoData,
+    create: { ...proyectoData, publicadorId: publicador.id },
+  });
+  await prisma.proyectoFoto.deleteMany({ where: { proyectoId: proyecto.id } });
+  await prisma.proyectoFoto.createMany({
+    data: FOTOS.slice(0, 3).map((cloudinaryPublicId, orden) => ({ proyectoId: proyecto.id, cloudinaryPublicId, orden })),
+  });
+
+  console.log(
+    `Listo: publicador "${publicador.email}" + ${DEMO_PROPERTIES.length} propiedades y 1 proyecto PUBLICADOS con fotos.`,
+  );
 }
 
 main()
