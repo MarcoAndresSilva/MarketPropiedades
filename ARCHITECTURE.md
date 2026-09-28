@@ -1086,3 +1086,71 @@ de los honorarios, un principio comercial del modelo de negocio.
 **Decisión — opciones de búsqueda compartidas en `core/search-options.ts`.** Los tramos de precio
 por operación y la lista de tipos los usaban el buscador de la home y el listado; ahora están en un
 solo lugar.
+
+### Fase 28 — Ficha nueva, consultas, métricas y proyectos (cierre de la etapa 2)
+
+**Bug real — el rate limit se compartía entre todos los visitantes.** La API corre detrás del
+proxy de Render y Express no confiaba en él, así que `req.ip` era siempre la IP del proxy: el
+límite de 5 intentos de login por minuto era para todo el mundo junto, no por persona. Con
+endpoints públicos nuevos (consultas, métricas) se habría notado de inmediato. Fix:
+`app.set('trust proxy', 1)` — se confía en exactamente un salto, el del proxy de Render; confiar
+en más permitiría falsificar la IP con un header `X-Forwarded-For` inventado.
+
+**Decisión — las consultas se guardan en la base, no solo se envían por correo.** El formulario de
+la ficha crea una `Consulta` ligada a la propiedad y el equipo las ve en `/admin/consultas`. Cuando
+exista el aviso por correo (con el registro de anunciantes) se sumará encima, sin reemplazar el
+registro: si un envío falla, el interesado no se pierde. Se exige correo o teléfono (al menos uno).
+
+**Decisión — anti-spam con honeypot y rate limit, sin captcha.** El formulario trae un campo oculto
+(`sitioWeb`) que una persona nunca llena; si llega con algo, la API responde igual que a una
+consulta real pero no guarda nada, para no darle pistas al bot. Además, 5 consultas cada 10 minutos
+por IP. Un captcha le cobra la fricción a las personas reales para frenar a unos pocos bots.
+
+**Decisión — métricas propias, deduplicadas por visitante anónimo y día.** Vistas, clics a
+WhatsApp y favoritos se registran en `EventoPropiedad`; las consultas se cuentan desde su tabla. El
+navegador genera un id al azar (`crypto.randomUUID()`, en `localStorage`) que no identifica a nadie
+y solo sirve para que recargar la ficha o tocar WhatsApp varias veces cuente una vez por día. Son
+los números que va a ver el anunciante y sobre los que se ofrece "Potenciar esta propiedad" (modelo
+de negocio): inflarlos con recargas los haría inútiles. Se eligió tabla propia en vez de Google
+Analytics porque estos números se muestran dentro del producto, por propiedad, y no dependen de que
+el visitante acepte cookies de terceros.
+
+**Decisión — `Proyecto` como modelo aparte de `Property`.** Un proyecto se vende por unidades, con
+precio "desde" y rangos (dormitorios, baños, m²), una etapa de obra y una fecha de entrega en texto
+libre ("2º semestre 2027", como se comunica en el rubro). Forzarlo dentro de `Property` habría
+llenado esa tabla de columnas nulas y condicionales. Solo cuentas de corredora o inmobiliaria pueden
+tener proyectos (validado en el backend), y los rangos invertidos se rechazan (también contra los
+valores ya guardados en un PATCH parcial). La home muestra, como el render, 3 propiedades y 1
+proyecto destacado; si no hay proyecto destacado, 4 propiedades.
+
+**Decisión — favoritos de proyectos con prefijo en la misma lista.** Los proyectos se guardan como
+`proyecto:<slug>` en el mismo `localStorage`; las propiedades siguen con su slug a secas, así los
+favoritos guardados antes de esta fase siguen valiendo sin migración.
+
+**Decisión — ficha rediseñada con contacto fijo al costado y barra de WhatsApp en celular.** Precio,
+anunciante, WhatsApp, agendar visita y el formulario viven en una columna `sticky`; en celular esa
+columna baja y queda una barra fija inferior con WhatsApp, para no tener que volver a subir. El
+verde de WhatsApp se oscurece (`#128C4A`): el `#25D366` oficial con texto blanco no alcanza
+contraste. La ficha de proyecto reutiliza los mismos estilos.
+
+**Decisión — carga diferida de todas las rutas salvo la home.** El bundle inicial había llegado a
+569 kB (sobre el presupuesto de 500 kB) porque todas las páginas, incluido el panel de admin, se
+descargaban de entrada. Con `loadComponent` en todas las rutas menos la home, bajó a 440 kB (116 kB
+comprimido). La home queda eager porque es la entrada del sitio y su LCP es el que más importa.
+
+**Decisión — subida a Cloudinary en un servicio compartido del admin.** La firma + subida directa
+(Fase 6) vivía dentro del formulario de propiedades; el de proyectos la necesitaba igual.
+`CloudinaryUploadService` la encapsula y los dos formularios la usan.
+
+**Decisión — video y fotos de relleno regenerados con la marca Habbi.** El video de relleno tenía
+"Market Propiedades" grabado en la imagen y las fotos SVG usaban la paleta terracota. Se
+regeneraron con `ffmpeg` (texto con `textfile=`, porque el guión largo "—" rompía el parseo del
+filtro inline) y cambiando los colores de los SVG.
+
+**Convención — cada componente en tres archivos: `.ts`, `.html` y `.scss`.** Varios componentes
+(algunos de fases anteriores y otros nuevos de esta) tenían el template y los estilos escritos
+dentro del `.ts`. Se separaron todos: así cada componente se revisa igual que el resto del
+proyecto, el diff de un cambio de estilos no se mezcla con la lógica, y el editor da resaltado y
+autocompletado completo en HTML y SCSS. Cuando un componente reutiliza los estilos de otro (la card
+y la ficha de proyecto usan los de propiedad), apunta a ese `.scss` y suma el suyo solo si agrega
+algo propio (`styleUrls`).
