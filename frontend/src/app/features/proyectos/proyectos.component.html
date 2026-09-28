@@ -1,0 +1,54 @@
+<main id="main-content" tabindex="-1" class="container proyectos">
+  <header class="page-head">
+    <p class="eyebrow">Proyectos inmobiliarios</p>
+    <h1>Proyectos en Melipilla y alrededores</h1>
+    <p>Condominios, edificios y loteos que corredoras e inmobiliarias están desarrollando en la zona.</p>
+  </header>
+
+  <form class="filtros" aria-label="Filtrar proyectos" (submit)="$event.preventDefault()">
+    <label class="filtro">
+      <span class="filtro__label">Comuna</span>
+      <select name="comuna" [ngModel]="comunaId()" (ngModelChange)="cambiar({ comuna: $event || null })">
+        <option value="">Todas las comunas</option>
+        @for (c of comunas(); track c.id) {
+          <option [value]="c.id">{{ c.nombre }}</option>
+        }
+      </select>
+    </label>
+    <label class="filtro">
+      <span class="filtro__label">Etapa</span>
+      <select name="etapa" [ngModel]="etapa()" (ngModelChange)="cambiar({ etapa: $event || null })">
+        <option value="">Todas las etapas</option>
+        @for (e of etapas; track e.value) {
+          <option [value]="e.value">{{ e.label }}</option>
+        }
+      </select>
+    </label>
+  </form>
+
+  @if (loading()) {
+    <p class="sr-only" role="status">Cargando proyectos…</p>
+    <div class="property-grid proyectos__grid" aria-hidden="true">
+      @for (i of [1, 2, 3, 4]; track i) {
+        <app-property-card-skeleton />
+      }
+    </div>
+  } @else if (items().length === 0) {
+    <div class="empty-state proyectos__grid">
+      <app-icon name="building-2" [strokeWidth]="1.6" />
+      <h2>{{ hayFiltros() ? 'No hay proyectos con estos filtros' : 'Todavía no hay proyectos publicados' }}</h2>
+      <p>
+        ¿Desarrollas un proyecto en la zona? Publícalo en Habbi y llega a quienes buscan propiedad en
+        Melipilla y alrededores.
+      </p>
+      <a class="btn btn--primary" [href]="contactoUrl" target="_blank" rel="noopener">Publicar un proyecto</a>
+    </div>
+  } @else {
+    <p class="proyectos__total" role="status">{{ total() }} {{ total() === 1 ? 'proyecto' : 'proyectos' }}</p>
+    <ul class="property-grid" role="list">
+      @for (p of items(); track p.id) {
+        <li><app-proyecto-card [proyecto]="p" /></li>
+      }
+    </ul>
+  }
+</main>

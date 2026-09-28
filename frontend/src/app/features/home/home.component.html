@@ -52,11 +52,16 @@
           <app-property-card-skeleton />
         }
       </div>
-    } @else if (destacadas().length > 0) {
+    } @else if (destacadas().length > 0 || proyectoDestacado()) {
       <ul class="destacadas__grid" role="list">
         @for (property of destacadas(); track property.id; let i = $index) {
           <li [appRevealOnScroll]="i * 80">
             <app-property-card [property]="property" />
+          </li>
+        }
+        @if (proyectoDestacado(); as proyecto) {
+          <li [appRevealOnScroll]="destacadas().length * 80">
+            <app-proyecto-card [proyecto]="proyecto" />
           </li>
         }
       </ul>

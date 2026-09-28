@@ -1,0 +1,116 @@
+@if (notFound()) {
+  <main id="main-content" tabindex="-1" class="container ficha">
+    <div class="empty-state ficha__vacia">
+      <app-icon name="building-2" [strokeWidth]="1.6" />
+      <h1>No encontramos este proyecto</h1>
+      <p>Puede que ya no esté publicado o que el link esté mal escrito.</p>
+      <a routerLink="/proyectos" class="btn btn--primary">Ver otros proyectos</a>
+    </div>
+  </main>
+} @else if (proyecto(); as p) {
+  <main id="main-content" tabindex="-1" class="container ficha">
+    <nav class="ficha__migas" aria-label="Ruta de navegación">
+      <a routerLink="/">Inicio</a>
+      <span aria-hidden="true">/</span>
+      <a routerLink="/proyectos">Proyectos</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ p.nombre }}</span>
+    </nav>
+
+    <header class="ficha__head">
+      <div>
+        <div class="ficha__badges">
+          <span class="badge badge--green">Proyecto</span>
+          <span class="badge badge--soft">{{ etapa() }}</span>
+          @if (p.destacado) {
+            <span class="badge">Destacado</span>
+          }
+        </div>
+        <h1>{{ p.nombre }}</h1>
+        <p class="ficha__ubicacion">
+          <app-icon name="map-pin" [strokeWidth]="1.8" />
+          {{ p.direccion ? p.direccion + ', ' : '' }}{{ ubicacion() }}
+        </p>
+      </div>
+      <button
+        type="button"
+        class="btn btn--ghost ficha__fav"
+        [class.is-active]="esFavorito()"
+        [attr.aria-pressed]="esFavorito()"
+        (click)="favorites.toggle(clave())"
+      >
+        <app-icon name="heart" />
+        {{ esFavorito() ? 'Guardado' : 'Guardar' }}
+      </button>
+    </header>
+
+    <div class="ficha__media">
+      @if (p.fotos.length > 0) {
+        <app-photo-slider [fotos]="p.fotos" />
+      } @else {
+        <div class="ficha__sin-fotos"><app-icon name="building-2" [strokeWidth]="1.4" /> Sin fotos todavía</div>
+      }
+    </div>
+
+    <div class="ficha__cuerpo">
+      <div class="ficha__main">
+        <ul class="specs" role="list">
+          @for (s of specs(); track s.label) {
+            <li>
+              <app-icon [name]="s.icono" [strokeWidth]="1.6" />
+              <span class="specs__valor">{{ s.valor }}</span>
+              <span class="specs__label">{{ s.label }}</span>
+            </li>
+          }
+        </ul>
+
+        <section class="ficha__seccion" aria-labelledby="descripcion-title">
+          <h2 id="descripcion-title">Sobre el proyecto</h2>
+          <p class="ficha__descripcion">{{ p.descripcion }}</p>
+        </section>
+
+        @if (p.lat !== null && p.lng !== null) {
+          <section class="ficha__seccion" aria-labelledby="ubicacion-title">
+            <h2 id="ubicacion-title">Ubicación</h2>
+            <app-property-map [lat]="p.lat" [lng]="p.lng" ariaLabel="Ubicación aproximada del proyecto" />
+          </section>
+        }
+      </div>
+
+      <aside class="contacto" aria-label="Contactar al desarrollador">
+        <p class="contacto__precio">
+          @if (p.precioDesdeUf) {
+            <span class="contacto__desde">Desde</span> UF {{ precioDesde() }}
+          } @else {
+            Precio a consultar
+          }
+        </p>
+        <p class="contacto__publica">
+          Desarrolla <strong>{{ p.publicador.name }}</strong>
+        </p>
+        @if (p.publicador.whatsapp) {
+          <a class="btn btn--whatsapp" [href]="whatsappUrl(p, 'info')" target="_blank" rel="noopener">
+            <app-icon name="message-circle" /> Pedir información
+          </a>
+          <a class="btn btn--ghost" [href]="whatsappUrl(p, 'cotizar')" target="_blank" rel="noopener">
+            <app-icon name="calendar-clock" /> Cotizar una unidad
+          </a>
+        }
+      </aside>
+    </div>
+
+    @if (p.publicador.whatsapp) {
+      <div class="barra-contacto">
+        <p>{{ p.precioDesdeUf ? 'Desde UF ' + precioDesde() : 'Proyecto' }}</p>
+        <a class="btn btn--whatsapp" [href]="whatsappUrl(p, 'info')" target="_blank" rel="noopener">
+          <app-icon name="message-circle" /> WhatsApp
+        </a>
+      </div>
+    }
+  </main>
+} @else {
+  <main id="main-content" tabindex="-1" class="container ficha" aria-busy="true">
+    <p role="status" class="sr-only">Cargando el proyecto…</p>
+    <div class="ficha__skeleton" aria-hidden="true"></div>
+  </main>
+}

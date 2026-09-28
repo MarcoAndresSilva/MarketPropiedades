@@ -1,0 +1,38 @@
+<main id="main-content" tabindex="-1" class="container favoritos">
+  <header class="page-head">
+    <p class="eyebrow">Tus favoritos</p>
+    <h1>Propiedades guardadas</h1>
+    <p>Se guardan en este navegador: si entras desde otro dispositivo no las vas a ver ahí.</p>
+  </header>
+
+  @if (loading()) {
+    <p role="status" class="sr-only">Cargando tus favoritos…</p>
+    <div class="property-grid" aria-hidden="true">
+      @for (i of skeletons(); track i) {
+        <app-property-card-skeleton />
+      }
+    </div>
+  } @else if (items().length === 0 && proyectos().length === 0) {
+    <div class="empty-state">
+      <app-icon name="heart" [strokeWidth]="1.6" />
+      <h2>Todavía no guardas propiedades</h2>
+      <p>Toca el corazón de cualquier propiedad para guardarla aquí y compararla después.</p>
+      <a routerLink="/propiedades" class="btn btn--primary">Ver propiedades</a>
+    </div>
+  } @else {
+    @if (quitadas() > 0) {
+      <p class="favoritos__aviso" role="status">
+        {{ quitadas() === 1 ? 'Algo que guardaste ya no está publicado' : quitadas() + ' cosas que guardaste ya no están publicadas' }}
+        y lo quitamos de tu lista.
+      </p>
+    }
+    <ul class="property-grid" role="list">
+      @for (property of items(); track property.id) {
+        <li><app-property-card [property]="property" /></li>
+      }
+      @for (proyecto of proyectos(); track proyecto.id) {
+        <li><app-proyecto-card [proyecto]="proyecto" /></li>
+      }
+    </ul>
+  }
+</main>

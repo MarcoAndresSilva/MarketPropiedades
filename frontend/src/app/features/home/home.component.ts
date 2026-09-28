@@ -1,6 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { forkJoin, of, catchError } from 'rxjs';
 import { PropertiesService } from '../../core/properties.service';
+import { ProyectosService } from '../../core/proyectos.service';
+import { Proyecto } from '../../core/proyecto.model';
 import { Property } from '../../core/property.model';
 import { SeoService } from '../../core/seo.service';
 import { IconComponent, IconName } from '../../core/icon.component';
@@ -11,6 +14,7 @@ import { PropertyCardComponent } from '../catalog/property-card.component';
 import { PropertyCardSkeletonComponent } from '../catalog/property-card-skeleton.component';
 import { SearchBoxComponent } from './search-box.component';
 import { MarketingVisualComponent } from './marketing-visual.component';
+import { ProyectoCardComponent } from '../proyectos/proyecto-card.component';
 
 // Home del render de marca de Habbi: hero con buscador, destacadas, beneficios,
 // marketing y CTA. Todos los textos describen cosas que el servicio hace hoy — el
@@ -26,15 +30,18 @@ import { MarketingVisualComponent } from './marketing-visual.component';
     PropertyCardSkeletonComponent,
     SearchBoxComponent,
     MarketingVisualComponent,
+    ProyectoCardComponent,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.scss',
 })
 export class HomeComponent implements OnInit {
   private readonly properties = inject(PropertiesService);
+  private readonly proyectosService = inject(ProyectosService);
   private readonly seo = inject(SeoService);
 
   protected readonly destacadas = signal<Property[]>([]);
+  protected readonly proyectoDestacado = signal<Proyecto | null>(null);
   protected readonly loading = signal(true);
 
   protected readonly beneficios: { icono: IconName; titulo: string; texto: string }[] = [
@@ -59,10 +66,17 @@ export class HomeComponent implements OnInit {
       ],
     });
 
-    // El backend ya ordena destacadas primero; las 4 primeras publicadas son la sección.
-    this.properties.findPublished({ pageSize: 4 }).subscribe({
-      next: (res) => {
-        this.destacadas.set(res.items);
+    // Como en el render: 4 cards, la última un proyecto destacado si hay alguno. El
+    // backend ya ordena las propiedades destacadas primero. Si falla la parte de
+    // proyectos, la sección igual muestra las 4 propiedades.
+    forkJoin({
+      propiedades: this.properties.findPublished({ pageSize: 4 }),
+      proyectos: this.proyectosService.findPublished({ destacado: true, pageSize: 1 }).pipe(catchError(() => of(null))),
+    }).subscribe({
+      next: ({ propiedades, proyectos }) => {
+        const proyecto = proyectos?.items[0] ?? null;
+        this.proyectoDestacado.set(proyecto);
+        this.destacadas.set(propiedades.items.slice(0, proyecto ? 3 : 4));
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

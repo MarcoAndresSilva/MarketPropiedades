@@ -1,0 +1,62 @@
+<article class="card">
+  <a class="card__link" [routerLink]="['/proyecto', proyecto().slug]">
+    <div class="card__media">
+      @if (proyecto().fotos.length > 0) {
+        <img
+          class="card__photo"
+          [src]="cloudinaryImageUrl(proyecto().fotos[0].cloudinaryPublicId, 640, 440)"
+          [alt]="proyecto().nombre"
+          loading="lazy"
+        />
+      } @else {
+        <div class="card__photo card__photo--placeholder" aria-hidden="true">
+          <app-icon name="building-2" [strokeWidth]="1.5" />
+        </div>
+      }
+    </div>
+
+    <div class="card__body">
+      <div class="card__top">
+        <p class="card__precio">
+          @if (proyecto().precioDesdeUf) {
+            <span class="card__precio-sufijo">Desde</span> UF {{ precioDesde() }}
+          } @else {
+            Precio a consultar
+          }
+        </p>
+        <p class="card__tipo">{{ etapa() }}</p>
+      </div>
+
+      <h3 class="card__titulo">{{ proyecto().nombre }}</h3>
+
+      @if (dormitorios() || banos() || m2()) {
+        <ul class="card__specs">
+          @if (dormitorios()) {
+            <li><app-icon name="bed-double" [strokeWidth]="1.6" /> {{ dormitorios() }} <span class="sr-only">dormitorios</span></li>
+          }
+          @if (banos()) {
+            <li><app-icon name="bath" [strokeWidth]="1.6" /> {{ banos() }} <span class="sr-only">baños</span></li>
+          }
+          @if (m2()) {
+            <li><app-icon name="scaling" [strokeWidth]="1.6" /> {{ m2() }}</li>
+          }
+        </ul>
+      }
+
+      <p class="card__ubicacion"><app-icon name="map-pin" [strokeWidth]="1.6" /> {{ ubicacion() }}</p>
+    </div>
+  </a>
+
+  <span class="card__badge card__badge--green">Proyecto</span>
+
+  <button
+    type="button"
+    class="card__fav"
+    [class.is-active]="esFavorito()"
+    [attr.aria-pressed]="esFavorito()"
+    [attr.aria-label]="(esFavorito() ? 'Quitar de favoritos: ' : 'Guardar en favoritos: ') + proyecto().nombre"
+    (click)="favorites.toggle(clave())"
+  >
+    <app-icon name="heart" />
+  </button>
+</article>
