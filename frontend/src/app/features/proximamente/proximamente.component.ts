@@ -8,35 +8,8 @@ import { SeoService } from '../../core/seo.service';
 @Component({
   selector: 'app-proximamente',
   imports: [RouterLink],
-  template: `
-    <main id="main-content" tabindex="-1" class="proximamente container">
-      <p class="eyebrow">{{ eyebrow }}</p>
-      <h1>{{ titulo }}</h1>
-      <p class="proximamente__texto">{{ texto }}</p>
-      <a routerLink="/" class="btn btn--primary">Volver al inicio</a>
-    </main>
-  `,
-  styles: `
-    .proximamente {
-      min-height: 55vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding-block: 80px;
-    }
-    h1 {
-      font-size: clamp(1.8rem, 1.4rem + 1.8vw, 2.6rem);
-      margin: 0 0 14px;
-    }
-    .proximamente__texto {
-      max-width: 520px;
-      margin: 0 0 28px;
-      color: var(--text-muted);
-      line-height: 1.6;
-    }
-  `,
+  templateUrl: './proximamente.component.html',
+  styleUrl: './proximamente.component.scss',
 })
 export class ProximamenteComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);

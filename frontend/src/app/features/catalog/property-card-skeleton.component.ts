@@ -6,16 +6,7 @@ import { Component } from '@angular/core';
 // anunciando el estado a un lector de pantalla, esto es solo la señal visual.
 @Component({
   selector: 'app-property-card-skeleton',
-  template: `
-    <div class="skeleton-card" aria-hidden="true">
-      <div class="skeleton-card__photo"></div>
-      <div class="skeleton-card__body">
-        <div class="skeleton-card__line skeleton-card__line--tipo"></div>
-        <div class="skeleton-card__line skeleton-card__line--comuna"></div>
-        <div class="skeleton-card__line skeleton-card__line--precio"></div>
-      </div>
-    </div>
-  `,
+  templateUrl: './property-card-skeleton.component.html',
   styleUrl: './property-card-skeleton.component.scss',
 })
 export class PropertyCardSkeletonComponent {}

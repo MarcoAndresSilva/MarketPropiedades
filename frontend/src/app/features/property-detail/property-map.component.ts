@@ -16,16 +16,8 @@ import type * as Leaflet from 'leaflet';
 // el navegador, igual que el autoplay del hero (ver ARCHITECTURE.md).
 @Component({
   selector: 'app-property-map',
-  template: `<div #mapContainer class="property-map" role="img" [attr.aria-label]="ariaLabel()"></div>`,
-  styles: `
-    .property-map {
-      width: 100%;
-      height: 320px;
-      border-radius: 10px;
-      overflow: hidden;
-      border: 1px solid var(--border);
-    }
-  `,
+  templateUrl: './property-map.component.html',
+  styleUrl: './property-map.component.scss',
 })
 export class PropertyMapComponent implements AfterViewInit, OnDestroy {
   readonly lat = input.required<number>();
