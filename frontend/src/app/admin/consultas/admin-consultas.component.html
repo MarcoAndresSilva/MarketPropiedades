@@ -1,0 +1,48 @@
+<app-admin-nav />
+<main id="main-content" tabindex="-1" class="admin">
+  <header class="admin__header">
+    <div>
+      <h1>Consultas</h1>
+      <p class="admin__user">
+        {{ noLeidas() }} sin leer de {{ items().length }} en total.
+      </p>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p role="status">Cargando…</p>
+  } @else if (error()) {
+    <p role="alert">No se pudieron cargar las consultas. Intenta de nuevo más tarde.</p>
+  } @else if (items().length === 0) {
+    <p>Todavía no llegan consultas desde las fichas.</p>
+  } @else {
+    <ul class="consultas" role="list">
+      @for (c of items(); track c.id) {
+        <li class="consulta" [class.consulta--leida]="c.leida">
+          <div class="consulta__head">
+            <div>
+              <strong>{{ c.nombre }}</strong>
+              <span class="admin__sub">
+                {{ c.createdAt | date: 'd MMM y, HH:mm' }} ·
+                <a [routerLink]="['/propiedad', c.property.slug]" target="_blank">{{ c.property.titulo }}</a>
+              </span>
+            </div>
+            <label class="consulta__check">
+              <input type="checkbox" [checked]="c.leida" (change)="toggle(c)" />
+              Leída
+            </label>
+          </div>
+          <p class="consulta__mensaje">{{ c.mensaje }}</p>
+          <p class="consulta__contacto">
+            @if (c.email) {
+              <a [href]="'mailto:' + c.email">{{ c.email }}</a>
+            }
+            @if (c.telefono) {
+              <a [href]="whatsapp(c)" target="_blank" rel="noopener">WhatsApp {{ c.telefono }}</a>
+            }
+          </p>
+        </li>
+      }
+    </ul>
+  }
+</main>

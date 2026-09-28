@@ -1,0 +1,14 @@
+<nav class="admin-nav" aria-label="Panel de administración">
+  <a routerLink="/" class="admin-nav__logo" aria-label="Ir al sitio"><app-logo /></a>
+  <div class="admin-nav__links">
+    <a routerLink="/admin/propiedades" routerLinkActive="is-active">Propiedades</a>
+    <a routerLink="/admin/proyectos" routerLinkActive="is-active">Proyectos</a>
+    <a routerLink="/admin/consultas" routerLinkActive="is-active">Consultas</a>
+  </div>
+  <div class="admin-nav__user">
+    @if (auth.currentUser(); as user) {
+      <span>{{ user.name }}</span>
+    }
+    <button type="button" (click)="auth.logout()">Cerrar sesión</button>
+  </div>
+</nav>

@@ -1,0 +1,159 @@
+<app-admin-nav />
+<main id="main-content" tabindex="-1" class="admin admin--form">
+  <a routerLink="/admin/proyectos" class="admin__volver">← Volver a proyectos</a>
+  <h1>{{ esEdicion ? 'Editar proyecto' : 'Nuevo proyecto' }}</h1>
+
+  @if (loading()) {
+    <p role="status">Cargando…</p>
+  } @else {
+    <form class="form" (ngSubmit)="guardar()">
+      <fieldset>
+        <legend>Datos básicos</legend>
+        <p class="form__hint">Los campos con <span class="form__asterisco">*</span> son obligatorios.</p>
+
+        <label class="form__field">
+          Nombre del proyecto <span class="form__asterisco">*</span>
+          <input type="text" name="nombre" [(ngModel)]="model.nombre" minlength="3" maxlength="120" required placeholder="Ej: Condominio Los Aromos" />
+        </label>
+
+        <label class="form__field">
+          Desarrolla (corredora o inmobiliaria) <span class="form__asterisco">*</span>
+          <select name="publicadorId" [(ngModel)]="model.publicadorId" required>
+            <option value="" disabled>Selecciona una cuenta</option>
+            @for (p of desarrolladores(); track p.id) {
+              <option [value]="p.id">{{ p.name }} ({{ rolPublicador[p.role] }})</option>
+            }
+          </select>
+        </label>
+
+        <label class="form__field">
+          Comuna <span class="form__asterisco">*</span>
+          <select name="comunaId" [(ngModel)]="model.comunaId" required>
+            <option value="" disabled>Selecciona una comuna</option>
+            @for (c of comunas(); track c.id) {
+              <option [value]="c.id">{{ c.nombre }} — {{ c.region.nombre }}</option>
+            }
+          </select>
+        </label>
+
+        <div class="form__grid">
+          <label class="form__field">
+            Etapa <span class="form__asterisco">*</span>
+            <select name="etapa" [(ngModel)]="model.etapa" required>
+              <option value="" disabled>Selecciona</option>
+              @for (e of etapas; track e.value) {
+                <option [value]="e.value">{{ e.label }}</option>
+              }
+            </select>
+          </label>
+          <label class="form__field">
+            Entrega estimada
+            <input type="text" name="entrega" [(ngModel)]="model.entrega" maxlength="60" placeholder="Ej: 2º semestre 2027" />
+          </label>
+          <label class="form__field">
+            Estado
+            <select name="estado" [(ngModel)]="model.estado" required>
+              <option value="BORRADOR">Borrador</option>
+              <option value="PUBLICADA">Publicado</option>
+              <option value="PAUSADA">Pausado</option>
+              <option value="CERRADA">Cerrado</option>
+            </select>
+          </label>
+        </div>
+
+        <label class="form__checkbox">
+          <input type="checkbox" name="destacado" [(ngModel)]="model.destacado" />
+          Destacado (aparece en la portada)
+        </label>
+
+        <label class="form__field">
+          Dirección o sector
+          <input type="text" name="direccion" [(ngModel)]="model.direccion" maxlength="200" />
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Precio y unidades</legend>
+        <p class="form__hint">Los rangos se muestran como "1 – 3". Si una unidad no aplica, déjala vacía.</p>
+        <div class="form__grid">
+          <label class="form__field">
+            Precio desde (UF)
+            <input type="number" name="precioDesdeUf" [(ngModel)]="model.precioDesdeUf" min="0" step="0.01" />
+          </label>
+          <label class="form__field">
+            Total de unidades
+            <input type="number" name="unidades" [(ngModel)]="model.unidades" min="1" />
+          </label>
+          <label class="form__field">
+            Dormitorios desde
+            <input type="number" name="dormitoriosMin" [(ngModel)]="model.dormitoriosMin" min="0" />
+          </label>
+          <label class="form__field">
+            Dormitorios hasta
+            <input type="number" name="dormitoriosMax" [(ngModel)]="model.dormitoriosMax" min="0" />
+          </label>
+          <label class="form__field">
+            Baños desde
+            <input type="number" name="banosMin" [(ngModel)]="model.banosMin" min="0" />
+          </label>
+          <label class="form__field">
+            Baños hasta
+            <input type="number" name="banosMax" [(ngModel)]="model.banosMax" min="0" />
+          </label>
+          <label class="form__field">
+            M² desde
+            <input type="number" name="m2Min" [(ngModel)]="model.m2Min" min="0" />
+          </label>
+          <label class="form__field">
+            M² hasta
+            <input type="number" name="m2Max" [(ngModel)]="model.m2Max" min="0" />
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Descripción</legend>
+        <label class="form__field">
+          Descripción (mínimo 20 caracteres) <span class="form__asterisco">*</span>
+          <textarea name="descripcion" [(ngModel)]="model.descripcion" rows="6" minlength="20" maxlength="4000" required></textarea>
+        </label>
+      </fieldset>
+
+      @if (esEdicion) {
+        <fieldset>
+          <legend>Fotos</legend>
+          @if (fotos().length > 0) {
+            <ul class="form__fotos">
+              @for (foto of fotos(); track foto.id) {
+                <li>
+                  <img [src]="cloudinaryImageUrl(foto.cloudinaryPublicId, 160, 110)" alt="" />
+                  <button type="button" (click)="eliminarFoto(foto.id)">Eliminar</button>
+                </li>
+              }
+            </ul>
+          }
+          <label class="form__field">
+            Agregar fotos
+            <input type="file" accept="image/*" multiple (change)="onFotosSeleccionadas($event)" [disabled]="uploadingFoto()" />
+          </label>
+          @if (uploadingFoto()) {
+            <p role="status">Subiendo foto…</p>
+          }
+        </fieldset>
+      } @else {
+        <p class="form__hint">Guarda el proyecto primero para poder agregarle fotos.</p>
+      }
+
+      @if (error()) {
+        <p class="form__error" role="alert">{{ error() }}</p>
+      }
+      @if (guardado()) {
+        <p class="form__hint" role="status">Cambios guardados.</p>
+      }
+
+      <button type="submit" class="btn btn--primary" [disabled]="saving()">
+        {{ saving() ? 'Guardando…' : 'Guardar' }}
+      </button>
+    </form>
+  }
+</main>

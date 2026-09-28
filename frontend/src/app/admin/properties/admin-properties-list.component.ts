@@ -1,30 +1,35 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { AdminNavComponent } from '../shared/admin-nav.component';
+import { AdminMetricasService, MetricasPropiedad } from '../shared/admin-metricas.service';
 import { RouterLink } from '@angular/router';
 import { AdminPropertiesService } from '../shared/admin-properties.service';
 import { Property } from '../../core/property.model';
 import { formatPrecio, formatTipoPropiedad } from '../../core/format.util';
-import { AuthService } from '../../core/auth.service';
 
 @Component({
   selector: 'app-admin-properties-list',
-  imports: [RouterLink],
+  imports: [RouterLink, AdminNavComponent],
   templateUrl: './admin-properties-list.component.html',
   styleUrl: './admin-properties-list.component.scss',
 })
 export class AdminPropertiesListComponent implements OnInit {
   private readonly properties = inject(AdminPropertiesService);
-  protected readonly auth = inject(AuthService);
+  private readonly metricasService = inject(AdminMetricasService);
 
   readonly items = signal<Property[]>([]);
   readonly loading = signal(true);
   readonly error = signal(false);
+  readonly metricas = signal(new Map<string, MetricasPropiedad>());
 
   readonly formatPrecio = formatPrecio;
   readonly formatTipoPropiedad = formatTipoPropiedad;
 
   ngOnInit(): void {
-    this.auth.loadCurrentUser().subscribe();
     this.load();
+    // Si las métricas fallan, la tabla igual se muestra (con ceros).
+    this.metricasService.porPropiedad().subscribe({
+      next: (lista) => this.metricas.set(new Map(lista.map((m) => [m.propertyId, m]))),
+    });
   }
 
   load(): void {

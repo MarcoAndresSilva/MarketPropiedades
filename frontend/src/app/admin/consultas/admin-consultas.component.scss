@@ -1,0 +1,44 @@
+.consultas {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.consulta {
+  padding: 18px 20px;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.consulta--leida {
+  border-left-color: var(--border);
+  opacity: 0.75;
+}
+.consulta__head {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+.consulta__check {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.85rem;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.consulta__mensaje {
+  margin: 12px 0;
+  white-space: pre-line;
+  line-height: 1.6;
+}
+.consulta__contacto {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin: 0;
+  font-size: 0.9rem;
+}

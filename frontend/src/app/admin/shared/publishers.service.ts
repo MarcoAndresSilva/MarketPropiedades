@@ -8,9 +8,15 @@ export interface Publisher {
   email: string;
   name: string;
   whatsapp: string | null;
-  role: 'PERSONA' | 'CORREDORA';
+  role: 'PERSONA' | 'CORREDORA' | 'INMOBILIARIA';
   corredoraProfile: { razonSocial: string; rut: string } | null;
 }
+
+export const ROL_PUBLICADOR: Record<Publisher['role'], string> = {
+  PERSONA: 'Propietario',
+  CORREDORA: 'Corredora',
+  INMOBILIARIA: 'Inmobiliaria',
+};
 
 @Injectable({ providedIn: 'root' })
 export class PublishersService {

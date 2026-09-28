@@ -11,14 +11,6 @@ export type CreatePropertyPayload = Omit<
 
 export type UpdatePropertyPayload = Partial<CreatePropertyPayload>;
 
-export interface UploadSignature {
-  cloudName: string;
-  apiKey: string;
-  timestamp: number;
-  folder: string;
-  signature: string;
-}
-
 @Injectable({ providedIn: 'root' })
 export class AdminPropertiesService {
   private readonly http = inject(HttpClient);
@@ -50,9 +42,5 @@ export class AdminPropertiesService {
 
   removeFoto(fotoId: string): Observable<{ ok: true }> {
     return this.http.delete<{ ok: true }>(`${this.baseUrl}/fotos/${fotoId}`);
-  }
-
-  getUploadSignature(): Observable<UploadSignature> {
-    return this.http.post<UploadSignature>(`${environment.apiUrl}/uploads/signature`, {});
   }
 }

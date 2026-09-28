@@ -1,3 +1,4 @@
+<app-admin-nav />
 <main id="main-content" tabindex="-1" class="admin admin--form">
   <a routerLink="/admin/propiedades" class="admin__volver">← Volver al listado</a>
   <h1>{{ esEdicion ? 'Editar propiedad' : 'Nueva propiedad' }}</h1>
@@ -15,7 +16,7 @@
           <select name="publicadorId" [(ngModel)]="model.publicadorId" required>
             <option value="" disabled>Selecciona un publicador</option>
             @for (p of publishers(); track p.id) {
-              <option [value]="p.id">{{ p.name }} ({{ p.role === 'CORREDORA' ? 'Corredora' : 'Persona' }})</option>
+              <option [value]="p.id">{{ p.name }} ({{ rolPublicador[p.role] }})</option>
             }
           </select>
         </label>

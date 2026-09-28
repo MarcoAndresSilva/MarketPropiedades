@@ -1,10 +1,12 @@
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AdminPropertiesService, CreatePropertyPayload } from '../shared/admin-properties.service';
 import { LocationsService } from '../shared/locations.service';
-import { Publisher, PublishersService } from '../shared/publishers.service';
+import { Publisher, PublishersService, ROL_PUBLICADOR } from '../shared/publishers.service';
+import { CloudinaryUploadService } from '../shared/cloudinary-upload.service';
+import { AdminNavComponent } from '../shared/admin-nav.component';
 import { Comuna, PropertyFoto, TipoOperacion, TipoPropiedad } from '../../core/property.model';
 import { cloudinaryImageUrl } from '../../core/cloudinary.util';
 
@@ -55,7 +57,7 @@ const MODELO_VACIO: FormModel = {
 
 @Component({
   selector: 'app-admin-property-form',
-  imports: [FormsModule, RouterLink],
+  imports: [FormsModule, RouterLink, AdminNavComponent],
   templateUrl: './admin-property-form.component.html',
   styleUrl: './admin-property-form.component.scss',
 })
@@ -65,11 +67,10 @@ export class AdminPropertyFormComponent implements OnInit {
   private readonly adminProperties = inject(AdminPropertiesService);
   private readonly locations = inject(LocationsService);
   private readonly publishersService = inject(PublishersService);
-  // HttpClient plano (no pasa por el interceptor de auth: la URL de Cloudinary nunca
-  // empieza con environment.apiUrl, así que el Bearer token no se le agrega igual).
-  private readonly http = inject(HttpClient);
+  private readonly cloudinary = inject(CloudinaryUploadService);
 
   readonly cloudinaryImageUrl = cloudinaryImageUrl;
+  readonly rolPublicador = ROL_PUBLICADOR;
 
   readonly propertyId = signal<string | null>(null);
   readonly comunas = signal<Comuna[]>([]);
@@ -194,37 +195,17 @@ export class AdminPropertyFormComponent implements OnInit {
       return;
     }
 
-    this.adminProperties.getUploadSignature().subscribe({
-      next: (sig) => {
-        const form = new FormData();
-        form.append('file', file);
-        form.append('api_key', sig.apiKey);
-        form.append('timestamp', String(sig.timestamp));
-        form.append('signature', sig.signature);
-        form.append('folder', sig.folder);
-
-        this.http
-          .post<{ public_id: string }>(`https://api.cloudinary.com/v1_1/${sig.cloudName}/auto/upload`, form)
-          .subscribe({
-            next: (res) => {
-              const orden = this.fotos().length;
-              this.adminProperties.addFoto(propertyId, res.public_id, orden).subscribe(() => {
-                this.fotos.update((fs) => [
-                  ...fs,
-                  { id: `temp-${res.public_id}`, cloudinaryPublicId: res.public_id, orden },
-                ]);
-                this.subirFotosEnCola(resto, propertyId);
-              });
-            },
-            error: () => {
-              this.uploadingFoto.set(false);
-              this.error.set('No se pudo subir una de las fotos a Cloudinary.');
-            },
-          });
+    this.cloudinary.subir(file).subscribe({
+      next: (res) => {
+        const orden = this.fotos().length;
+        this.adminProperties.addFoto(propertyId, res.public_id, orden).subscribe(() => {
+          this.fotos.update((fs) => [...fs, { id: `temp-${res.public_id}`, cloudinaryPublicId: res.public_id, orden }]);
+          this.subirFotosEnCola(resto, propertyId);
+        });
       },
       error: () => {
         this.uploadingFoto.set(false);
-        this.error.set('No se pudo pedir el permiso de subida al backend.');
+        this.error.set('No se pudo subir una de las fotos a Cloudinary.');
       },
     });
   }
@@ -242,33 +223,16 @@ export class AdminPropertyFormComponent implements OnInit {
     if (!propertyId || !file) return;
 
     this.uploadingVideo.set(true);
-    this.adminProperties.getUploadSignature().subscribe({
-      next: (sig) => {
-        const form = new FormData();
-        form.append('file', file);
-        form.append('api_key', sig.apiKey);
-        form.append('timestamp', String(sig.timestamp));
-        form.append('signature', sig.signature);
-        form.append('folder', sig.folder);
-
-        this.http
-          .post<{ secure_url: string }>(`https://api.cloudinary.com/v1_1/${sig.cloudName}/auto/upload`, form)
-          .subscribe({
-            next: (res) => {
-              this.adminProperties.update(propertyId, { videoUrl: res.secure_url }).subscribe(() => {
-                this.videoUrl.set(res.secure_url);
-                this.uploadingVideo.set(false);
-              });
-            },
-            error: () => {
-              this.uploadingVideo.set(false);
-              this.error.set('No se pudo subir el video a Cloudinary.');
-            },
-          });
+    this.cloudinary.subir(file).subscribe({
+      next: (res) => {
+        this.adminProperties.update(propertyId, { videoUrl: res.secure_url }).subscribe(() => {
+          this.videoUrl.set(res.secure_url);
+          this.uploadingVideo.set(false);
+        });
       },
       error: () => {
         this.uploadingVideo.set(false);
-        this.error.set('No se pudo pedir el permiso de subida al backend.');
+        this.error.set('No se pudo subir el video a Cloudinary.');
       },
     });
     input.value = '';

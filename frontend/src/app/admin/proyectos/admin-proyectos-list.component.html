@@ -1,0 +1,51 @@
+<app-admin-nav />
+<main id="main-content" tabindex="-1" class="admin">
+  <header class="admin__header">
+    <div>
+      <h1>Proyectos</h1>
+      <p class="admin__user">Solo cuentas de corredora o inmobiliaria pueden tener proyectos.</p>
+    </div>
+    <div class="admin__actions">
+      <a routerLink="/admin/proyectos/nuevo" class="btn btn--primary">+ Nuevo proyecto</a>
+    </div>
+  </header>
+
+  @if (loading()) {
+    <p role="status">Cargando…</p>
+  } @else if (error()) {
+    <p role="alert">No se pudo cargar el listado. Intenta de nuevo más tarde.</p>
+  } @else if (items().length === 0) {
+    <p>Todavía no hay proyectos cargados.</p>
+  } @else {
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Estado</th>
+            <th>Proyecto</th>
+            <th>Desde</th>
+            <th>Desarrolla</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (p of items(); track p.id) {
+            <tr>
+              <td><span class="badge" [class]="'badge--' + p.estado.toLowerCase()">{{ p.estado }}</span></td>
+              <td>
+                <strong>{{ p.nombre }}</strong>
+                <span class="admin__sub">{{ etapa[p.etapa] }} · {{ p.comuna.nombre }}{{ p.destacado ? ' · Destacado' : '' }}</span>
+              </td>
+              <td>{{ p.precioDesdeUf ? 'UF ' + precio(p) : '—' }}</td>
+              <td>{{ p.publicador.name }}</td>
+              <td class="admin__row-actions">
+                <a [routerLink]="['/admin/proyectos', p.id, 'editar']">Editar</a>
+                <button type="button" class="link-danger" (click)="eliminar(p)">Eliminar</button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</main>
