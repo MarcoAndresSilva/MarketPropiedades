@@ -1,0 +1,43 @@
+@if (enviada()) {
+  <div class="consulta__ok" role="status">
+    <app-icon name="shield-check" [strokeWidth]="1.8" />
+    <p><strong>¡Consulta enviada!</strong> El anunciante la va a recibir y te contactará pronto.</p>
+  </div>
+} @else {
+  <form class="consulta" #f="ngForm" (ngSubmit)="enviar(f)" novalidate>
+    <p class="consulta__titulo">¿Prefieres que te contacten?</p>
+
+    <label>
+      <span>Nombre</span>
+      <input name="nombre" [(ngModel)]="nombre" required minlength="2" maxlength="100" autocomplete="name" />
+    </label>
+    <div class="consulta__fila">
+      <label>
+        <span>Correo</span>
+        <input name="email" type="email" [(ngModel)]="email" maxlength="200" autocomplete="email" />
+      </label>
+      <label>
+        <span>Teléfono</span>
+        <input name="telefono" type="tel" [(ngModel)]="telefono" maxlength="20" autocomplete="tel" placeholder="+56 9…" />
+      </label>
+    </div>
+    <label>
+      <span>Mensaje</span>
+      <textarea name="mensaje" rows="4" [(ngModel)]="mensaje" required minlength="10" maxlength="2000"></textarea>
+    </label>
+
+    <!-- Campo trampa: fuera de la vista y del foco; si llega con algo, es un bot. -->
+    <label class="consulta__trampa" aria-hidden="true">
+      Sitio web
+      <input name="sitioWeb" [(ngModel)]="sitioWeb" tabindex="-1" autocomplete="off" />
+    </label>
+
+    @if (error()) {
+      <p class="consulta__error" role="alert">{{ error() }}</p>
+    }
+
+    <button type="submit" class="btn btn--ghost consulta__enviar" [disabled]="enviando()">
+      {{ enviando() ? 'Enviando…' : 'Enviar consulta' }}
+    </button>
+  </form>
+}

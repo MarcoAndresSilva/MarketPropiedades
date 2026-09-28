@@ -1,69 +1,125 @@
 @if (notFound()) {
-  <main id="main-content" tabindex="-1" class="ficha ficha--vacia">
-    <p>No encontramos esta propiedad. Puede que ya no esté disponible.</p>
-    <a routerLink="/">Volver al catálogo</a>
+  <main id="main-content" tabindex="-1" class="container ficha">
+    <div class="empty-state ficha__vacia">
+      <app-icon name="house" [strokeWidth]="1.6" />
+      <h1>No encontramos esta propiedad</h1>
+      <p>Puede que ya se haya vendido o arrendado, o que el link esté mal escrito.</p>
+      <a routerLink="/propiedades" class="btn btn--primary">Ver otras propiedades</a>
+    </div>
   </main>
 } @else if (property(); as p) {
-  <main id="main-content" tabindex="-1" class="ficha">
-    <a routerLink="/" class="ficha__volver">← Volver al catálogo</a>
+  <main id="main-content" tabindex="-1" class="container ficha">
+    <nav class="ficha__migas" aria-label="Ruta de navegación">
+      <a routerLink="/">Inicio</a>
+      <span aria-hidden="true">/</span>
+      <a [routerLink]="p.tipoOperacion === 'VENTA' ? '/comprar' : '/arrendar'">{{ p.tipoOperacion === 'VENTA' ? 'Comprar' : 'Arrendar' }}</a>
+      <span aria-hidden="true">/</span>
+      <span aria-current="page">{{ p.titulo }}</span>
+    </nav>
 
-    <h1>{{ p.titulo }}</h1>
-    <p class="ficha__region">{{ p.comuna.region.nombre }}{{ p.direccion ? ' · ' + p.direccion : '' }}</p>
+    <header class="ficha__head">
+      <div>
+        <div class="ficha__badges">
+          <span class="badge" [class.badge--green]="p.tipoOperacion === 'ARRIENDO'">{{ p.tipoOperacion === 'VENTA' ? 'Venta' : 'Arriendo' }}</span>
+          <span class="badge badge--soft">{{ formatTipoPropiedad(p.tipoPropiedad) }}</span>
+          @if (p.destacada) {
+            <span class="badge">Destacada</span>
+          }
+        </div>
+        <h1>{{ p.titulo }}</h1>
+        <p class="ficha__ubicacion">
+          <app-icon name="map-pin" [strokeWidth]="1.8" />
+          {{ p.direccion ? p.direccion + ', ' : '' }}{{ formatUbicacion(p.comuna) }}
+        </p>
+      </div>
+      <button
+        type="button"
+        class="btn btn--ghost ficha__fav"
+        [class.is-active]="esFavorito()"
+        [attr.aria-pressed]="esFavorito()"
+        (click)="favorites.toggle(p.slug)"
+      >
+        <app-icon name="heart" />
+        {{ esFavorito() ? 'Guardada' : 'Guardar' }}
+      </button>
+    </header>
 
     <div class="ficha__media" [class.ficha__media--dual]="p.fotos.length > 0 && p.videoUrl">
       @if (p.fotos.length > 0) {
-        <app-photo-slider [fotos]="p.fotos" class="ficha__galeria" />
+        <app-photo-slider [fotos]="p.fotos" />
       } @else if (!p.videoUrl) {
-        <div class="ficha__sin-fotos">Sin fotos todavía</div>
+        <div class="ficha__sin-fotos"><app-icon name="house" [strokeWidth]="1.4" /> Sin fotos todavía</div>
       }
-
       @if (p.videoUrl) {
         <video class="ficha__video" [src]="p.videoUrl" controls preload="metadata"></video>
       }
     </div>
 
-    <p class="ficha__precio">{{ formatPrecio(p) }}</p>
+    <div class="ficha__cuerpo">
+      <div class="ficha__main">
+        <ul class="specs" role="list">
+          @for (s of specs(); track s.label) {
+            <li>
+              <app-icon [name]="s.icono" [strokeWidth]="1.6" />
+              <span class="specs__valor">{{ s.valor }}</span>
+              <span class="specs__label">{{ s.label }}</span>
+            </li>
+          }
+        </ul>
 
-    <ul class="ficha__specs">
-      @if (p.dormitorios !== null) {
-        <li><strong>{{ p.dormitorios }}</strong> dormitorios</li>
-      }
-      @if (p.banos !== null) {
-        <li><strong>{{ p.banos }}</strong> baños</li>
-      }
-      @if (p.estacionamientos !== null) {
-        <li><strong>{{ p.estacionamientos }}</strong> estacionamientos</li>
-      }
-      @if (p.bodegas !== null) {
-        <li><strong>{{ p.bodegas }}</strong> bodegas</li>
-      }
-      @if (p.m2Construidos !== null) {
-        <li><strong>{{ p.m2Construidos }}</strong> m² construidos</li>
-      }
-      @if (p.m2Terreno !== null) {
-        <li><strong>{{ p.m2Terreno }}</strong> m² de terreno</li>
-      }
-      @if (p.gastosComunesClp !== null) {
-        <li>Gastos comunes: <strong>{{ p.gastosComunesClp | number }}</strong></li>
-      }
-    </ul>
+        <section class="ficha__seccion" aria-labelledby="descripcion-title">
+          <h2 id="descripcion-title">Descripción</h2>
+          <p class="ficha__descripcion">{{ p.descripcion }}</p>
+        </section>
 
-    <p class="ficha__descripcion">{{ p.descripcion }}</p>
+        @if (p.gastosComunesClp !== null) {
+          <p class="ficha__nota">Gastos comunes aproximados: <strong>{{ formatClp(p.gastosComunesClp) }}</strong> al mes.</p>
+        }
 
-    @if (p.lat !== null && p.lng !== null) {
-      <app-property-map [lat]="p.lat" [lng]="p.lng" class="ficha__mapa" />
-    }
+        @if (p.lat !== null && p.lng !== null) {
+          <section class="ficha__seccion" aria-labelledby="ubicacion-title">
+            <h2 id="ubicacion-title">Ubicación</h2>
+            <app-property-map [lat]="p.lat" [lng]="p.lng" />
+          </section>
+        }
+      </div>
 
-    <div class="ficha__contacto">
-      <p>Publica: <strong>{{ p.publicador.name }}</strong></p>
-      @if (p.publicador.whatsapp) {
-        <a class="btn btn--whatsapp" [href]="whatsappContactoUrl(p)" target="_blank" rel="noopener">Contactar por WhatsApp</a>
-        <a class="btn btn--agendar" [href]="whatsappAgendarUrl(p)" target="_blank" rel="noopener">Agendar visita</a>
-      }
+      <aside class="contacto" aria-label="Contactar al anunciante">
+        <p class="contacto__precio">
+          {{ formatPrecio(p) }}
+        </p>
+        <p class="contacto__publica">
+          Publica <strong>{{ p.publicador.name }}</strong>
+          <span class="contacto__rol">{{ rolLabel(p.publicador.role) }}</span>
+        </p>
+
+        @if (p.publicador.whatsapp) {
+          <a class="btn btn--whatsapp" [href]="whatsappContactoUrl(p)" target="_blank" rel="noopener" (click)="clicWhatsapp(p)">
+            <app-icon name="message-circle" /> Contactar por WhatsApp
+          </a>
+          <a class="btn btn--ghost" [href]="whatsappAgendarUrl(p)" target="_blank" rel="noopener" (click)="clicWhatsapp(p)">
+            <app-icon name="calendar-clock" /> Agendar visita
+          </a>
+        }
+
+        <hr />
+        <app-consulta-form [slug]="p.slug" />
+      </aside>
     </div>
+
+    @if (p.publicador.whatsapp) {
+      <!-- En celular el contacto queda siempre a mano, sin volver a subir. -->
+      <div class="barra-contacto">
+        <p>{{ formatPrecio(p) }}</p>
+        <a class="btn btn--whatsapp" [href]="whatsappContactoUrl(p)" target="_blank" rel="noopener" (click)="clicWhatsapp(p)">
+          <app-icon name="message-circle" /> WhatsApp
+        </a>
+      </div>
+    }
   </main>
 } @else {
-  <main id="main-content" tabindex="-1" class="ficha">
-    <p role="status">Cargando…</p>
+  <main id="main-content" tabindex="-1" class="container ficha" aria-busy="true">
+    <p role="status" class="sr-only">Cargando la propiedad…</p>
+    <div class="ficha__skeleton" aria-hidden="true"></div>
   </main>
 }

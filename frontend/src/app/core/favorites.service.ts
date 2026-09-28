@@ -1,18 +1,36 @@
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
+import { MetricasService } from './metricas.service';
 
 const STORAGE_KEY = 'habbi:favoritos';
+const PREFIJO_PROYECTO = 'proyecto:';
+
+/** Clave de favorito de un proyecto. Las propiedades usan su slug a secas (así estaban
+ * guardadas antes de que existieran los proyectos, y siguen valiendo). */
+export function claveProyecto(slug: string): string {
+  return PREFIJO_PROYECTO + slug;
+}
+
+export function esClaveProyecto(clave: string): boolean {
+  return clave.startsWith(PREFIJO_PROYECTO);
+}
+
+export function slugDeClave(clave: string): string {
+  return esClaveProyecto(clave) ? clave.slice(PREFIJO_PROYECTO.length) : clave;
+}
 
 /**
  * Favoritos del visitante, guardados en su navegador — el comprador no tiene cuenta
  * en Habbi (decisión de producto), así que no hay dónde más guardarlos.
- * Se guarda solo el slug de cada propiedad; la página de favoritos pide los datos
- * frescos a la API, para no mostrar un precio o estado viejo.
+ * Se guarda solo el slug de cada propiedad (o "proyecto:<slug>" para un proyecto); la
+ * página de favoritos pide los datos frescos a la API, para no mostrar un precio viejo.
+ * Guardar una propiedad suma la métrica "favorito" que después ve el anunciante.
  * SSR-safe: en el servidor la lista arranca vacía y no se toca localStorage.
  */
 @Injectable({ providedIn: 'root' })
 export class FavoritesService {
   private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
+  private readonly metricas = inject(MetricasService);
   private readonly slugs = signal<string[]>(this.read());
 
   readonly count = computed(() => this.slugs().length);
@@ -22,11 +40,15 @@ export class FavoritesService {
     return this.slugs().includes(slug);
   }
 
-  toggle(slug: string): void {
+  toggle(clave: string): void {
     const actual = this.slugs();
-    const next = actual.includes(slug) ? actual.filter((s) => s !== slug) : [...actual, slug];
+    const agregando = !actual.includes(clave);
+    const next = agregando ? [...actual, clave] : actual.filter((s) => s !== clave);
     this.slugs.set(next);
     this.write(next);
+    if (agregando && !esClaveProyecto(clave)) {
+      this.metricas.registrar(clave, 'FAVORITO');
+    }
   }
 
   private read(): string[] {
