@@ -1,13 +1,18 @@
-import { Component } from '@angular/core';
+import { Component, input } from '@angular/core';
 
-// Logo provisorio de Habbi, dibujado a imagen del render de marca mientras llega el
-// archivo definitivo: la "H" es una casa (dos muros + techo en V como travesaño, con
-// una ventana en violeta) y el punto de la "i" va en violeta. El resto de la palabra
-// es texto real en Plus Jakarta Sans — escala con font-size y hereda color.
-// El tamaño se controla con `font-size` desde el componente que lo usa.
+// Logo oficial de Habbi (archivo entregado por el socio), en public/marca/:
+// - logo-habbi*.png: solo la palabra, para el header y el panel (a ~40px de alto el
+//   lema "Propiedades en movimiento" quedaría ilegible).
+// - logo-habbi-lema*.png: con el lema, para el footer, donde hay espacio.
+// - "-claro": versión con el navy pasado a blanco para el tema oscuro (el violeta se
+//   mantiene); se muestra una u otra según el data-theme de <html>.
+// El alto se controla con `font-size` desde el componente que lo usa, igual que antes.
 @Component({
   selector: 'app-logo',
   templateUrl: './logo.component.html',
   styleUrl: './logo.component.scss',
 })
-export class LogoComponent {}
+export class LogoComponent {
+  /** true = versión con el lema "Propiedades en movimiento" debajo. */
+  readonly lema = input(false);
+}

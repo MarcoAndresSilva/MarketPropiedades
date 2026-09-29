@@ -1154,3 +1154,16 @@ proyecto, el diff de un cambio de estilos no se mezcla con la lógica, y el edit
 autocompletado completo en HTML y SCSS. Cuando un componente reutiliza los estilos de otro (la card
 y la ficha de proyecto usan los de propiedad), apunta a ese `.scss` y suma el suyo solo si agrega
 algo propio (`styleUrls`).
+
+### Fase 29 — Logo oficial de Habbi
+
+**Decisión — el logo pasa a ser el archivo oficial, en cuatro variantes generadas desde el
+original.** El socio entregó el logo en PNG (1544×523, con transparencia) con el lema "Propiedades
+en movimiento" debajo de la palabra. Reemplaza al logo provisorio dibujado en SVG (Fase 25). Con
+`sharp` se generan, en `public/marca/`: la palabra sola (`logo-habbi.png`, para header y panel: a
+~40 px de alto el lema quedaría ilegible) y la versión con lema (`logo-habbi-lema.png`, para el
+footer). Cada una tiene su variante `-claro` para el tema oscuro, con el navy pasado a blanco y el
+violeta intacto: el navy sobre el fondo oscuro no se vería. `LogoComponent` muestra una u otra
+según el `data-theme` de `<html>` (`:host-context`) y mantiene la misma API de tamaño por
+`font-size`. Pesan entre 8 y 14 KB. Si llega una versión vectorial (SVG), se reemplaza en el mismo
+componente.
