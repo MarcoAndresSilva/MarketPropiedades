@@ -1,0 +1,21 @@
+<div class="fotos" (pointerenter)="precargar()" (touchstart)="precargar()">
+  <!-- Las fotos también llevan a la ficha, pero fuera del orden de tabulación: el link
+       accesible de la card es el título. -->
+  <div class="fotos__track" #track (scroll)="onScroll()">
+    @for (foto of visibles(); track $index; let i = $index) {
+      <a class="fotos__slide" [routerLink]="link()" tabindex="-1" aria-hidden="true">
+        <img [attr.src]="cargadas().has(i) ? url(foto) : null" [alt]="i === 0 ? alt() : ''" loading="lazy" draggable="false" />
+      </a>
+    }
+  </div>
+
+  @if (visibles().length > 1) {
+    <button type="button" class="fotos__nav fotos__nav--prev" (click)="mover(-1)" aria-label="Foto anterior">‹</button>
+    <button type="button" class="fotos__nav fotos__nav--next" (click)="mover(1)" aria-label="Foto siguiente">›</button>
+    <div class="fotos__dots" aria-hidden="true">
+      @for (foto of visibles(); track $index; let i = $index) {
+        <span class="fotos__dot" [class.is-active]="i === actual()"></span>
+      }
+    </div>
+  }
+</div>

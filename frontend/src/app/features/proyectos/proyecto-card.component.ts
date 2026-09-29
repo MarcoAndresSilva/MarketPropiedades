@@ -2,16 +2,16 @@ import { Component, computed, inject, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ETAPA_LABEL, Proyecto, formatRango } from '../../core/proyecto.model';
 import { formatUbicacion } from '../../core/format.util';
-import { cloudinaryImageUrl } from '../../core/cloudinary.util';
 import { IconComponent } from '../../core/icon.component';
 import { FavoritesService, claveProyecto } from '../../core/favorites.service';
+import { CardFotosComponent } from '../catalog/card-fotos.component';
 
 // Card de proyecto del render: badge verde "Proyecto", "Desde UF 1.700" y rangos
 // ("1 – 3" dormitorios, "45 – 95 m²"). Reusa los estilos de la card de propiedad
 // para que las dos convivan en la misma grilla sin verse distintas.
 @Component({
   selector: 'app-proyecto-card',
-  imports: [RouterLink, IconComponent],
+  imports: [RouterLink, IconComponent, CardFotosComponent],
   templateUrl: './proyecto-card.component.html',
   styleUrl: '../catalog/property-card.component.scss',
 })
@@ -28,6 +28,6 @@ export class ProyectoCardComponent {
   protected readonly banos = computed(() => formatRango(this.proyecto().banosMin, this.proyecto().banosMax));
   protected readonly m2 = computed(() => formatRango(this.proyecto().m2Min, this.proyecto().m2Max, ' m²'));
   protected readonly ubicacion = computed(() => formatUbicacion(this.proyecto().comuna));
+  protected readonly fotoIds = computed(() => this.proyecto().fotos.map((f) => f.cloudinaryPublicId));
 
-  readonly cloudinaryImageUrl = cloudinaryImageUrl;
 }

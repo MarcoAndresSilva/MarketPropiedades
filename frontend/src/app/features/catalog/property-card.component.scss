@@ -2,6 +2,8 @@
 // tipo a la derecha, título, fila de íconos (dorm/baños/m²) y ubicación.
 .card {
   position: relative;
+  display: flex;
+  flex-direction: column;
   height: 100%;
   border: 1px solid var(--border);
   border-radius: 14px;
@@ -23,7 +25,7 @@
 .card__link {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
   color: inherit;
   text-decoration: none;
 }
@@ -39,13 +41,6 @@
   object-fit: cover;
   background: var(--surface-2);
 
-  @media (prefers-reduced-motion: no-preference) {
-    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-
-    .card:hover & {
-      transform: scale(1.04);
-    }
-  }
 }
 
 .card__photo--placeholder {

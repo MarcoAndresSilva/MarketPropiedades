@@ -1,0 +1,102 @@
+:host {
+  display: block;
+}
+
+.fotos {
+  position: relative;
+}
+
+.fotos__track {
+  display: flex;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.fotos__slide {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+
+  img {
+    display: block;
+    width: 100%;
+    aspect-ratio: 16 / 11;
+    object-fit: cover;
+    background: var(--surface-2);
+    user-select: none;
+  }
+}
+
+// Flechas: solo en dispositivos con mouse y al pasar por la card; en táctil se desliza.
+.fotos__nav {
+  position: absolute;
+  top: 50%;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: #07162b;
+  font-size: 1.3rem;
+  line-height: 1;
+  box-shadow: 0 4px 12px -4px rgba(7, 22, 43, 0.4);
+  cursor: pointer;
+  transform: translateY(-50%);
+  opacity: 0;
+  transition: opacity 0.2s ease;
+
+  &:focus-visible {
+    opacity: 1;
+  }
+}
+
+.fotos__nav--prev {
+  left: 10px;
+}
+
+.fotos__nav--next {
+  right: 10px;
+}
+
+@media (hover: hover) {
+  .fotos__nav {
+    display: flex;
+  }
+
+  .fotos:hover .fotos__nav {
+    opacity: 1;
+  }
+}
+
+.fotos__dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.fotos__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.3);
+  transition: background-color 0.2s ease;
+
+  &.is-active {
+    background: #ffffff;
+  }
+}

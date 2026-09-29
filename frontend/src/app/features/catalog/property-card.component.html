@@ -1,20 +1,15 @@
 <article class="card">
-  <a class="card__link" [routerLink]="['/propiedad', property().slug]">
-    <div class="card__media">
-      @if (property().fotos.length > 0) {
-        <img
-          class="card__photo"
-          [src]="cloudinaryImageUrl(property().fotos[0].cloudinaryPublicId, 640, 440)"
-          [alt]="titulo()"
-          loading="lazy"
-        />
-      } @else {
-        <div class="card__photo card__photo--placeholder" aria-hidden="true">
-          <app-icon name="house" [strokeWidth]="1.5" />
-        </div>
-      }
-    </div>
+  <div class="card__media">
+    @if (fotoIds().length > 0) {
+      <app-card-fotos [fotos]="fotoIds()" [alt]="titulo()" [link]="['/propiedad', property().slug]" />
+    } @else {
+      <div class="card__photo card__photo--placeholder" aria-hidden="true">
+        <app-icon name="house" [strokeWidth]="1.5" />
+      </div>
+    }
+  </div>
 
+  <a class="card__link" [routerLink]="['/propiedad', property().slug]">
     <div class="card__body">
       <div class="card__top">
         <p class="card__precio">
