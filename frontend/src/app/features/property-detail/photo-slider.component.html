@@ -1,5 +1,6 @@
 <div
   class="slider"
+  [class.slider--visor]="modo() === 'visor'"
   tabindex="0"
   role="group"
   [attr.aria-label]="'Galería de fotos, imagen ' + (currentIndex() + 1) + ' de ' + fotos().length"
@@ -10,7 +11,7 @@
       <img
         class="slider__image"
         [class.slider__image--active]="i === currentIndex()"
-        [src]="cloudinaryImageUrl(foto.cloudinaryPublicId, 900, 600)"
+        [src]="url(foto.cloudinaryPublicId)"
         [alt]="i === currentIndex() ? 'Foto de la propiedad' : ''"
         [attr.aria-hidden]="i === currentIndex() ? null : 'true'"
       />

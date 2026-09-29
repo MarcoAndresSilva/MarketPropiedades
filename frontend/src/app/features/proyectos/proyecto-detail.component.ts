@@ -10,14 +10,14 @@ import { buildWhatsappUrl } from '../../core/whatsapp.util';
 import { cloudinaryImageUrl } from '../../core/cloudinary.util';
 import { BRAND_NAME } from '../../core/brand';
 import { environment } from '../../../environments/environment';
-import { PhotoSliderComponent } from '../property-detail/photo-slider.component';
+import { GaleriaComponent } from '../property-detail/galeria.component';
 import { PropertyMapComponent } from '../property-detail/property-map.component';
 
 // Ficha de proyecto: misma estructura y estilos que la de propiedad (título, galería,
 // datos y columna de contacto), pero con "Desde UF", rangos, etapa y fecha de entrega.
 @Component({
   selector: 'app-proyecto-detail',
-  imports: [RouterLink, IconComponent, PhotoSliderComponent, PropertyMapComponent],
+  imports: [RouterLink, IconComponent, GaleriaComponent, PropertyMapComponent],
   templateUrl: './proyecto-detail.component.html',
   styleUrls: ['../property-detail/property-detail.component.scss', './proyecto-detail.component.scss'],
 })

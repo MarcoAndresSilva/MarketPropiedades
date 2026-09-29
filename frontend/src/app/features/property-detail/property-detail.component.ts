@@ -4,7 +4,7 @@ import { PropertiesService } from '../../core/properties.service';
 import { Property } from '../../core/property.model';
 import { formatPrecio, formatTipoPropiedad, formatUbicacion, truncarEnPalabra } from '../../core/format.util';
 import { buildWhatsappUrl } from '../../core/whatsapp.util';
-import { PhotoSliderComponent } from './photo-slider.component';
+import { GaleriaComponent } from './galeria.component';
 import { PropertyMapComponent } from './property-map.component';
 import { SeoService } from '../../core/seo.service';
 import { cloudinaryImageUrl } from '../../core/cloudinary.util';
@@ -26,7 +26,7 @@ const ROL_LABEL: Record<Property['publicador']['role'], string> = {
 
 @Component({
   selector: 'app-property-detail',
-  imports: [RouterLink, IconComponent, PhotoSliderComponent, PropertyMapComponent, ConsultaFormComponent],
+  imports: [RouterLink, IconComponent, GaleriaComponent, PropertyMapComponent, ConsultaFormComponent],
   templateUrl: './property-detail.component.html',
   styleUrl: './property-detail.component.scss',
 })

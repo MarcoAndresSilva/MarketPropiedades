@@ -104,3 +104,30 @@
     background: #fff;
   }
 }
+
+// Visor a pantalla completa: la foto entera (sin recorte) sobre fondo oscuro.
+.slider--visor {
+  border-radius: 0;
+  background: transparent;
+
+  // El foco se pone solo al abrir (para usar las flechas del teclado); el anillo de foco
+  // enmarcaría la foto sin aportar nada, porque el visor ya es todo lo que hay en pantalla.
+  &:focus-visible {
+    outline: none;
+  }
+
+  .slider__stage {
+    aspect-ratio: auto;
+    height: min(82vh, 900px);
+  }
+
+  .slider__image {
+    object-fit: contain;
+  }
+
+  .slider__nav {
+    width: 48px;
+    height: 48px;
+    font-size: 1.8rem;
+  }
+}

@@ -1,0 +1,137 @@
+:host {
+  display: block;
+}
+
+// ---------------------------------------------------------------- GRILLA (desktop)
+.grilla {
+  position: relative;
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+  height: 460px;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+// Con menos de 4 miniaturas la grilla se ajusta para no dejar huecos. Se cuenta por
+// posición (nth-child) y no por :last-of-type, porque "Ver las N fotos" también es un
+// <button> y sería el último de su tipo.
+.grilla[data-cantidad='0'] {
+  grid-template-columns: 1fr;
+}
+
+.grilla[data-cantidad='1'] {
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: 1fr;
+}
+
+.grilla[data-cantidad='2'] {
+  grid-template-columns: 2fr 1fr;
+}
+
+.grilla[data-cantidad='3'] .grilla__foto:nth-child(4) {
+  grid-column: span 2;
+}
+
+.grilla__foto {
+  position: relative;
+  display: block;
+  // Un <button> en una grilla no se estira solo como un <div>: sin esto la miniatura
+  // toma el ancho de su contenido y queda más angosta que su celda.
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: var(--surface-2);
+  cursor: zoom-in;
+  overflow: hidden;
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    img {
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    &:hover img {
+      transform: scale(1.03);
+    }
+  }
+}
+
+.grilla__foto--principal {
+  grid-row: span 2;
+}
+
+.grilla__ver-todas {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  padding: 9px 16px;
+  border: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #07162b;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  box-shadow: var(--shadow-sm);
+  cursor: pointer;
+}
+
+.deslizador {
+  display: none;
+}
+
+// En celular, el deslizador reemplaza a la grilla.
+@media (max-width: 899px) {
+  .grilla {
+    display: none;
+  }
+
+  .deslizador {
+    display: block;
+  }
+}
+
+// ---------------------------------------------------------------- VISOR
+.visor {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(4, 10, 22, 0.92);
+}
+
+.visor__contenido {
+  position: relative;
+  width: min(1200px, 100%);
+}
+
+.visor__cerrar {
+  position: absolute;
+  top: -44px;
+  right: 0;
+  width: 40px;
+  height: 40px;
+  border: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 1.1rem;
+  cursor: pointer;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.28);
+  }
+}

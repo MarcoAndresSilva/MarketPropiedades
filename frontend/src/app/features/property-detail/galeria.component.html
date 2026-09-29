@@ -1,0 +1,26 @@
+<!-- Desktop: foto grande + miniaturas -->
+<div class="grilla" [attr.data-cantidad]="miniaturas().length">
+  <button type="button" class="grilla__foto grilla__foto--principal" (click)="abrir(0)" aria-label="Ver fotos en pantalla completa">
+    <img [src]="url(fotos()[0].cloudinaryPublicId, true)" [alt]="titulo()" fetchpriority="high" />
+  </button>
+  @for (foto of miniaturas(); track foto.id; let i = $index) {
+    <button type="button" class="grilla__foto" (click)="abrir(i + 1)" [attr.aria-label]="'Ver foto ' + (i + 2) + ' de ' + fotos().length">
+      <img [src]="url(foto.cloudinaryPublicId, false)" alt="" loading="lazy" />
+    </button>
+  }
+  @if (fotos().length > 1) {
+    <button type="button" class="grilla__ver-todas" (click)="abrir(0)">Ver las {{ fotos().length }} fotos</button>
+  }
+</div>
+
+<!-- Celular: deslizador -->
+<app-photo-slider class="deslizador" [fotos]="fotos()" />
+
+@if (visor() !== null) {
+  <div class="visor" role="dialog" aria-modal="true" [attr.aria-label]="'Fotos de ' + titulo()" (click)="cerrar()">
+    <div class="visor__contenido" (click)="$event.stopPropagation()">
+      <button type="button" class="visor__cerrar" (click)="cerrar()" aria-label="Cerrar">✕</button>
+      <app-photo-slider [fotos]="fotos()" [inicio]="visor()!" modo="visor" />
+    </div>
+  </div>
+}

@@ -44,14 +44,11 @@
       </button>
     </header>
 
-    <div class="ficha__media" [class.ficha__media--dual]="p.fotos.length > 0 && p.videoUrl">
+    <div class="ficha__media">
       @if (p.fotos.length > 0) {
-        <app-photo-slider [fotos]="p.fotos" />
-      } @else if (!p.videoUrl) {
+        <app-galeria [fotos]="p.fotos" [titulo]="p.titulo" />
+      } @else {
         <div class="ficha__sin-fotos"><app-icon name="house" [strokeWidth]="1.4" /> Sin fotos todavía</div>
-      }
-      @if (p.videoUrl) {
-        <video class="ficha__video" [src]="p.videoUrl" controls preload="metadata"></video>
       }
     </div>
 
@@ -66,6 +63,13 @@
             </li>
           }
         </ul>
+
+        @if (p.videoUrl) {
+          <section class="ficha__seccion" aria-labelledby="video-title">
+            <h2 id="video-title">Video</h2>
+            <video class="ficha__video" [src]="p.videoUrl" controls preload="metadata"></video>
+          </section>
+        }
 
         <section class="ficha__seccion" aria-labelledby="descripcion-title">
           <h2 id="descripcion-title">Descripción</h2>

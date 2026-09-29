@@ -46,7 +46,7 @@
 
     <div class="ficha__media">
       @if (p.fotos.length > 0) {
-        <app-photo-slider [fotos]="p.fotos" />
+        <app-galeria [fotos]="p.fotos" [titulo]="p.nombre" />
       } @else {
         <div class="ficha__sin-fotos"><app-icon name="building-2" [strokeWidth]="1.4" /> Sin fotos todavía</div>
       }
