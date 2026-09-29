@@ -1167,3 +1167,25 @@ violeta intacto: el navy sobre el fondo oscuro no se vería. `LogoComponent` mue
 según el `data-theme` de `<html>` (`:host-context`) y mantiene la misma API de tamaño por
 `font-size`. Pesan entre 8 y 14 KB. Si llega una versión vectorial (SVG), se reemplaza en el mismo
 componente.
+
+### Fase 30 — Galería de la ficha y carrusel en las cards
+
+**Decisión — galería de ficha en grilla (una grande + 4 miniaturas) con visor a pantalla
+completa.** Con fotos reales, el deslizador a todo el ancho ocupaba ~725 px de alto y dejaba el
+precio y el botón de WhatsApp bajo la primera pantalla. La grilla (formato de los portales grandes)
+muestra cinco fotos en 460 px y deja el contacto visible sin scroll. Cualquier foto abre un visor
+modal con todas, en tamaño completo y sin recorte (`object-fit: contain`), que parte en la foto
+tocada, se maneja con flechas del teclado y se cierra con Esc o clic afuera; mientras está abierto,
+la página de fondo no hace scroll. En celular (< 900 px) se mantiene el deslizador, que ahí se usa
+mejor que una grilla de miniaturas chicas. El video pasa a su propia sección bajo los datos. La
+misma galería se usa en la ficha de proyecto.
+
+**Decisión — carrusel de hasta 5 fotos en las cards, con carga bajo demanda.** Es un contenedor con
+scroll horizontal y `scroll-snap`: en celular se desliza con el dedo sin JavaScript; en desktop, las
+flechas (solo con mouse, `@media (hover: hover)`) mueven ese mismo scroll. Solo la primera foto de
+cada card lleva `src` de entrada: la siguiente se pide cuando el visitante pasa el mouse o toca la
+card, y así de a una. Se probó primero con `loading="lazy"` y no alcanzó: Chrome precarga las
+imágenes cercanas de un scroll horizontal aunque estén ocultas, y una grilla de 12 cards pedía 60
+fotos de entrada. Las fotos quedan fuera del link principal de la card (un botón dentro de un
+`<a>` es HTML inválido) y son links a la ficha fuera del orden de tabulación: el link accesible
+sigue siendo el título.
