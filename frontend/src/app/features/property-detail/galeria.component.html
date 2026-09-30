@@ -17,8 +17,11 @@
 <app-photo-slider class="deslizador" [fotos]="fotos()" />
 
 @if (visor() !== null) {
-  <div class="visor" role="dialog" aria-modal="true" [attr.aria-label]="'Fotos de ' + titulo()" (click)="cerrar()">
-    <div class="visor__contenido" (click)="$event.stopPropagation()">
+  <div class="visor" role="dialog" aria-modal="true" [attr.aria-label]="'Fotos de ' + titulo()">
+    <!-- El fondo es un botón real (no un div con click): así cerrar tocando afuera también
+         funciona con teclado y lectores de pantalla. -->
+    <button type="button" class="visor__fondo" (click)="cerrar()" aria-label="Cerrar visor" tabindex="-1"></button>
+    <div class="visor__contenido">
       <button type="button" class="visor__cerrar" (click)="cerrar()" aria-label="Cerrar">✕</button>
       <app-photo-slider [fotos]="fotos()" [inicio]="visor()!" modo="visor" />
     </div>

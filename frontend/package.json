@@ -9,7 +9,8 @@
     "build:ci": "ng build --configuration production,ci",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "serve:ssr:frontend": "node dist/frontend/server/server.mjs"
+    "serve:ssr:frontend": "node dist/frontend/server/server.mjs",
+    "lint": "ng lint"
   },
   "private": true,
   "packageManager": "npm@12.0.2",
@@ -32,15 +33,19 @@
     "@angular/build": "^22.1.8",
     "@angular/cli": "^22.1.8",
     "@angular/compiler-cli": "^22.1.0",
+    "@eslint/js": "^10.0.1",
     "@netlify/angular-runtime": "^4.0.0",
     "@netlify/functions": "^6.0.0",
     "@types/compression": "^1.8.1",
     "@types/express": "^5.0.1",
     "@types/leaflet": "^1.9.22",
     "@types/node": "^20.17.19",
+    "angular-eslint": "22.5.0",
+    "eslint": "^10.9.1",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
+    "typescript-eslint": "8.69.0",
     "vitest": "^4.0.8"
   }
 }
