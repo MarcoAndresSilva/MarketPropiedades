@@ -121,9 +121,14 @@ model Property {
   lat       Float?
   lng       Float?
 
-  // Venta en UF, arriendo en CLP — convención chilena (ver ARCHITECTURE.md).
-  precioUf  Decimal? @db.Decimal(12, 2)
-  precioClp Int?
+  // Precio tal como lo publicó el anunciante: venta normalmente en UF, arriendo en CLP;
+  // una venta también puede venir en pesos (precioClp). Ver ARCHITECTURE.md.
+  precioUf    Decimal? @db.Decimal(12, 2)
+  precioClp   Int?
+  // Solo ventas: el precio llevado a UF (el mismo precioUf, o precioClp / UF del día en
+  // que se guardó). Lo usan el filtro de rango y el orden por precio para comparar
+  // ventas publicadas en monedas distintas; nunca se muestra.
+  precioRefUf Decimal? @db.Decimal(12, 2)
 
   m2Construidos    Float?
   m2Terreno        Float?
@@ -147,6 +152,7 @@ model Property {
   @@index([comunaId])
   @@index([publicadorId])
   @@index([tipoOperacion, tipoPropiedad, estado])
+  @@index([precioRefUf])
 }
 
 model PropertyFoto {

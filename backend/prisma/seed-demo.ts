@@ -256,7 +256,13 @@ async function main() {
     // update() traía una lista angosta de campos a mano (solo estado + videoUrl), un
     // campo nuevo en DEMO_PROPERTIES (comunaId, y ahora lat/lng) quedaba silenciosamente
     // sin sincronizar en las filas que ya existían de una corrida anterior del seed.
-    const data = { ...p, estado: 'PUBLICADA' as const, videoUrl: 'videoUrl' in p ? p.videoUrl : null };
+    const data = {
+      ...p,
+      estado: 'PUBLICADA' as const,
+      videoUrl: 'videoUrl' in p ? p.videoUrl : null,
+      // Las ventas de demo están en UF: su referencia para filtrar es el mismo valor.
+      precioRefUf: p.tipoOperacion === 'VENTA' && 'precioUf' in p ? p.precioUf : null,
+    };
     const property = await prisma.property.upsert({
       where: { slug: p.slug },
       update: data,

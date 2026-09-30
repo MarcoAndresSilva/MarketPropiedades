@@ -13,6 +13,7 @@ import { LocationsModule } from './locations/locations.module';
 import { ConsultasModule } from './consultas/consultas.module';
 import { MetricasModule } from './metricas/metricas.module';
 import { ProyectosModule } from './proyectos/proyectos.module';
+import { IndicadoresModule } from './indicadores/indicadores.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { ProyectosModule } from './proyectos/proyectos.module';
     ConsultasModule,
     MetricasModule,
     ProyectosModule,
+    IndicadoresModule,
   ],
   controllers: [AppController],
   providers: [AppService, { provide: APP_GUARD, useClass: ThrottlerGuard }],

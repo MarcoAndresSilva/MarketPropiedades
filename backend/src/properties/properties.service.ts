@@ -7,6 +7,7 @@ import { QueryPropertiesDto } from './dto/query-properties.dto';
 import { CreatePropertyFotoDto } from './dto/create-property-foto.dto';
 import { EstadoPublicacion, TipoOperacion } from '../generated/prisma/enums';
 import { randomSlugSuffix, slugify } from './slug.util';
+import { IndicadoresService } from '../indicadores/indicadores.service';
 
 const LIST_INCLUDE = {
   comuna: { include: { region: true } },
@@ -22,7 +23,8 @@ export function precioWhere(query: Pick<QueryPropertiesDto, 'tipoOperacion' | 'p
     return {};
   }
   const rango = { gte: query.precioMin, lte: query.precioMax };
-  return query.tipoOperacion === TipoOperacion.VENTA ? { precioUf: rango } : { precioClp: rango };
+  // Venta: contra la referencia en UF, que incluye las ventas publicadas en pesos.
+  return query.tipoOperacion === TipoOperacion.VENTA ? { precioRefUf: rango } : { precioClp: rango };
 }
 
 // Por precio solo con operación (la columna depende de ella, igual que en precioWhere);
@@ -31,22 +33,39 @@ export function precioWhere(query: Pick<QueryPropertiesDto, 'tipoOperacion' | 'p
 export function ordenBy(query: Pick<QueryPropertiesDto, 'tipoOperacion' | 'orden'>) {
   if (query.tipoOperacion && query.orden !== 'recientes') {
     const direccion = query.orden === 'precio_asc' ? ('asc' as const) : ('desc' as const);
-    const columna = query.tipoOperacion === TipoOperacion.VENTA ? 'precioUf' : 'precioClp';
+    const columna = query.tipoOperacion === TipoOperacion.VENTA ? 'precioRefUf' : 'precioClp';
     return [{ [columna]: { sort: direccion, nulls: 'last' as const } }, { createdAt: 'desc' as const }];
   }
   return [{ destacada: 'desc' as const }, { createdAt: 'desc' as const }];
 }
 
+type Precios = { tipoOperacion?: TipoOperacion | null; precioUf?: number | { toString(): string } | null; precioClp?: number | null };
+
+/**
+ * Referencia en UF de una venta: su precioUf si lo tiene, o su precio en pesos dividido
+ * por la UF del día. Arriendos y ventas sin precio no tienen referencia.
+ */
+export function precioRefUf(p: Precios, valorUf: number): number | null {
+  if (p.tipoOperacion !== TipoOperacion.VENTA) return null;
+  if (p.precioUf !== null && p.precioUf !== undefined) return Number(p.precioUf);
+  if (p.precioClp !== null && p.precioClp !== undefined) return Math.round((p.precioClp / valorUf) * 100) / 100;
+  return null;
+}
+
 @Injectable()
 export class PropertiesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly indicadores: IndicadoresService,
+  ) {}
 
   async create(dto: CreatePropertyDto) {
     const comuna = await this.prisma.comuna.findUniqueOrThrow({ where: { id: dto.comunaId } });
     const slug = `${slugify(dto.tipoPropiedad)}-${slugify(comuna.nombre)}-${randomSlugSuffix()}`;
 
+    const { valor } = await this.indicadores.uf();
     return this.prisma.property.create({
-      data: { ...dto, slug },
+      data: { ...dto, slug, precioRefUf: precioRefUf(dto, valor) },
       include: LIST_INCLUDE,
     });
   }
@@ -113,8 +132,12 @@ export class PropertiesService {
   }
 
   async update(id: string, dto: UpdatePropertyDto) {
-    await this.findOneOrThrow(id);
-    return this.prisma.property.update({ where: { id }, data: dto, include: LIST_INCLUDE });
+    const actual = await this.findOneOrThrow(id);
+    // Un PATCH puede traer solo el precio o solo la operación: la referencia se calcula
+    // sobre el resultado final, no sobre lo que vino en la request.
+    const { valor } = await this.indicadores.uf();
+    const data = { ...dto, precioRefUf: precioRefUf({ ...actual, ...dto }, valor) };
+    return this.prisma.property.update({ where: { id }, data, include: LIST_INCLUDE });
   }
 
   async remove(id: string) {
