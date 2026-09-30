@@ -1216,3 +1216,25 @@ la API falla, usa el último valor conocido y, si no hay ninguno, `UF_RESPALDO` 
 fijo del 29-09-2026: un equivalente aproximado es mejor que romper el catálogo. El frontend la pide
 una sola vez por visita (`UfService`) y la comparten todas las cards; si no llega, el equivalente
 simplemente no aparece.
+
+### Fase 32 — Ajustes de celular con propiedades reales
+
+**Bug real — dos deslizamientos horizontales anidados en las destacadas de la home.** En celular
+las destacadas eran un carrusel horizontal de cards, y desde la Fase 30 cada card tiene además su
+propio carrusel de fotos: al deslizar sobre la foto se movían las fotos y no las cards. Se pasan a
+una columna, igual que el listado; son cuatro cards y con fotos reales se leen mejor grandes.
+
+**Bug real — la galería de la ficha no se podía deslizar con el dedo, y con muchas fotos se llenaba
+de puntos intocables.** El deslizador solo respondía a las flechas. Ahora un gesto mayormente
+horizontal de al menos 40 px cambia de foto; si es más vertical que horizontal se deja pasar como
+scroll de la página (`touch-action: pan-y`), para no saltar de foto al bajar. Con más de 8 fotos se
+ocultan los puntos (la clínica veterinaria tiene 21: eran puntos de 8 px imposibles de tocar) y
+queda el contador "3 / 21".
+
+**Decisión — "Propiedades destacadas" con título grande y "Ver todas" como botón.** El render lo
+resolvía con un rótulo chico en mayúsculas y un link de texto en la esquina; con el sitio real, el
+propio equipo no encontraba el link al listado. El encabezado pasa a un título del tamaño de las
+demás secciones, con una bajada, y "Ver todas las propiedades" es un botón con borde; en celular
+se mueve al final de la sección, a todo el ancho. La home sigue mostrando 4 destacadas: la
+portada es una vitrina (y, con el Plan Pro, la posición destacada será pagada), el resto está en el
+listado.
