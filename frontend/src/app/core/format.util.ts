@@ -2,15 +2,42 @@ import { Property } from './property.model';
 
 const CLP_FORMATTER = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
 
-/** Venta en UF, arriendo en CLP — la convención chilena que ya define el schema del backend. */
+const UF_FORMATTER = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 });
+
+/**
+ * El precio tal como lo publicó el anunciante: venta en UF o en pesos, arriendo en pesos
+ * por mes. Es el que manda; el equivalente en la otra moneda es solo referencia.
+ */
 export function formatPrecio(property: Pick<Property, 'tipoOperacion' | 'precioUf' | 'precioClp'>): string {
   if (property.tipoOperacion === 'VENTA' && property.precioUf) {
     return `UF ${Number(property.precioUf).toLocaleString('es-CL')}`;
+  }
+  if (property.tipoOperacion === 'VENTA' && property.precioClp) {
+    return CLP_FORMATTER.format(property.precioClp);
   }
   if (property.tipoOperacion === 'ARRIENDO' && property.precioClp) {
     return `${CLP_FORMATTER.format(property.precioClp)} / mes`;
   }
   return 'Precio a consultar';
+}
+
+/**
+ * Equivalente de una venta en la otra moneda, con la UF del día: "≈ $352.950.981" para
+ * una publicada en UF, "≈ UF 6.821" para una publicada en pesos. Null si no aplica
+ * (arriendo, sin precio, o sin valor de UF todavía).
+ */
+export function formatPrecioEquivalente(
+  property: Pick<Property, 'tipoOperacion' | 'precioUf' | 'precioClp'>,
+  valorUf: number | null,
+): string | null {
+  if (property.tipoOperacion !== 'VENTA' || !valorUf) return null;
+  if (property.precioUf) {
+    return `≈ ${CLP_FORMATTER.format(Math.round(Number(property.precioUf) * valorUf))}`;
+  }
+  if (property.precioClp) {
+    return `≈ UF ${UF_FORMATTER.format(property.precioClp / valorUf)}`;
+  }
+  return null;
 }
 
 const TIPO_PROPIEDAD_LABEL: Record<Property['tipoPropiedad'], string> = {

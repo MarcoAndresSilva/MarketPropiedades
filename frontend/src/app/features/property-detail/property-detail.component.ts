@@ -2,7 +2,8 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PropertiesService } from '../../core/properties.service';
 import { Property } from '../../core/property.model';
-import { formatPrecio, formatTipoPropiedad, formatUbicacion, truncarEnPalabra } from '../../core/format.util';
+import { formatPrecio, formatPrecioEquivalente, formatTipoPropiedad, formatUbicacion, truncarEnPalabra } from '../../core/format.util';
+import { UfService } from '../../core/uf.service';
 import { buildWhatsappUrl } from '../../core/whatsapp.util';
 import { GaleriaComponent } from './galeria.component';
 import { PropertyMapComponent } from './property-map.component';
@@ -35,10 +36,16 @@ export class PropertyDetailComponent implements OnInit {
   private readonly properties = inject(PropertiesService);
   private readonly seo = inject(SeoService);
   private readonly metricas = inject(MetricasService);
+  private readonly uf = inject(UfService);
   protected readonly favorites = inject(FavoritesService);
 
   readonly property = signal<Property | null>(null);
   readonly notFound = signal(false);
+
+  protected readonly equivalente = computed(() => {
+    const p = this.property();
+    return p ? formatPrecioEquivalente(p, this.uf.valor()) : null;
+  });
 
   protected readonly esFavorito = computed(() => {
     const p = this.property();

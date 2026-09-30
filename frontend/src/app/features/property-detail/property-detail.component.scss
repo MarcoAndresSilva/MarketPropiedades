@@ -234,6 +234,16 @@
   letter-spacing: -0.02em;
 }
 
+.contacto__equiv {
+  margin: -8px 0 4px;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+
+  span {
+    font-size: 0.8rem;
+  }
+}
+
 .contacto__publica {
   display: flex;
   flex-wrap: wrap;

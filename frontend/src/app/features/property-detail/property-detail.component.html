@@ -92,6 +92,9 @@
         <p class="contacto__precio">
           {{ formatPrecio(p) }}
         </p>
+        @if (equivalente(); as eq) {
+          <p class="contacto__equiv">{{ eq }} <span>(UF del día)</span></p>
+        }
         <p class="contacto__publica">
           Publica <strong>{{ p.publicador.name }}</strong>
           <span class="contacto__rol">{{ rolLabel(p.publicador.role) }}</span>

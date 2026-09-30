@@ -79,10 +79,27 @@
         <legend>Precio</legend>
 
         @if (model.tipoOperacion === 'VENTA') {
-          <label class="form__field">
-            Precio en UF
-            <input type="number" name="precioUf" [(ngModel)]="model.precioUf" min="0" step="0.01" />
-          </label>
+          <div class="form__grid">
+            <label class="form__field">
+              Moneda en que se publica
+              <select name="monedaVenta" [(ngModel)]="model.monedaVenta">
+                <option value="UF">UF</option>
+                <option value="CLP">Pesos (CLP)</option>
+              </select>
+            </label>
+            @if (model.monedaVenta === 'UF') {
+              <label class="form__field">
+                Precio en UF
+                <input type="number" name="precioUf" [(ngModel)]="model.precioUf" min="0" step="0.01" />
+              </label>
+            } @else {
+              <label class="form__field">
+                Precio en pesos
+                <input type="number" name="precioClpVenta" [(ngModel)]="model.precioClp" min="0" step="1000000" />
+              </label>
+            }
+          </div>
+          <p class="form__hint">El sitio muestra además el equivalente en la otra moneda con la UF del día.</p>
         } @else if (model.tipoOperacion === 'ARRIENDO') {
           <label class="form__field">
             Precio mensual en CLP

@@ -21,6 +21,8 @@ interface FormModel {
   estado: 'BORRADOR' | 'PUBLICADA' | 'PAUSADA' | 'CERRADA';
   destacada: boolean;
   direccion: string;
+  /** Solo ventas: en qué moneda publicó el anunciante. Arriendo va siempre en pesos. */
+  monedaVenta: 'UF' | 'CLP';
   precioUf: number | null;
   precioClp: number | null;
   m2Construidos: number | null;
@@ -42,6 +44,7 @@ const MODELO_VACIO: FormModel = {
   estado: 'BORRADOR',
   destacada: false,
   direccion: '',
+  monedaVenta: 'UF',
   precioUf: null,
   precioClp: null,
   m2Construidos: null,
@@ -109,6 +112,7 @@ export class AdminPropertyFormComponent implements OnInit {
           estado: p.estado,
           destacada: p.destacada,
           direccion: p.direccion ?? '',
+          monedaVenta: p.tipoOperacion === 'VENTA' && p.precioUf === null && p.precioClp !== null ? 'CLP' : 'UF',
           precioUf: p.precioUf !== null ? Number(p.precioUf) : null,
           precioClp: p.precioClp,
           m2Construidos: p.m2Construidos,
@@ -146,8 +150,11 @@ export class AdminPropertyFormComponent implements OnInit {
       direccion: this.model.direccion || null,
       lat: null,
       lng: null,
-      precioUf: this.model.precioUf,
-      precioClp: this.model.precioClp,
+      // Se guarda solo el precio de la moneda elegida, para que no quede un valor viejo en
+      // la otra (el backend calcula la referencia en UF a partir del que venga).
+      precioUf: this.model.tipoOperacion === 'VENTA' && this.model.monedaVenta === 'UF' ? this.model.precioUf : null,
+      precioClp:
+        this.model.tipoOperacion === 'ARRIENDO' || this.model.monedaVenta === 'CLP' ? this.model.precioClp : null,
       m2Construidos: this.model.m2Construidos,
       m2Terreno: this.model.m2Terreno,
       dormitorios: this.model.dormitorios,
