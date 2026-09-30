@@ -14,6 +14,10 @@ export class PhotoSliderComponent implements OnInit {
   /** 'visor': foto completa sin recortar, a pantalla completa, con foco de teclado al abrir. */
   readonly modo = input<'ficha' | 'visor'>('ficha');
   readonly currentIndex = signal(0);
+  // Con más fotos que esto, los puntos no caben ni se pueden tocar en un celular: queda
+  // solo el contador "3 / 21".
+  protected readonly maxPuntos = 8;
+  private toqueInicio: { x: number; y: number } | null = null;
 
   private readonly host: ElementRef<HTMLElement> = inject(ElementRef);
 
@@ -48,6 +52,27 @@ export class PhotoSliderComponent implements OnInit {
 
   goTo(index: number): void {
     this.currentIndex.set(index);
+  }
+
+  // Deslizar con el dedo: un gesto mayormente horizontal de al menos 40px cambia de foto.
+  // Si es más vertical que horizontal, es scroll de la página y no se toca.
+  protected onTouchStart(event: TouchEvent): void {
+    const t = event.touches[0];
+    this.toqueInicio = { x: t.clientX, y: t.clientY };
+  }
+
+  protected onTouchEnd(event: TouchEvent): void {
+    if (!this.toqueInicio) return;
+    const t = event.changedTouches[0];
+    const dx = t.clientX - this.toqueInicio.x;
+    const dy = t.clientY - this.toqueInicio.y;
+    this.toqueInicio = null;
+    if (Math.abs(dx) < 40 || Math.abs(dx) < Math.abs(dy)) return;
+    if (dx < 0) {
+      this.next();
+    } else {
+      this.prev();
+    }
   }
 
   onKeydown(event: KeyboardEvent): void {

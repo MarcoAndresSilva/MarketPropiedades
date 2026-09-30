@@ -6,7 +6,7 @@
   [attr.aria-label]="'Galería de fotos, imagen ' + (currentIndex() + 1) + ' de ' + fotos().length"
   (keydown)="onKeydown($event)"
 >
-  <div class="slider__stage">
+  <div class="slider__stage" (touchstart)="onTouchStart($event)" (touchend)="onTouchEnd($event)">
     @for (foto of fotos(); track foto.id; let i = $index) {
       <img
         class="slider__image"
@@ -19,21 +19,37 @@
   </div>
 
   @if (fotos().length > 1) {
-    <button type="button" class="slider__nav slider__nav--prev" (click)="prev()" aria-label="Foto anterior">‹</button>
-    <button type="button" class="slider__nav slider__nav--next" (click)="next()" aria-label="Foto siguiente">›</button>
+    <button
+      type="button"
+      class="slider__nav slider__nav--prev"
+      (click)="prev()"
+      aria-label="Foto anterior"
+    >
+      ‹
+    </button>
+    <button
+      type="button"
+      class="slider__nav slider__nav--next"
+      (click)="next()"
+      aria-label="Foto siguiente"
+    >
+      ›
+    </button>
 
     <div class="slider__counter">{{ currentIndex() + 1 }} / {{ fotos().length }}</div>
 
-    <div class="slider__dots">
-      @for (foto of fotos(); track foto.id; let i = $index) {
-        <button
-          type="button"
-          class="slider__dot"
-          [class.slider__dot--active]="i === currentIndex()"
-          (click)="goTo(i)"
-          [attr.aria-label]="'Ir a la foto ' + (i + 1)"
-        ></button>
-      }
-    </div>
+    @if (fotos().length <= maxPuntos) {
+      <div class="slider__dots">
+        @for (foto of fotos(); track foto.id; let i = $index) {
+          <button
+            type="button"
+            class="slider__dot"
+            [class.slider__dot--active]="i === currentIndex()"
+            (click)="goTo(i)"
+            [attr.aria-label]="'Ir a la foto ' + (i + 1)"
+          ></button>
+        }
+      </div>
+    }
   }
 </div>

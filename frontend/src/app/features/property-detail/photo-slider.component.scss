@@ -16,6 +16,8 @@
 // un parpadeo/corte seco, sobre todo con fotos de tamaños o tonos distintos).
 .slider__stage {
   position: relative;
+  // El gesto horizontal lo maneja el deslizador; el vertical sigue siendo scroll de página.
+  touch-action: pan-y;
   width: 100%;
   aspect-ratio: 3 / 2;
 }
