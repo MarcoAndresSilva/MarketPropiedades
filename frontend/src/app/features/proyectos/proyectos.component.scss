@@ -2,34 +2,8 @@
   padding-bottom: 72px;
 }
 .filtros {
-  display: grid;
+  // Solo dos filtros: columnas acotadas para que no se estiren a todo el ancho.
   grid-template-columns: repeat(auto-fit, minmax(200px, 280px));
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid var(--border);
-  border-radius: 16px;
-  background: var(--surface);
-  box-shadow: var(--shadow-sm);
-}
-.filtro {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.filtro__label {
-  font-size: 0.75rem;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-select {
-  height: 46px;
-  padding: 0 14px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--surface);
-  color: var(--text);
-  font: inherit;
-  font-size: 0.9rem;
 }
 .proyectos__total {
   margin: 28px 0 20px;

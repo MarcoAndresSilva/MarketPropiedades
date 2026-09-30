@@ -16,6 +16,17 @@
 // --success es una variante más oscura del mismo tono para texto. Ver ARCHITECTURE.md.
 // =============================================================================
 
+// Colores de marca fijos: no cambian con el tema. Se usan donde el fondo no depende del
+// tema (badges y botones sobre fotos, la barra blanca del buscador). El violeta de
+// --accent en cambio se aclara en modo oscuro para tener contraste sobre fondos oscuros.
+:root {
+  --marca-violeta: #4b35ff;
+  --marca-violeta-hover: #3a24e6;
+  --marca-navy: #07162b;
+  // Verde de marca oscurecido: #38B59C con texto blanco da 2.5:1; este da 5.0:1.
+  --marca-verde-texto: #1a7d69;
+}
+
 :root,
 :root[data-theme='light'] {
   color-scheme: light;

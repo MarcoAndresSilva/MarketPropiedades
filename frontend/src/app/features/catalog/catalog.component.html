@@ -9,7 +9,7 @@
     @if (!operacionFija) {
       <label class="filtro">
         <span class="filtro__label">Operación</span>
-        <select [ngModel]="filtros().tipoOperacion ?? ''" name="operacion" (ngModelChange)="cambiarOperacion($event)">
+        <select class="select" [ngModel]="filtros().tipoOperacion ?? ''" name="operacion" (ngModelChange)="cambiarOperacion($event)">
           <option value="">Venta y arriendo</option>
           <option value="VENTA">Venta</option>
           <option value="ARRIENDO">Arriendo</option>
@@ -19,7 +19,7 @@
 
     <label class="filtro">
       <span class="filtro__label">Comuna</span>
-      <select [ngModel]="filtros().comunaId ?? ''" name="comuna" (ngModelChange)="cambiar({ comuna: $event || null })">
+      <select class="select" [ngModel]="filtros().comunaId ?? ''" name="comuna" (ngModelChange)="cambiar({ comuna: $event || null })">
         <option value="">Todas las comunas</option>
         @for (c of comunas(); track c.id) {
           <option [value]="c.id">{{ c.nombre }}</option>
@@ -29,7 +29,7 @@
 
     <label class="filtro">
       <span class="filtro__label">Tipo</span>
-      <select [ngModel]="filtros().tipoPropiedad ?? ''" name="tipo" (ngModelChange)="cambiar({ tipo: $event || null })">
+      <select class="select" [ngModel]="filtros().tipoPropiedad ?? ''" name="tipo" (ngModelChange)="cambiar({ tipo: $event || null })">
         <option value="">Todos los tipos</option>
         @for (t of tipos; track t.value) {
           <option [value]="t.value">{{ t.label }}</option>
@@ -55,7 +55,7 @@
 
     <label class="filtro">
       <span class="filtro__label">Dormitorios</span>
-      <select [ngModel]="'' + (filtros().dormitoriosMin ?? '')" name="dormitorios" (ngModelChange)="cambiar({ dormitorios: $event || null })">
+      <select class="select" [ngModel]="'' + (filtros().dormitoriosMin ?? '')" name="dormitorios" (ngModelChange)="cambiar({ dormitorios: $event || null })">
         <option value="">Cualquiera</option>
         @for (d of dormitoriosOpciones; track d) {
           <option [value]="'' + d">{{ d }} o más</option>
@@ -76,7 +76,7 @@
 
     <label class="orden">
       <span>Ordenar por</span>
-      <select [ngModel]="filtros().orden ?? 'recientes'" name="orden" (ngModelChange)="cambiar({ orden: $event === 'recientes' ? null : $event })">
+      <select class="select" [ngModel]="filtros().orden ?? 'recientes'" name="orden" (ngModelChange)="cambiar({ orden: $event === 'recientes' ? null : $event })">
         <option value="recientes">Destacadas y recientes</option>
         @if (operacion()) {
           <option value="precio_asc">Menor precio</option>

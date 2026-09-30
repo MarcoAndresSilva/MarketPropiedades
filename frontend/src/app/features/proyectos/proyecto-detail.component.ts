@@ -19,7 +19,7 @@ import { PropertyMapComponent } from '../property-detail/property-map.component'
   selector: 'app-proyecto-detail',
   imports: [RouterLink, IconComponent, GaleriaComponent, PropertyMapComponent],
   templateUrl: './proyecto-detail.component.html',
-  styleUrls: ['../property-detail/property-detail.component.scss', './proyecto-detail.component.scss'],
+  styleUrl: './proyecto-detail.component.scss',
 })
 export class ProyectoDetailComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);

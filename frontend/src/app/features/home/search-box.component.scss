@@ -12,16 +12,16 @@
   border: 0;
   border-radius: 12px 12px 0 0;
   background: #ffffff;
-  color: #07162b;
+  color: var(--marca-navy);
   font: inherit;
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
 
-  // La barra es blanca en ambos temas: el violeta va fijo, no el --accent aclarado
+  // La barra es blanca en ambos temas: violeta de marca fijo, no el --accent aclarado
   // del tema oscuro (con texto blanco perdería contraste).
   &.is-active {
-    background: #4b35ff;
+    background: var(--marca-violeta);
     color: #ffffff;
     font-weight: 600;
   }
@@ -44,7 +44,7 @@
   display: flex;
   align-items: center;
   min-width: 0;
-  color: #07162b;
+  color: var(--marca-navy);
 
   > app-icon:first-child {
     position: absolute;
@@ -61,7 +61,7 @@
     border: 1px solid #e6e8ee;
     border-radius: 10px;
     background: #ffffff;
-    color: #07162b;
+    color: var(--marca-navy);
     font: inherit;
     font-size: 0.92rem;
     appearance: none;
@@ -87,12 +87,12 @@
   min-width: 190px;
   height: 56px;
   border-radius: 10px;
-  background: #4b35ff;
+  background: var(--marca-violeta);
   color: #ffffff;
   font-size: 1rem;
 
   &:hover {
-    background: #3a24e6;
+    background: var(--marca-violeta-hover);
   }
 }
 

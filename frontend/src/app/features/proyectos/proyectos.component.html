@@ -8,7 +8,7 @@
   <form class="filtros" aria-label="Filtrar proyectos" (submit)="$event.preventDefault()">
     <label class="filtro">
       <span class="filtro__label">Comuna</span>
-      <select name="comuna" [ngModel]="comunaId()" (ngModelChange)="cambiar({ comuna: $event || null })">
+      <select class="select" name="comuna" [ngModel]="comunaId()" (ngModelChange)="cambiar({ comuna: $event || null })">
         <option value="">Todas las comunas</option>
         @for (c of comunas(); track c.id) {
           <option [value]="c.id">{{ c.nombre }}</option>
@@ -17,7 +17,7 @@
     </label>
     <label class="filtro">
       <span class="filtro__label">Etapa</span>
-      <select name="etapa" [ngModel]="etapa()" (ngModelChange)="cambiar({ etapa: $event || null })">
+      <select class="select" name="etapa" [ngModel]="etapa()" (ngModelChange)="cambiar({ etapa: $event || null })">
         <option value="">Todas las etapas</option>
         @for (e of etapas; track e.value) {
           <option [value]="e.value">{{ e.label }}</option>

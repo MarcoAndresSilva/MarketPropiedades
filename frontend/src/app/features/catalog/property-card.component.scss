@@ -59,18 +59,6 @@
   position: absolute;
   top: 14px;
   left: 14px;
-  padding: 5px 14px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: #ffffff;
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-// El verde de marca (#38B59C) da 2.5:1 con texto blanco; se usa la variante oscura del
-// mismo tono (5.0:1), igual que --success en el tema claro.
-.card__badge--green {
-  background: #1a7d69;
 }
 
 .card__fav {
