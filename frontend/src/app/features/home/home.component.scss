@@ -100,6 +100,19 @@
   list-style: none;
 }
 
+.destacadas__mas {
+  display: none;
+  margin-top: 24px;
+
+  .btn {
+    width: 100%;
+  }
+
+  @media (max-width: 640px) {
+    display: block;
+  }
+}
+
 .destacadas__vacio {
   color: var(--text-muted);
 }
@@ -297,26 +310,14 @@
     font-size: 1rem;
   }
 
-  // Cards en carrusel horizontal con snap: 4 cards apiladas serían 4 pantallas de scroll.
+  // Una columna: antes era un carrusel horizontal de cards, pero cada card ya tiene su
+  // propio carrusel de fotos y dos deslizamientos horizontales anidados se pelean el
+  // dedo (al tocar la foto se movían las fotos, no las cards).
   .destacadas__grid {
-    display: flex;
-    gap: 14px;
-    margin: 0 -16px;
-    padding: 4px 16px 12px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scrollbar-width: none;
-
-    > * {
-      flex: 0 0 80%;
-      scroll-snap-align: center;
-    }
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
 
-  .section-head {
-    flex-direction: column;
-    gap: 6px;
-  }
 
   .marketing {
     padding-top: 48px;

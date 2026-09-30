@@ -38,8 +38,11 @@
   <!-- DESTACADAS -->
   <section class="destacadas container" aria-labelledby="destacadas-title">
     <div class="section-head">
-      <h2 id="destacadas-title" class="eyebrow">Propiedades destacadas</h2>
-      <a routerLink="/propiedades" class="section-head__link">
+      <div>
+        <h2 id="destacadas-title">Propiedades destacadas</h2>
+        <p class="section-head__bajada">Una selección de lo que hay hoy en Melipilla y alrededores.</p>
+      </div>
+      <a routerLink="/propiedades" class="btn btn--ghost section-head__btn">
         Ver todas las propiedades
         <app-icon name="arrow-right" />
       </a>
@@ -68,6 +71,12 @@
     } @else {
       <p class="destacadas__vacio">Muy pronto vas a ver aquí las primeras propiedades publicadas.</p>
     }
+    <div class="destacadas__mas">
+      <a routerLink="/propiedades" class="btn btn--ghost">
+        Ver todas las propiedades
+        <app-icon name="arrow-right" />
+      </a>
+    </div>
   </section>
 
   <!-- BENEFICIOS -->

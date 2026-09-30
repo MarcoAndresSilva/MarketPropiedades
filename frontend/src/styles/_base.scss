@@ -207,35 +207,36 @@ input {
 }
 
 // Encabezado de sección: rótulo a la izquierda y link "Ver todas →" a la derecha.
+// Encabezado de sección de la home: título grande con bajada a la izquierda y la acción
+// ("Ver todas…") como botón a la derecha, para que se encuentre de un vistazo.
 .section-head {
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
-  gap: 16px;
-  margin-bottom: 20px;
+  align-items: flex-end;
+  gap: 24px;
+  margin-bottom: 24px;
 
-  .eyebrow {
+  h2 {
     margin: 0;
+    font-size: clamp(1.7rem, 1.2rem + 1.8vw, 2.4rem);
+    letter-spacing: -0.03em;
   }
 }
 
-.section-head__link {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  color: var(--accent);
-  font-size: 0.9rem;
-  font-weight: 500;
-  text-decoration: none;
-  white-space: nowrap;
+.section-head__bajada {
+  margin: 8px 0 0;
+  color: var(--text-muted);
+}
 
-  app-icon {
-    width: 18px;
-    height: 18px;
-  }
+.section-head__btn {
+  flex-shrink: 0;
+}
 
-  &:hover {
-    text-decoration: underline;
+// En celular el botón del encabezado se esconde: va al final de la sección, a todo el
+// ancho, que es donde el dedo lo busca después de ver las cards.
+@media (max-width: 640px) {
+  .section-head__btn {
+    display: none;
   }
 }
 
