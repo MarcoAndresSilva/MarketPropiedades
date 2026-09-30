@@ -1189,3 +1189,30 @@ imágenes cercanas de un scroll horizontal aunque estén ocultas, y una grilla d
 fotos de entrada. Las fotos quedan fuera del link principal de la card (un botón dentro de un
 `<a>` es HTML inválido) y son links a la ficha fuera del orden de tabulación: el link accesible
 sigue siendo el título.
+
+### Fase 31 — Precios en UF y en pesos, con la UF del día
+
+**Decisión — una venta se publica en la moneda que eligió el anunciante, y se muestra también su
+equivalente.** Las primeras propiedades reales llegaron con ventas en pesos ($280.000.000), no en
+UF, y el modelo solo contemplaba ventas en UF. Ahora una venta tiene `precioUf` **o** `precioClp`
+(el formulario del admin pide elegir la moneda y guarda solo esa, para que no quede un valor viejo
+en la otra). El sitio muestra el precio tal como se publicó y debajo el equivalente con la UF del
+día ("≈ $352.950.981" o "≈ UF 6.821"), como hacen los portales chilenos. Convertir y mostrar solo
+en UF habría cambiado el precio que publicó el anunciante.
+
+**Decisión — `precioRefUf` para filtrar y ordenar, calculado al guardar.** Para que el filtro "UF
+6.000–10.000" y el orden por precio encuentren también las ventas publicadas en pesos, cada venta
+guarda su precio llevado a UF (`precioUf`, o `precioClp` dividido por la UF del día en que se
+guardó), con índice. Nunca se muestra. Se descartó convertir en cada consulta con una expresión SQL:
+Prisma no ordena por expresiones sin SQL crudo, y la UF varía ~3% al año, así que un valor fijado
+al guardar sirve para filtrar. Se recalcula en cada edición sobre el resultado final (un PATCH puede
+traer solo el precio o solo la operación). La migración completa las ventas existentes con su
+`precioUf`.
+
+**Decisión — la UF sale de mindicador.cl, en caché 6 horas y con respaldo.** `IndicadoresService`
+consulta la API pública de mindicador.cl (indicadores del Banco Central) con un timeout de 5 s y
+guarda el valor en memoria 6 horas: cambia una vez al día y así no se consulta en cada request. Si
+la API falla, usa el último valor conocido y, si no hay ninguno, `UF_RESPALDO` del entorno o un valor
+fijo del 29-09-2026: un equivalente aproximado es mejor que romper el catálogo. El frontend la pide
+una sola vez por visita (`UfService`) y la comparten todas las cards; si no llega, el equivalente
+simplemente no aparece.
