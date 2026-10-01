@@ -1238,3 +1238,62 @@ demás secciones, con una bajada, y "Ver todas las propiedades" es un botón con
 se mueve al final de la sección, a todo el ancho. La home sigue mostrando 4 destacadas: la
 portada es una vitrina (y, con el Plan Pro, la posición destacada será pagada), el resto está en el
 listado.
+
+### Fase 33 — Linter del frontend y auditoría periódica
+
+**Decisión — angular-eslint para el frontend, no oxlint como el backend.** El frontend no tenía
+ningún linter. oxlint es rápido pero no entiende los templates de Angular, que es donde aparecen
+los problemas de accesibilidad y de buenas prácticas del framework. Se instaló `angular-eslint`
+22.5 (el instalador oficial, `ng add`), verificado antes contra el registro de npm: su versión
+acompaña a Angular 22 y acepta ESLint 9/10, sin el choque de `peerDependencies` que obligó a
+`legacy-peer-deps` con `@nestjs/throttler` (Fase 4). Configuración por defecto, que incluye las
+reglas de accesibilidad de templates. Se suma al CI (`npm run lint` antes del build).
+
+**Bug real encontrado por el linter — el fondo del visor de fotos no era accesible.** El primer
+lint dio 3 errores, todos en el visor de la Fase 30: el fondo que cierra al hacer clic afuera era
+un `<div>` con `(click)`, que no se puede enfocar ni activar con teclado. Pasa a ser un `<button>`
+("Cerrar visor") detrás de la foto, y el contenido ya no necesita `stopPropagation`.
+
+**Decisión — auditoría de calidad como skill del proyecto (`/auditoria`), al cierre de cada
+etapa.** El proyecto ya pasa las 30 fases y la deuda técnica se acumula más rápido de lo que se
+nota. `.claude/skills/auditoria/SKILL.md` define una revisión repetible: primero los chequeos
+automáticos (lint, tipos, tests, build) y después una revisión con criterio de lo que un linter no
+ve (duplicación, componentes demasiado grandes, patrones mal aplicados, nombres, convenciones,
+código muerto, contradicciones con este documento). La auditoría **no modifica nada**: entrega un
+informe priorizado y los refactors se aprueban y se commitean uno por uno, nunca mezclados con
+funcionalidad nueva. Queda escrita ahí la convención de nombres vigente: métodos de NestJS en
+inglés con el estilo del framework y el dominio del negocio en español.
+
+### Fase 34 — Refactors de la primera auditoría
+
+**Subida de fotos y errores del admin, en un solo lugar.** Los formularios de propiedad y de
+proyecto tenían cada uno su cola de subida recursiva y su traducción de errores HTTP. La cola pasa
+a `CloudinaryUploadService.subirEnOrden()`, un flujo con `concatMap` que sube y registra cada foto
+antes de pasar a la siguiente (así el `orden` sigue siendo correcto), y el mensaje de error a
+`core/http-error.util.ts`. Al unificar apareció un bug real: si el backend fallaba al *registrar*
+una foto ya subida, el formulario quedaba para siempre en "Subiendo foto…", porque ese error no se
+manejaba; ahora cualquier falla corta el lote y avisa que las fotos anteriores quedaron guardadas.
+
+**Tokens de marca fijos y un solo badge.** Los colores de marca que no deben cambiar con el tema
+(badges y botones sobre fotos, la barra blanca del buscador) estaban escritos a mano en 8 archivos.
+Pasan a `--marca-violeta`, `--marca-violeta-hover`, `--marca-navy` y `--marca-verde-texto` en
+`_theme.scss`, fuera de los bloques de tema. El badge de la card y el de la ficha eran dos clases
+con los mismos valores; queda uno solo (`.badge`, `.badge--verde`, `.badge--suave`) en
+`_base.scss`. Esto corrigió de paso un problema de contraste: el badge de la card usaba `--accent`,
+que en modo oscuro es un violeta claro, y con texto blanco no se leía bien.
+
+**Estilos de ficha en un parcial compartido.** La ficha de proyecto usaba el `.scss` de la ficha
+de propiedad por referencia cruzada, así que cambiar una rompía la otra sin aviso. Ahora las dos
+importan `styles/_ficha.scss` con `@use`, y cada una agrega solo lo propio.
+
+**El backend valida la moneda del precio.** Solo el formulario del admin impedía una venta con
+precio en UF y en pesos a la vez. Ahora el service lo rechaza (400) y también rechaza un arriendo
+en UF, con tests; el formulario deja de ser la única defensa, y así el futuro panel del anunciante
+no puede cargar un precio incoherente.
+
+**Formateo de pesos, etiquetas de rol y barra de filtros compartidos.** El formateador de pesos
+estaba repetido en tres archivos y las etiquetas de rol en dos; pasan a `core/format.util.ts`
+(`formatClp`, `ETIQUETA_ROL`). La barra de filtros y el select con flecha propia estaban copiados
+entre el listado de propiedades y el de proyectos, y la copia de proyectos era una versión más
+pobre del select (sin flecha ni estados); pasan a `_base.scss` (`.filtros`, `.filtro`, `.select`),
+y proyectos solo ajusta el ancho de sus columnas.
