@@ -1,4 +1,4 @@
-import { ordenBy, precioRefUf, precioWhere } from './properties.service';
+import { erroresDePrecio, ordenBy, precioRefUf, precioWhere } from './properties.service';
 import { TipoOperacion } from '../generated/prisma/enums';
 
 describe('precioWhere', () => {
@@ -54,5 +54,20 @@ describe('precioRefUf', () => {
 
   it('un arriendo no tiene referencia', () => {
     expect(precioRefUf({ tipoOperacion: TipoOperacion.ARRIENDO, precioClp: 450_000 }, UF)).toBeNull();
+  });
+});
+
+describe('erroresDePrecio', () => {
+  it('acepta una venta en UF o en pesos', () => {
+    expect(erroresDePrecio({ tipoOperacion: TipoOperacion.VENTA, precioUf: 8600, precioClp: null })).toEqual([]);
+    expect(erroresDePrecio({ tipoOperacion: TipoOperacion.VENTA, precioUf: null, precioClp: 280_000_000 })).toEqual([]);
+  });
+
+  it('rechaza una venta con precio en las dos monedas', () => {
+    expect(erroresDePrecio({ tipoOperacion: TipoOperacion.VENTA, precioUf: 8600, precioClp: 350_000_000 })).toHaveLength(1);
+  });
+
+  it('rechaza un arriendo en UF', () => {
+    expect(erroresDePrecio({ tipoOperacion: TipoOperacion.ARRIENDO, precioUf: 20, precioClp: null })).toHaveLength(1);
   });
 });

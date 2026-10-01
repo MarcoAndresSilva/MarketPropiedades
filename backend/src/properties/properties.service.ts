@@ -1,5 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
@@ -52,6 +51,23 @@ export function precioRefUf(p: Precios, valorUf: number): number | null {
   return null;
 }
 
+/**
+ * Una propiedad se publica en una sola moneda: una venta en UF o en pesos (no las dos, o
+ * el sitio no sabría cuál mostrar como precio publicado) y un arriendo siempre en pesos.
+ * Devuelve los mensajes de error para responder un 400 legible.
+ */
+export function erroresDePrecio(p: Precios): string[] {
+  const tieneUf = p.precioUf !== null && p.precioUf !== undefined;
+  const tieneClp = p.precioClp !== null && p.precioClp !== undefined;
+  if (p.tipoOperacion === TipoOperacion.VENTA && tieneUf && tieneClp) {
+    return ['Una venta se publica en UF o en pesos, no en las dos monedas a la vez.'];
+  }
+  if (p.tipoOperacion === TipoOperacion.ARRIENDO && tieneUf) {
+    return ['Un arriendo se publica en pesos (precioClp), no en UF.'];
+  }
+  return [];
+}
+
 @Injectable()
 export class PropertiesService {
   constructor(
@@ -63,6 +79,7 @@ export class PropertiesService {
     const comuna = await this.prisma.comuna.findUniqueOrThrow({ where: { id: dto.comunaId } });
     const slug = `${slugify(dto.tipoPropiedad)}-${slugify(comuna.nombre)}-${randomSlugSuffix()}`;
 
+    this.validarPrecio(dto);
     const { valor } = await this.indicadores.uf();
     return this.prisma.property.create({
       data: { ...dto, slug, precioRefUf: precioRefUf(dto, valor) },
@@ -135,6 +152,7 @@ export class PropertiesService {
     const actual = await this.findOneOrThrow(id);
     // Un PATCH puede traer solo el precio o solo la operación: la referencia se calcula
     // sobre el resultado final, no sobre lo que vino en la request.
+    this.validarPrecio({ ...actual, ...dto });
     const { valor } = await this.indicadores.uf();
     const data = { ...dto, precioRefUf: precioRefUf({ ...actual, ...dto }, valor) };
     return this.prisma.property.update({ where: { id }, data, include: LIST_INCLUDE });
@@ -160,6 +178,13 @@ export class PropertiesService {
     }
     await this.prisma.propertyFoto.delete({ where: { id: fotoId } });
     return { ok: true };
+  }
+
+  private validarPrecio(p: Precios) {
+    const errores = erroresDePrecio(p);
+    if (errores.length > 0) {
+      throw new BadRequestException(errores);
+    }
   }
 
   private async findOneOrThrow(id: string) {
