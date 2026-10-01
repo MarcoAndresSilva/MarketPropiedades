@@ -2,7 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PropertiesService } from '../../core/properties.service';
 import { Property } from '../../core/property.model';
-import { formatPrecio, formatPrecioEquivalente, formatTipoPropiedad, formatUbicacion, truncarEnPalabra } from '../../core/format.util';
+import { ETIQUETA_ROL, formatClp, formatPrecio, formatPrecioEquivalente, formatTipoPropiedad, formatUbicacion, truncarEnPalabra } from '../../core/format.util';
 import { UfService } from '../../core/uf.service';
 import { buildWhatsappUrl } from '../../core/whatsapp.util';
 import { GaleriaComponent } from './galeria.component';
@@ -16,14 +16,6 @@ import { FavoritesService } from '../../core/favorites.service';
 import { MetricasService } from '../../core/metricas.service';
 import { ConsultaFormComponent } from './consulta-form.component';
 
-const CLP = new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 });
-
-const ROL_LABEL: Record<Property['publicador']['role'], string> = {
-  ADMIN: 'Habbi',
-  PERSONA: 'Propietario',
-  CORREDORA: 'Corredora',
-  INMOBILIARIA: 'Inmobiliaria',
-};
 
 @Component({
   selector: 'app-property-detail',
@@ -69,14 +61,10 @@ export class PropertyDetailComponent implements OnInit {
   readonly formatPrecio = formatPrecio;
   readonly formatTipoPropiedad = formatTipoPropiedad;
   readonly formatUbicacion = formatUbicacion;
+  readonly formatClp = formatClp;
+  readonly etiquetaRol = ETIQUETA_ROL;
 
-  protected formatClp(valor: number): string {
-    return CLP.format(valor);
-  }
 
-  protected rolLabel(role: Property['publicador']['role']): string {
-    return ROL_LABEL[role];
-  }
 
   protected clicWhatsapp(p: Property): void {
     this.metricas.registrar(p.slug, 'CLIC_WHATSAPP');

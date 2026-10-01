@@ -4,6 +4,11 @@ const CLP_FORMATTER = new Intl.NumberFormat('es-CL', { style: 'currency', curren
 
 const UF_FORMATTER = new Intl.NumberFormat('es-CL', { maximumFractionDigits: 0 });
 
+/** "$380.000": pesos chilenos sin decimales. Un solo formateador para todo el sitio. */
+export function formatClp(valor: number): string {
+  return CLP_FORMATTER.format(valor);
+}
+
 /**
  * El precio tal como lo publicó el anunciante: venta en UF o en pesos, arriendo en pesos
  * por mes. Es el que manda; el equivalente en la otra moneda es solo referencia.
@@ -78,3 +83,11 @@ export function formatUbicacion(comuna: Pick<Property['comuna'], 'nombre' | 'reg
   return region ? `${comuna.nombre}, ${region}` : comuna.nombre;
 }
 
+
+/** Cómo se muestra cada tipo de cuenta (ficha, formularios del admin). */
+export const ETIQUETA_ROL: Record<Property['publicador']['role'], string> = {
+  ADMIN: 'Habbi',
+  PERSONA: 'Propietario',
+  CORREDORA: 'Corredora',
+  INMOBILIARIA: 'Inmobiliaria',
+};

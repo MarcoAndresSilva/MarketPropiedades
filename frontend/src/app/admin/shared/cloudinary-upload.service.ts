@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, switchMap } from 'rxjs';
+import { Observable, concatMap, from, map, switchMap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 
 export interface UploadSignature {
@@ -35,6 +35,20 @@ export class CloudinaryUploadService {
         form.append('folder', sig.folder);
         return this.http.post<CloudinaryUpload>(`https://api.cloudinary.com/v1_1/${sig.cloudName}/auto/upload`, form);
       }),
+    );
+  }
+
+  /**
+   * Sube varias fotos de a una y registra cada una en el backend (`registrar`) antes de
+   * pasar a la siguiente: cada foto necesita saber cuántas van antes para su `orden`.
+   * Emite el publicId de cada foto ya registrada; si falla una subida o un registro, el
+   * flujo termina con error y no sigue con las demás.
+   */
+  subirEnOrden(files: File[], registrar: (publicId: string) => Observable<unknown>): Observable<string> {
+    return from(files).pipe(
+      concatMap((file) =>
+        this.subir(file).pipe(concatMap((res) => registrar(res.public_id).pipe(map(() => res.public_id)))),
+      ),
     );
   }
 }

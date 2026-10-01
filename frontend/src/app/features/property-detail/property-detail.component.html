@@ -20,8 +20,8 @@
     <header class="ficha__head">
       <div>
         <div class="ficha__badges">
-          <span class="badge" [class.badge--green]="p.tipoOperacion === 'ARRIENDO'">{{ p.tipoOperacion === 'VENTA' ? 'Venta' : 'Arriendo' }}</span>
-          <span class="badge badge--soft">{{ formatTipoPropiedad(p.tipoPropiedad) }}</span>
+          <span class="badge" [class.badge--verde]="p.tipoOperacion === 'ARRIENDO'">{{ p.tipoOperacion === 'VENTA' ? 'Venta' : 'Arriendo' }}</span>
+          <span class="badge badge--suave">{{ formatTipoPropiedad(p.tipoPropiedad) }}</span>
           @if (p.destacada) {
             <span class="badge">Destacada</span>
           }
@@ -97,7 +97,7 @@
         }
         <p class="contacto__publica">
           Publica <strong>{{ p.publicador.name }}</strong>
-          <span class="contacto__rol">{{ rolLabel(p.publicador.role) }}</span>
+          <span class="contacto__rol">{{ etiquetaRol[p.publicador.role] }}</span>
         </p>
 
         @if (p.publicador.whatsapp) {

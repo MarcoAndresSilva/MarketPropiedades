@@ -12,12 +12,6 @@ export interface Publisher {
   corredoraProfile: { razonSocial: string; rut: string } | null;
 }
 
-export const ROL_PUBLICADOR: Record<Publisher['role'], string> = {
-  PERSONA: 'Propietario',
-  CORREDORA: 'Corredora',
-  INMOBILIARIA: 'Inmobiliaria',
-};
-
 @Injectable({ providedIn: 'root' })
 export class PublishersService {
   private readonly http = inject(HttpClient);

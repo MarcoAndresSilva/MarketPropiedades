@@ -6,10 +6,12 @@ import { AdminNavComponent } from '../shared/admin-nav.component';
 import { AdminProyectosService, ProyectoPayload } from '../shared/admin-proyectos.service';
 import { CloudinaryUploadService } from '../shared/cloudinary-upload.service';
 import { LocationsService } from '../shared/locations.service';
-import { Publisher, PublishersService, ROL_PUBLICADOR } from '../shared/publishers.service';
+import { Publisher, PublishersService } from '../shared/publishers.service';
 import { Comuna } from '../../core/property.model';
 import { ETAPA_LABEL, EtapaProyecto, ProyectoFoto } from '../../core/proyecto.model';
 import { cloudinaryImageUrl } from '../../core/cloudinary.util';
+import { ETIQUETA_ROL } from '../../core/format.util';
+import { mensajeDeErrorHttp } from '../../core/http-error.util';
 
 interface FormModel {
   publicadorId: string;
@@ -68,7 +70,7 @@ export class AdminProyectoFormComponent implements OnInit {
   private readonly cloudinary = inject(CloudinaryUploadService);
 
   protected readonly cloudinaryImageUrl = cloudinaryImageUrl;
-  protected readonly rolPublicador = ROL_PUBLICADOR;
+  protected readonly etiquetaRol = ETIQUETA_ROL;
   protected readonly etapas = (Object.keys(ETAPA_LABEL) as EtapaProyecto[]).map((value) => ({ value, label: ETAPA_LABEL[value] }));
 
   protected readonly proyectoId = signal<string | null>(null);
@@ -168,14 +170,7 @@ export class AdminProyectoFormComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         this.saving.set(false);
-        const detalle = err.error?.message;
-        this.error.set(
-          Array.isArray(detalle)
-            ? `No se pudo guardar: ${detalle.join(' · ')}`
-            : err.status === 0
-              ? 'No se pudo guardar: no hay conexión con el servidor.'
-              : `No se pudo guardar (error ${err.status}). Intenta de nuevo.`,
-        );
+        this.error.set(mensajeDeErrorHttp(err));
       },
     });
   }
@@ -185,7 +180,19 @@ export class AdminProyectoFormComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     if (!proyectoId || !input.files?.length) return;
     this.uploadingFoto.set(true);
-    this.subirEnCola(Array.from(input.files), proyectoId);
+    this.cloudinary
+      .subirEnOrden(Array.from(input.files), (publicId) =>
+        this.proyectos.addFoto(proyectoId, publicId, this.fotos().length),
+      )
+      .subscribe({
+        next: (publicId) =>
+          this.fotos.update((fs) => [...fs, { id: `temp-${publicId}`, cloudinaryPublicId: publicId, orden: fs.length }]),
+        error: () => {
+          this.uploadingFoto.set(false);
+          this.error.set('No se pudo subir una de las fotos. Las anteriores quedaron guardadas.');
+        },
+        complete: () => this.uploadingFoto.set(false),
+      });
     input.value = '';
   }
 
@@ -193,25 +200,4 @@ export class AdminProyectoFormComponent implements OnInit {
     this.proyectos.removeFoto(fotoId).subscribe(() => this.fotos.update((fs) => fs.filter((f) => f.id !== fotoId)));
   }
 
-  // Una por una: cada foto necesita saber cuántas van antes para su `orden`.
-  private subirEnCola(files: File[], proyectoId: string): void {
-    const [file, ...resto] = files;
-    if (!file) {
-      this.uploadingFoto.set(false);
-      return;
-    }
-    this.cloudinary.subir(file).subscribe({
-      next: (res) => {
-        const orden = this.fotos().length;
-        this.proyectos.addFoto(proyectoId, res.public_id, orden).subscribe(() => {
-          this.fotos.update((fs) => [...fs, { id: `temp-${res.public_id}`, cloudinaryPublicId: res.public_id, orden }]);
-          this.subirEnCola(resto, proyectoId);
-        });
-      },
-      error: () => {
-        this.uploadingFoto.set(false);
-        this.error.set('No se pudo subir una de las fotos a Cloudinary.');
-      },
-    });
-  }
 }

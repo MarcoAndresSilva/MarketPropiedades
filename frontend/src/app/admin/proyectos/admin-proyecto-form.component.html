@@ -21,7 +21,7 @@
           <select name="publicadorId" [(ngModel)]="model.publicadorId" required>
             <option value="" disabled>Selecciona una cuenta</option>
             @for (p of desarrolladores(); track p.id) {
-              <option [value]="p.id">{{ p.name }} ({{ rolPublicador[p.role] }})</option>
+              <option [value]="p.id">{{ p.name }} ({{ etiquetaRol[p.role] }})</option>
             }
           </select>
         </label>

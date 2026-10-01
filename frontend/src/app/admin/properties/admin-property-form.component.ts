@@ -4,11 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AdminPropertiesService, CreatePropertyPayload } from '../shared/admin-properties.service';
 import { LocationsService } from '../shared/locations.service';
-import { Publisher, PublishersService, ROL_PUBLICADOR } from '../shared/publishers.service';
+import { Publisher, PublishersService } from '../shared/publishers.service';
 import { CloudinaryUploadService } from '../shared/cloudinary-upload.service';
 import { AdminNavComponent } from '../shared/admin-nav.component';
 import { Comuna, PropertyFoto, TipoOperacion, TipoPropiedad } from '../../core/property.model';
 import { cloudinaryImageUrl } from '../../core/cloudinary.util';
+import { ETIQUETA_ROL } from '../../core/format.util';
+import { mensajeDeErrorHttp } from '../../core/http-error.util';
 
 // Campos numéricos/opcionales del formulario, sueltos como strings/number|null porque
 // vienen de <input> — se convierten a la forma que espera el backend recién al armar
@@ -73,7 +75,7 @@ export class AdminPropertyFormComponent implements OnInit {
   private readonly cloudinary = inject(CloudinaryUploadService);
 
   readonly cloudinaryImageUrl = cloudinaryImageUrl;
-  readonly rolPublicador = ROL_PUBLICADOR;
+  readonly etiquetaRol = ETIQUETA_ROL;
 
   readonly propertyId = signal<string | null>(null);
   readonly comunas = signal<Comuna[]>([]);
@@ -180,7 +182,7 @@ export class AdminPropertyFormComponent implements OnInit {
       },
       error: (err: HttpErrorResponse) => {
         this.saving.set(false);
-        this.error.set(this.mensajeDeError(err));
+        this.error.set(mensajeDeErrorHttp(err));
       },
     });
   }
@@ -191,30 +193,20 @@ export class AdminPropertyFormComponent implements OnInit {
     if (!propertyId || !input.files?.length) return;
 
     this.uploadingFoto.set(true);
-    this.subirFotosEnCola(Array.from(input.files), propertyId);
+    this.cloudinary
+      .subirEnOrden(Array.from(input.files), (publicId) =>
+        this.adminProperties.addFoto(propertyId, publicId, this.fotos().length),
+      )
+      .subscribe({
+        next: (publicId) =>
+          this.fotos.update((fs) => [...fs, { id: `temp-${publicId}`, cloudinaryPublicId: publicId, orden: fs.length }]),
+        error: () => {
+          this.uploadingFoto.set(false);
+          this.error.set('No se pudo subir una de las fotos. Las anteriores quedaron guardadas.');
+        },
+        complete: () => this.uploadingFoto.set(false),
+      });
     input.value = '';
-  }
-
-  private subirFotosEnCola(files: File[], propertyId: string): void {
-    const [file, ...resto] = files;
-    if (!file) {
-      this.uploadingFoto.set(false);
-      return;
-    }
-
-    this.cloudinary.subir(file).subscribe({
-      next: (res) => {
-        const orden = this.fotos().length;
-        this.adminProperties.addFoto(propertyId, res.public_id, orden).subscribe(() => {
-          this.fotos.update((fs) => [...fs, { id: `temp-${res.public_id}`, cloudinaryPublicId: res.public_id, orden }]);
-          this.subirFotosEnCola(resto, propertyId);
-        });
-      },
-      error: () => {
-        this.uploadingFoto.set(false);
-        this.error.set('No se pudo subir una de las fotos a Cloudinary.');
-      },
-    });
   }
 
   eliminarFoto(fotoId: string): void {
@@ -245,20 +237,4 @@ export class AdminPropertyFormComponent implements OnInit {
     input.value = '';
   }
 
-  // Antes esto siempre mostraba la misma frase genérica sin importar qué falló de
-  // verdad (un campo vacío, un id inválido, la red caída) - class-validator (backend)
-  // devuelve el detalle exacto en error.error.message, uno por campo.
-  private mensajeDeError(err: HttpErrorResponse): string {
-    const detalle = err.error?.message;
-    if (Array.isArray(detalle) && detalle.length > 0) {
-      return `No se pudo guardar: ${detalle.join(' · ')}`;
-    }
-    if (typeof detalle === 'string') {
-      return `No se pudo guardar: ${detalle}`;
-    }
-    if (err.status === 0) {
-      return 'No se pudo guardar: no hay conexión con el servidor.';
-    }
-    return `No se pudo guardar (error ${err.status}). Intenta de nuevo.`;
-  }
 }
