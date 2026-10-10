@@ -2,10 +2,16 @@ import { BadRequestException, Injectable, NotFoundException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { EstadoPublicacion } from '../generated/prisma/enums';
 import { CreateConsultaDto } from './dto/create-consulta.dto';
+import { MailService } from '../mail/mail.service';
+import { PlantillasCorreo } from '../mail/plantillas-correo';
 
 @Injectable()
 export class ConsultasService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly mail: MailService,
+    private readonly plantillas: PlantillasCorreo,
+  ) {}
 
   async create(slug: string, dto: CreateConsultaDto) {
     if (!dto.email && !dto.telefono) {
@@ -14,7 +20,7 @@ export class ConsultasService {
 
     const property = await this.prisma.property.findFirst({
       where: { slug, estado: EstadoPublicacion.PUBLICADA },
-      select: { id: true },
+      select: { id: true, titulo: true, publicador: { select: { email: true, emailVerificadoAt: true } } },
     });
     if (!property) {
       throw new NotFoundException('Propiedad no encontrada.');
@@ -25,7 +31,7 @@ export class ConsultasService {
       return { ok: true };
     }
 
-    await this.prisma.consulta.create({
+    const consulta = await this.prisma.consulta.create({
       data: {
         propertyId: property.id,
         nombre: dto.nombre.trim(),
@@ -34,6 +40,12 @@ export class ConsultasService {
         mensaje: dto.mensaje.trim(),
       },
     });
+    // Aviso al anunciante, solo a un correo verificado (no se manda correo a una
+    // dirección que nadie confirmó). Si el envío falla, la consulta ya quedó guardada.
+    const { publicador } = property;
+    if (publicador.emailVerificadoAt) {
+      await this.mail.enviar(this.plantillas.nuevaConsulta(publicador.email, consulta, property.titulo));
+    }
     return { ok: true };
   }
 
