@@ -245,6 +245,7 @@ async function main() {
       name: DEMO_PUBLICADOR.name,
       whatsapp: DEMO_PUBLICADOR.whatsapp,
       role: 'CORREDORA',
+      emailVerificadoAt: new Date(),
       corredoraProfile: {
         create: { razonSocial: DEMO_PUBLICADOR.razonSocial, rut: DEMO_PUBLICADOR.rut },
       },

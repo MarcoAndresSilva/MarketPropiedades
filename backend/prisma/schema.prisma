@@ -36,10 +36,10 @@ model Comuna {
 }
 
 // --- Cuentas ---
-// ADMIN: panel interno. PERSONA/CORREDORA: publicadores — confirmado con el socio que una
-// corredora es UNA cuenta por agencia (no una por agente individual); sus agentes suben material
-// bajo esa misma cuenta. El registro público todavía no existe (MVP curado, admin crea las cuentas
-// a mano), pero el modelo ya soporta ambos tipos de publicador sin tener que rehacerse.
+// ADMIN: panel interno. PERSONA/CORREDORA/INMOBILIARIA: anunciantes — confirmado con el socio que
+// una corredora es UNA cuenta por agencia (no una por agente individual); sus agentes suben
+// material bajo esa misma cuenta. Los anunciantes se registran solos (POST /auth/registro) o los
+// crea el admin.
 
 enum Role {
   ADMIN
@@ -55,12 +55,16 @@ model User {
   name              String // nombre de contacto (persona) o nombre de la agencia (corredora)
   whatsapp          String? // formato E.164, ej. "+56912345678" — contacto de sus fichas, link wa.me
   role              Role      @default(ADMIN)
-  // null = correo sin verificar. Lo llena el flujo de registro público de anunciantes.
+  // null = correo sin verificar: puede entrar, pero no publicar. Ver AuthService.
   emailVerificadoAt DateTime?
+  // Tokens emitidos antes de esta fecha dejan de servir: cambiar la contraseña cierra las
+  // sesiones abiertas en otros dispositivos. Ver JwtStrategy.
+  passwordCambiadaAt DateTime?
 
   corredoraProfile CorredoraProfile?
   properties       Property[]
   proyectos        Proyecto[]
+  tokens           TokenCuenta[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -73,6 +77,26 @@ model CorredoraProfile {
   user        User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   razonSocial String?
   rut         String? @unique
+}
+
+enum TipoTokenCuenta {
+  VERIFICAR_EMAIL
+  RECUPERAR_PASSWORD
+}
+
+// Token de un solo uso enviado por correo (verificar la cuenta, recuperar la contraseña).
+// Se guarda solo su hash SHA-256: quien lea la base no puede usar los links pendientes.
+model TokenCuenta {
+  id        String          @id @default(cuid())
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tipo      TipoTokenCuenta
+  tokenHash String          @unique
+  expiraAt  DateTime
+  usadoAt   DateTime?
+  createdAt DateTime        @default(now())
+
+  @@index([userId, tipo])
 }
 
 // --- Propiedades ---
@@ -94,6 +118,8 @@ enum TipoPropiedad {
 
 enum EstadoPublicacion {
   BORRADOR
+  EN_REVISION // enviada por un anunciante, esperando que el admin la apruebe
+  RECHAZADA // el admin no la aprobó; el motivo queda en motivoRechazo
   PUBLICADA
   PAUSADA
   CERRADA // vendida o arrendada, según tipoOperacion
@@ -103,9 +129,11 @@ model Property {
   id     String            @id @default(cuid())
   slug   String            @unique
   estado EstadoPublicacion @default(BORRADOR)
+  // Lo escribe el admin al rechazar; se limpia cuando el anunciante vuelve a enviarla.
+  motivoRechazo String? @db.VarChar(500)
 
   // Contacto de la ficha = el publicador dueño de la cuenta (User.name / User.whatsapp).
-  // Admin sigue pudiendo cargar propiedades a nombre de cualquier cuenta durante el MVP curado.
+  // El admin puede cargar propiedades a nombre de cualquier cuenta; un anunciante, solo a la suya.
   publicadorId String
   publicador   User   @relation(fields: [publicadorId], references: [id])
 
