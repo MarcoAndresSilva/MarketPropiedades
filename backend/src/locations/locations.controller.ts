@@ -2,8 +2,8 @@ import { Controller, Get, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { LocationsService } from './locations.service';
 
-// Protegido: hoy el único consumidor es el selector de comuna del panel de admin al
-// cargar una propiedad. Nada le impide ser público más adelante si hace falta.
+// Protegido: lo usa el selector de comuna al cargar una propiedad, en el panel del admin
+// y en el del anunciante. Nada le impide ser público más adelante si hace falta.
 @UseGuards(JwtAuthGuard)
 @Controller('comunas')
 export class LocationsController {

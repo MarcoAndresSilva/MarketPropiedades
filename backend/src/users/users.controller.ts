@@ -1,17 +1,17 @@
-import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Body, Controller, Get, Post } from '@nestjs/common';
+import { SoloAdmin } from '../auth/roles';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 
-// Solo el admin crea/lista publicadores por ahora (MVP curado, sin registro público).
-@UseGuards(JwtAuthGuard)
+// El admin crea y lista anunciantes; los anunciantes se registran solos en POST /auth/registro.
+@SoloAdmin()
 @Controller('users')
 export class UsersController {
   constructor(private readonly users: UsersService) {}
 
   @Post()
   create(@Body() dto: CreateUserDto) {
-    return this.users.create(dto);
+    return this.users.create(dto, { verificada: true });
   }
 
   @Get()

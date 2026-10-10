@@ -1,6 +1,6 @@
-import { Body, Controller, Get, HttpCode, Param, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Patch, Post } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { SoloAdmin } from '../auth/roles';
 import { ConsultasService } from './consultas.service';
 import { CreateConsultaDto } from './dto/create-consulta.dto';
 import { UpdateConsultaDto } from './dto/update-consulta.dto';
@@ -18,13 +18,13 @@ export class ConsultasController {
     return this.consultas.create(slug, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @SoloAdmin()
   @Get('consultas')
   findAll() {
     return this.consultas.findAllForAdmin();
   }
 
-  @UseGuards(JwtAuthGuard)
+  @SoloAdmin()
   @Patch('consultas/:id')
   marcarLeida(@Param('id') id: string, @Body() dto: UpdateConsultaDto) {
     return this.consultas.marcarLeida(id, dto.leida);

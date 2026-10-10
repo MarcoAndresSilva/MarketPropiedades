@@ -1,6 +1,6 @@
-import { Body, Controller, Get, HttpCode, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Param, Post } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { SoloAdmin } from '../auth/roles';
 import { MetricasService } from './metricas.service';
 import { CreateEventoDto } from './dto/create-evento.dto';
 
@@ -17,7 +17,7 @@ export class MetricasController {
     await this.metricas.registrar(slug, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @SoloAdmin()
   @Get('metricas/propiedades')
   totales() {
     return this.metricas.totalesPorPropiedad();
