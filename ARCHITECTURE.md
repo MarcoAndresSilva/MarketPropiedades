@@ -1297,3 +1297,74 @@ estaba repetido en tres archivos y las etiquetas de rol en dos; pasan a `core/fo
 entre el listado de propiedades y el de proyectos, y la copia de proyectos era una versión más
 pobre del select (sin flecha ni estados); pasan a `_base.scss` (`.filtros`, `.filtro`, `.select`),
 y proyectos solo ajusta el ancho de sus columnas.
+
+### Fase 35 — Backend de la etapa 3: cuentas de anunciante y moderación
+
+**Bug de seguridad cerrado antes de abrir el registro — cualquier token entraba al panel de
+admin.** Todos los endpoints internos usaban solo `JwtAuthGuard`, que prueba que hay sesión pero
+no de quién. Mientras las únicas cuentas eran del equipo daba igual; con registro público, un
+anunciante recién creado habría podido editar o borrar propiedades ajenas. Se agrega
+`auth/roles.ts`: `RolesGuard` (lee los roles declarados con metadata) y dos decoradores
+compuestos, `@SoloAdmin()` y `@SoloAnunciante()`, que juntan guard y roles para que ningún
+endpoint pueda quedar con uno y sin el otro. Todo lo que antes era `JwtAuthGuard` en propiedades,
+proyectos, consultas, métricas y usuarios pasa a `@SoloAdmin()`.
+
+**Decisión — la cuenta sin verificar puede entrar, pero no publicar.** Registrarse devuelve la
+sesión abierta, así el anunciante llega a su panel y ve "confirma tu correo" con el botón de
+reenviar, en vez de quedar en una pantalla muerta. Lo que exige el correo verificado es publicar y
+subir fotos (`CuentaVerificadaGuard`, también en la firma de Cloudinary). El WhatsApp es
+obligatorio al registrarse (`RegistroDto`): es el contacto que muestran sus fichas. Las cuentas que
+crea el admin nacen verificadas; la migración marca como verificadas las que el equipo creó
+después de la Fase 26, que habían quedado sin fecha.
+
+**Decisión — tokens de un solo uso en su propia tabla, guardados como SHA-256.** Verificar correo
+y recuperar contraseña usan `TokenCuenta`: el token (32 bytes aleatorios) viaja solo en el link y
+en la base queda su hash, así que quien lea la base no puede usar links pendientes. SHA-256 y no
+argon2 porque no es una contraseña adivinable por diccionario. Emitir uno nuevo borra los
+pendientes del mismo tipo (solo vale el último link) y consumirlo es un `updateMany` filtrado por
+`usadoAt: null`, atómico: el mismo link abierto dos veces a la vez se usa una sola vez. Vigencia:
+48 horas para verificar, 1 hora para recuperar. Pedir recuperación responde lo mismo exista o no
+la cuenta, igual que el login.
+
+**Decisión — cambiar la contraseña cierra las otras sesiones.** El JWT no tiene estado, pero
+`JwtStrategy` ya consulta el usuario en cada request (Fase 4); ahora además compara el `iat` del
+token con `User.passwordCambiadaAt` y rechaza los anteriores. Quien recupera la cuenta porque se
+la robaron saca al intruso sin esperar las 8 horas del token. `seed:admin` también lo marca, así
+rotar la clave del admin invalida las sesiones abiertas con la anterior.
+
+**Decisión — correos con la API HTTP de Resend, sin SDK, y nunca bloqueantes.** Es un `POST` con
+`fetch`, igual que mindicador.cl en la Fase 31. Sin `RESEND_API_KEY` el correo se escribe en el log
+en vez de enviarse, así el flujo completo se prueba en local copiando el link de la consola. Un
+envío fallido se registra y no rompe la operación que lo pidió: la consulta ya quedó guardada, y
+la verificación y la recuperación se pueden volver a pedir. Lo que escribe un usuario (nombre,
+mensaje de una consulta) se escapa antes de entrar al HTML. Con esto también queda el aviso por
+correo de cada consulta nueva al anunciante, pendiente desde la Fase 28, solo si su correo está
+verificado.
+
+**Decisión — moderación como estados de la propiedad, con las transiciones en una tabla.** Se
+agregan `EN_REVISION` y `RECHAZADA` (con `motivoRechazo`) a `EstadoPublicacion`. Lo que puede
+pedir un anunciante está en `properties/moderacion.ts`, con tests: enviar a revisión un borrador o
+una rechazada, retirarla de revisión, pausar, reanudar y cerrar. Nunca llega a `PUBLICADA` por su
+cuenta, salvo reanudar una pausada, cuyo contenido ya fue aprobado. El admin aprueba o rechaza con
+`POST /properties/:id/aprobar|rechazar`, que avisan por correo al anunciante. Cada envío a
+revisión avisa a los admins.
+
+**Trade-off aceptado — editar una propiedad publicada la saca del catálogo hasta aprobarla.**
+Si cambiar el contenido de algo aprobado no lo mandara a revisión, la moderación se saltaría
+publicando algo correcto y editándolo después. La alternativa (guardar una versión pendiente
+mientras la aprobada sigue visible) duplica el modelo de la propiedad y las fotos; no se justifica
+con el volumen actual, donde el equipo revisa en el día. Agregar fotos cuenta como editar; borrar
+fotos no.
+
+**Decisión — panel del anunciante en un controller aparte (`/mis-propiedades`).** Cambian el guard,
+los DTO (sin `publicadorId`, que siempre es la cuenta propia; sin `estado`, que va por
+`PATCH /:id/estado` para validar la transición; sin `destacada`, que es un servicio pagado) y el
+alcance. `MisPropiedadesService` busca siempre por id y publicador a la vez: una propiedad ajena
+responde 404 igual que una inexistente, sin revelar qué ids hay. Precio, slug y fotos reusan
+`PropertiesService`.
+
+**Detalle de módulos — `UsersModule` importa Passport directo.** El registro crea la cuenta con
+`UsersService`, así que `AuthModule` importa `UsersModule`; si `UsersModule` siguiera importando
+`AuthModule` para sus guards, los dos módulos dependerían uno del otro. Se evitó con
+`auth/passport.ts`, la configuración de Passport en un solo lugar, que `UsersModule` importa sin
+pasar por `AuthModule`, en vez de usar `forwardRef`.
