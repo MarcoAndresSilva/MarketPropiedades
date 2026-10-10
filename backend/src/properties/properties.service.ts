@@ -1,4 +1,4 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
@@ -7,6 +7,8 @@ import { CreatePropertyFotoDto } from './dto/create-property-foto.dto';
 import { EstadoPublicacion, TipoOperacion } from '../generated/prisma/enums';
 import { randomSlugSuffix, slugify } from './slug.util';
 import { IndicadoresService } from '../indicadores/indicadores.service';
+import { MailService } from '../mail/mail.service';
+import { PlantillasCorreo } from '../mail/plantillas-correo';
 
 const LIST_INCLUDE = {
   comuna: { include: { region: true } },
@@ -73,6 +75,8 @@ export class PropertiesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly indicadores: IndicadoresService,
+    private readonly mail: MailService,
+    private readonly plantillas: PlantillasCorreo,
   ) {}
 
   async create(dto: CreatePropertyDto) {
@@ -133,11 +137,40 @@ export class PropertiesService {
     return property;
   }
 
-  findAllForAdmin() {
+  findAllForAdmin(estado?: EstadoPublicacion) {
     return this.prisma.property.findMany({
+      where: { estado },
       include: LIST_INCLUDE,
       orderBy: { createdAt: 'desc' },
     });
+  }
+
+  // --- Moderación: lo que envía un anunciante se publica solo cuando el admin lo aprueba ---
+
+  async aprobar(id: string) {
+    await this.exigirEnRevision(id);
+    const property = await this.prisma.property.update({
+      where: { id },
+      data: { estado: EstadoPublicacion.PUBLICADA, motivoRechazo: null },
+      include: { publicador: { select: { email: true, name: true } } },
+    });
+    await this.mail.enviar(
+      this.plantillas.propiedadAprobada(property.publicador.email, property.publicador.name, property.titulo, property.slug),
+    );
+    return { ok: true };
+  }
+
+  async rechazar(id: string, motivo: string) {
+    await this.exigirEnRevision(id);
+    const property = await this.prisma.property.update({
+      where: { id },
+      data: { estado: EstadoPublicacion.RECHAZADA, motivoRechazo: motivo.trim() },
+      include: { publicador: { select: { email: true, name: true } } },
+    });
+    await this.mail.enviar(
+      this.plantillas.propiedadRechazada(property.publicador.email, property.publicador.name, property.titulo, motivo.trim()),
+    );
+    return { ok: true };
   }
 
   async findOneForAdmin(id: string) {
@@ -178,6 +211,13 @@ export class PropertiesService {
     }
     await this.prisma.propertyFoto.delete({ where: { id: fotoId } });
     return { ok: true };
+  }
+
+  private async exigirEnRevision(id: string) {
+    const property = await this.findOneOrThrow(id);
+    if (property.estado !== EstadoPublicacion.EN_REVISION) {
+      throw new ConflictException('Solo se puede aprobar o rechazar una propiedad en revisión.');
+    }
   }
 
   private validarPrecio(p: Precios) {

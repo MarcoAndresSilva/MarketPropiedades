@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post, Query, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { Body, Controller, Delete, Get, HttpCode, Param, Patch, Post, Query } from '@nestjs/common';
+import { SoloAdmin } from '../auth/roles';
 import { PropertiesService } from './properties.service';
 import { CreatePropertyDto } from './dto/create-property.dto';
 import { UpdatePropertyDto } from './dto/update-property.dto';
 import { QueryPropertiesDto } from './dto/query-properties.dto';
 import { CreatePropertyFotoDto } from './dto/create-property-foto.dto';
+import { QueryAdminPropertiesDto, RechazarPropertyDto } from './dto/moderacion.dto';
 
 @Controller('properties')
 export class PropertiesController {
@@ -31,48 +32,62 @@ export class PropertiesController {
 
   // --- Panel de administración: cualquier estado ---
 
-  @UseGuards(JwtAuthGuard)
+  @SoloAdmin()
   @Get('admin/all')
-  findAllForAdmin() {
-    return this.properties.findAllForAdmin();
+  findAllForAdmin(@Query() query: QueryAdminPropertiesDto) {
+    return this.properties.findAllForAdmin(query.estado);
   }
 
   // Después de 'admin/all' a propósito: si fuera antes, ':id' matchearía "all" como un
   // id cualquiera y esta ruta se comería a la de arriba.
-  @UseGuards(JwtAuthGuard)
+  @SoloAdmin()
   @Get('admin/:id')
   findOneForAdmin(@Param('id') id: string) {
     return this.properties.findOneForAdmin(id);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @SoloAdmin()
   @Post()
   create(@Body() dto: CreatePropertyDto) {
     return this.properties.create(dto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @SoloAdmin()
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdatePropertyDto) {
     return this.properties.update(id, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @SoloAdmin()
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.properties.remove(id);
   }
 
+  @SoloAdmin()
+  @HttpCode(200)
+  @Post(':id/aprobar')
+  aprobar(@Param('id') id: string) {
+    return this.properties.aprobar(id);
+  }
+
+  @SoloAdmin()
+  @HttpCode(200)
+  @Post(':id/rechazar')
+  rechazar(@Param('id') id: string, @Body() dto: RechazarPropertyDto) {
+    return this.properties.rechazar(id, dto.motivo);
+  }
+
   // --- Fotos: se suben directo a Cloudinary (ver UploadsController), acá solo se
   // registra el resultado (cloudinaryPublicId) contra la propiedad. ---
 
-  @UseGuards(JwtAuthGuard)
+  @SoloAdmin()
   @Post(':id/fotos')
   addFoto(@Param('id') id: string, @Body() dto: CreatePropertyFotoDto) {
     return this.properties.addFoto(id, dto);
   }
 
-  @UseGuards(JwtAuthGuard)
+  @SoloAdmin()
   @Delete('fotos/:fotoId')
   removeFoto(@Param('fotoId') fotoId: string) {
     return this.properties.removeFoto(fotoId);
