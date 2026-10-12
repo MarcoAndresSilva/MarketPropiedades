@@ -1368,3 +1368,53 @@ responde 404 igual que una inexistente, sin revelar qué ids hay. Precio, slug y
 `AuthModule` para sus guards, los dos módulos dependerían uno del otro. Se evitó con
 `auth/passport.ts`, la configuración de Passport en un solo lugar, que `UsersModule` importa sin
 pasar por `AuthModule`, en vez de usar `forwardRef`.
+
+### Fase 36 — Frontend de la etapa 3: cuentas de anunciante
+
+**Decisión — una sola sesión para el admin y los anunciantes, separada por rol.** El backend firma
+el mismo JWT para todos y distingue con `RolesGuard` (Fase 35); el frontend hace lo mismo. Un solo
+`AuthService` guarda el token (la clave de `localStorage` pasa de `admin_token` a `habbi_token`,
+así que el admin vuelve a entrar una vez) y dos guards, `adminGuard` y `anuncianteGuard`, salen de
+una misma función `guardPorRol`: sin sesión llevan al login de su zona, con sesión de otro rol
+llevan al panel propio (`inicioSegunRol`). `login()` y `registro()` comparten `abrirSesion`, que
+guarda el token y encadena `GET /auth/me` con `switchMap`, para que quien llama reciba el usuario
+y sepa adónde navegar.
+
+**Cambio respecto de la Fase 20 — el guard ahora consulta `/auth/me`.** Con una sola cuenta de
+admin bastaba con revisar que hubiera token y dejar que el primer 401 cerrara la sesión. Con
+roles, el guard necesita saber quién es, y el rol no se lee del payload del JWT: el navegador
+puede tener guardado el token de una cuenta borrada o de antes de un cambio de contraseña, y solo
+`JwtStrategy` lo sabe. El usuario queda en memoria (`usuario()` lo pide una sola vez), así que es
+un round-trip por carga de página, no por navegación. Los guards siguen siendo comodidad: lo que
+protege es la API, que responde 403 a cada endpoint fuera del rol.
+
+**Decisión — el interceptor cierra la sesión solo ante un 401 de una request que llevaba token.**
+Un 401 sin token es una contraseña mal escrita en el login; antes eso llamaba a `logout()` y
+sacaba al usuario del formulario. Además `logout()` navega solo si estaba en un panel
+(`/admin/**` o `/mi-cuenta`): el header pide `/auth/me` en todas las páginas para mostrar "Mi
+cuenta", y un token vencido de alguien que está mirando una propiedad se limpia sin moverlo de ahí.
+
+**Decisión — las páginas con token de un solo uso son `RenderMode.Client`.** `/cuenta/verificar`
+y `/cuenta/restablecer` (las rutas de los links de `PlantillasCorreo`) consumen el token al
+abrirse. Renderizadas en el servidor, el SSR lo consumiría y la hidratación lo volvería a mandar,
+mostrando "link vencido" justo después de verificar. `/mi-cuenta` también es CSR, por la misma
+razón que el panel de admin (Fase 20). Login y registro sí se renderizan en el servidor: no
+dependen de la sesión. Restablecer la contraseña descarta además la sesión local, que el backend
+ya invalidó con `passwordCambiadaAt`, en vez de esperar al 401 siguiente.
+
+**Decisión — el WhatsApp se normaliza en el cliente, no se le exige formato al usuario.**
+`RegistroDto` pide E.164 (`+56912345678`), que nadie escribe así. `normalizarWhatsapp` acepta las
+formas chilenas habituales (`9 1234 5678`, `56 9…`, con espacios o guiones) y, si no calza con
+ninguna, manda el valor tal cual para que el mensaje del backend explique el formato.
+
+**Decisión — una cuenta sin verificar entra a `/mi-cuenta` con un aviso, no a una pantalla de
+espera.** Sigue la decisión de la Fase 35: el aviso usa la lavanda de marca y no el rojo de error
+(es un paso pendiente, no una falla), trae el botón de reenviar con su propio mensaje para el
+límite de 3 envíos por 10 minutos, y desaparece al verificar porque `verificarEmail` vuelve a
+pedir `/auth/me` si hay sesión en ese navegador.
+
+**Detalle — tipo de cuenta como cards con un radio real.** El input queda oculto pero sigue siendo
+el control (teclado, lector de pantalla) y la card se pinta con `:has(input:checked)`. "Propietario"
+en pantalla es `PERSONA` en la base: el rol es anterior al registro público (Fase 3). Las cinco
+pantallas de cuenta comparten `features/cuenta/cuenta.scss` vía `styleUrl`; la encapsulación de
+Angular evita que esos estilos se filtren al resto del sitio.
