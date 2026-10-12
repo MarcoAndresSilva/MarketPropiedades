@@ -1418,3 +1418,40 @@ el control (teclado, lector de pantalla) y la card se pinta con `:has(input:chec
 en pantalla es `PERSONA` en la base: el rol es anterior al registro público (Fase 3). Las cinco
 pantallas de cuenta comparten `features/cuenta/cuenta.scss` vía `styleUrl`; la encapsulación de
 Angular evita que esos estilos se filtren al resto del sitio.
+
+### Fase 37 — Panel del anunciante
+
+**Decisión — un solo formulario de propiedad para el admin y el anunciante.** Los datos, el precio
+y las fotos son los mismos en los dos paneles; duplicar las 240 líneas del formulario del admin
+habría dejado dos copias que divergen con cada campo nuevo. `AdminPropertyFormComponent` pasa a
+`shared/propiedad-form/PropiedadFormComponent` y la ruta le dice para quién trabaja
+(`data: { panel: 'anunciante' }`). Lo que cambia según el panel está en el componente y no en
+dos subclases: la API (`/properties` o `/mis-propiedades`), los campos que solo ve el admin
+(publicador, estado, destacada) y el bloque de moderación que solo ve el anunciante. El payload
+del anunciante no lleva esos tres campos aunque el `ValidationPipe` (`whitelist`) igual los
+descartaría: el contrato queda explícito en `PropiedadAnunciantePayload`. `CloudinaryUploadService`
+y `LocationsService` pasan de `admin/shared` a `core`, porque ya no son solo del admin.
+
+**Decisión — "Enviar a revisión" guarda primero.** El botón encadena el `PATCH` del contenido y el
+cambio de estado con `switchMap`: si el anunciante corrige algo y envía sin haber guardado, lo
+corregido no se pierde ni llega a revisión una versión vieja.
+
+**Decisión — las transiciones del anunciante están también en el frontend, solo para decidir qué
+botones mostrar.** `core/estado-publicacion.ts` repite la tabla de `moderacion.ts` del backend
+junto con el nombre y la explicación de cada estado. Si quedaran desfasadas, el backend rechaza la
+transición con 400 y el panel muestra el mensaje; no hay forma de saltarse la moderación desde
+acá. Cerrar una propiedad pide confirmación porque no tiene vuelta atrás.
+
+**Decisión — sin fotos no se envía a revisión, aunque la API lo permitiría.** Una ficha sin fotos
+no se aprobaría, así que el botón queda deshabilitado con la explicación, en vez de hacerle esperar
+una revisión que termina en rechazo.
+
+**Decisión — sin correo verificado no se llama a `/mis-propiedades`.** `@SoloAnunciante` exige la
+cuenta verificada en todo el controller, incluido el listado. En vez de mostrar un error,
+`/mi-cuenta` reemplaza la lista por la explicación, y las rutas del formulario usan
+`anuncianteVerificadoGuard`, que devuelve a `/mi-cuenta` y su aviso. `guardPorRol` pasa a
+`guardPorCuenta` y recibe al usuario completo, no solo el rol.
+
+**Detalle — el estado de publicación tiene su propia clase, `.estado`, en los estilos globales.**
+`.badge` es la etiqueta de marca con colores fijos para ir sobre fotos; el estado va sobre fondos
+de página y tiene que seguir el tema claro/oscuro.
