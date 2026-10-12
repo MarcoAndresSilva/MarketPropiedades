@@ -1,0 +1,33 @@
+<main id="main-content" tabindex="-1" class="cuenta container">
+  @if (enviado()) {
+    <div class="cuenta__card" role="status">
+      <h1>Revisa tu correo</h1>
+      <!-- Mismo mensaje exista o no la cuenta: la respuesta no revela qué correos están registrados. -->
+      <p class="cuenta__ok">
+        Si hay una cuenta con <strong>{{ email }}</strong>, te enviamos un link para crear una contraseña nueva. Vence en
+        1 hora.
+      </p>
+      <p class="cuenta__pie"><a routerLink="/ingresar">Volver a ingresar</a></p>
+    </div>
+  } @else {
+    <form class="cuenta__card" #f="ngForm" (ngSubmit)="enviar(f)" novalidate>
+      <h1>Recuperar contraseña</h1>
+      <p class="cuenta__bajada">Escribe el correo de tu cuenta y te enviamos un link para crear una contraseña nueva.</p>
+
+      <label>
+        <span>Correo</span>
+        <input name="email" type="email" [(ngModel)]="email" required email autocomplete="email" />
+      </label>
+
+      @if (error()) {
+        <p class="cuenta__error" role="alert">{{ error() }}</p>
+      }
+
+      <button type="submit" class="btn btn--primary cuenta__enviar" [disabled]="enviando()">
+        {{ enviando() ? 'Enviando…' : 'Enviar link' }}
+      </button>
+
+      <p class="cuenta__pie"><a routerLink="/ingresar">Volver a ingresar</a></p>
+    </form>
+  }
+</main>

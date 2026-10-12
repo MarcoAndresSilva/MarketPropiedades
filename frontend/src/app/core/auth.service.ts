@@ -57,6 +57,36 @@ export class AuthService {
     return this.abrirSesion(this.http.post<{ accessToken: string }>(`${this.baseUrl}/registro`, data));
   }
 
+  /**
+   * Consume el link del correo. Si hay una sesión abierta en este navegador se vuelve a
+   * pedir `/me`, para que el aviso de "confirma tu correo" desaparezca sin recargar.
+   */
+  verificarEmail(token: string): Observable<unknown> {
+    return this.http
+      .post(`${this.baseUrl}/verificar-email`, { token })
+      .pipe(switchMap(() => (this.token() ? this.loadCurrentUser() : of(null))));
+  }
+
+  reenviarVerificacion(): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/reenviar-verificacion`, {});
+  }
+
+  /** Responde lo mismo exista o no la cuenta (el backend no revela qué correos están registrados). */
+  recuperarPassword(email: string): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/recuperar-password`, { email });
+  }
+
+  /**
+   * Cambiar la contraseña invalida todos los tokens anteriores (passwordCambiadaAt en
+   * JwtStrategy), incluido el de este navegador si tenía sesión: se descarta acá mismo
+   * en vez de esperar al 401 de la próxima request.
+   */
+  restablecerPassword(token: string, password: string): Observable<unknown> {
+    return this.http
+      .post(`${this.baseUrl}/restablecer-password`, { token, password })
+      .pipe(tap(() => this.limpiarSesion()));
+  }
+
   loadCurrentUser(): Observable<AuthUser> {
     return this.http.get<AuthUser>(`${this.baseUrl}/me`).pipe(tap((user) => this.currentUser.set(user)));
   }
@@ -80,13 +110,17 @@ export class AuthService {
   logout(): void {
     const url = this.router.url;
     const eraAdmin = this.esAdmin() || url.startsWith('/admin');
-    this.setToken(null);
-    this.currentUser.set(null);
+    this.limpiarSesion();
     if (eraAdmin) {
       this.router.navigateByUrl('/admin/login');
     } else if (url.startsWith('/mi-cuenta')) {
       this.router.navigateByUrl('/ingresar');
     }
+  }
+
+  private limpiarSesion(): void {
+    this.setToken(null);
+    this.currentUser.set(null);
   }
 
   private abrirSesion(request: Observable<{ accessToken: string }>): Observable<AuthUser> {

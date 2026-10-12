@@ -1,0 +1,44 @@
+<main id="main-content" tabindex="-1" class="cuenta container">
+  @if (listo()) {
+    <div class="cuenta__card" role="status">
+      <h1>Contraseña actualizada</h1>
+      <p class="cuenta__ok">Cerramos las sesiones abiertas en otros dispositivos. Ingresa con tu contraseña nueva.</p>
+      <a routerLink="/ingresar" class="btn btn--primary cuenta__enviar">Ingresar</a>
+    </div>
+  } @else if (linkInvalido()) {
+    <div class="cuenta__card">
+      <h1>El link no sirve</h1>
+      <p class="cuenta__bajada">Puede que ya lo hayas usado o que haya vencido (dura 1 hora). Pide uno nuevo.</p>
+      <a routerLink="/cuenta/recuperar" class="btn btn--primary cuenta__enviar">Pedir otro link</a>
+    </div>
+  } @else {
+    <form class="cuenta__card" #f="ngForm" (ngSubmit)="guardar(f)" novalidate>
+      <h1>Nueva contraseña</h1>
+
+      <label>
+        <span>Contraseña nueva <span class="cuenta__ayuda">· mínimo 8 caracteres</span></span>
+        <input
+          name="password"
+          type="password"
+          [(ngModel)]="password"
+          required
+          minlength="8"
+          maxlength="128"
+          autocomplete="new-password"
+        />
+      </label>
+      <label>
+        <span>Repite la contraseña</span>
+        <input name="repetir" type="password" [(ngModel)]="repetir" required autocomplete="new-password" />
+      </label>
+
+      @if (error()) {
+        <p class="cuenta__error" role="alert">{{ error() }}</p>
+      }
+
+      <button type="submit" class="btn btn--primary cuenta__enviar" [disabled]="enviando()">
+        {{ enviando() ? 'Guardando…' : 'Guardar contraseña' }}
+      </button>
+    </form>
+  }
+</main>

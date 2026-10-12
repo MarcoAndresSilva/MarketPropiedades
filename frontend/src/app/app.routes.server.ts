@@ -17,6 +17,21 @@ export const serverRoutes: ServerRoute[] = [
     path: 'favoritos',
     renderMode: RenderMode.Client
   },
+  // Los links de los correos traen un token de un solo uso: si el servidor lo consumiera
+  // al renderizar, la hidratación lo mandaría otra vez y vería "link vencido".
+  {
+    path: 'cuenta/**',
+    renderMode: RenderMode.Client
+  },
+  // Panel del anunciante: detrás de login, igual que el de admin.
+  {
+    path: 'mi-cuenta',
+    renderMode: RenderMode.Client
+  },
+  {
+    path: 'mi-cuenta/**',
+    renderMode: RenderMode.Client
+  },
   {
     path: '**',
     renderMode: RenderMode.Server

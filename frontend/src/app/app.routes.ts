@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home.component';
-import { adminGuard } from './core/auth.guard';
+import { adminGuard, anuncianteGuard } from './core/auth.guard';
 
 // Solo la home va en el bundle inicial: es la entrada del sitio y su LCP importa. Todo
 // lo demás se carga al visitarlo (loadComponent). Sobre todo el panel de admin, que un
@@ -53,6 +53,25 @@ export const routes: Routes = [
   {
     path: 'registro',
     loadComponent: () => import('./features/cuenta/registro/registro.component').then((m) => m.RegistroComponent),
+  },
+  // /cuenta/verificar y /cuenta/restablecer son los links de los correos (PlantillasCorreo en el backend).
+  {
+    path: 'cuenta/verificar',
+    loadComponent: () => import('./features/cuenta/verificar/verificar.component').then((m) => m.VerificarComponent),
+  },
+  {
+    path: 'cuenta/recuperar',
+    loadComponent: () => import('./features/cuenta/recuperar/recuperar.component').then((m) => m.RecuperarComponent),
+  },
+  {
+    path: 'cuenta/restablecer',
+    loadComponent: () =>
+      import('./features/cuenta/restablecer/restablecer.component').then((m) => m.RestablecerComponent),
+  },
+  {
+    path: 'mi-cuenta',
+    canActivate: [anuncianteGuard],
+    loadComponent: () => import('./features/cuenta/mi-cuenta/mi-cuenta.component').then((m) => m.MiCuentaComponent),
   },
 
   // Panel interno: sin SEO, sin SSR (ver app.routes.server.ts) — detrás de login.

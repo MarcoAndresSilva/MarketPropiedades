@@ -1,0 +1,26 @@
+<main id="main-content" tabindex="-1" class="cuenta container">
+  <div class="cuenta__card" aria-live="polite">
+    @switch (estado()) {
+      @case ('verificando') {
+        <h1>Confirmando tu correo…</h1>
+      }
+      @case ('ok') {
+        <h1>Correo confirmado</h1>
+        <p class="cuenta__ok">Listo: ya puedes publicar tus propiedades en Habbi.</p>
+        @if (auth.currentUser()) {
+          <a routerLink="/mi-cuenta" class="btn btn--primary cuenta__enviar">Ir a mi cuenta</a>
+        } @else {
+          <a routerLink="/ingresar" class="btn btn--primary cuenta__enviar">Ingresar</a>
+        }
+      }
+      @case ('invalido') {
+        <h1>El link no sirve</h1>
+        <p class="cuenta__bajada">
+          Puede que ya lo hayas usado o que haya vencido (dura 48 horas). Entra a tu cuenta y pide uno nuevo con el botón
+          "Reenviar correo".
+        </p>
+        <a routerLink="/mi-cuenta" class="btn btn--primary cuenta__enviar">Ir a mi cuenta</a>
+      }
+    }
+  </div>
+</main>

@@ -1,0 +1,46 @@
+<main id="main-content" tabindex="-1" class="mi-cuenta container">
+  @if (user(); as user) {
+    <header class="mi-cuenta__head">
+      <div>
+        <p class="eyebrow">{{ nombreRol() }}</p>
+        <h1>Hola, {{ user.name }}</h1>
+        <p class="mi-cuenta__datos">{{ user.email }}</p>
+      </div>
+      <button type="button" class="btn btn--ghost" (click)="auth.logout()">Cerrar sesión</button>
+    </header>
+
+    @if (user.emailVerificado) {
+      <p class="mi-cuenta__verificado">
+        <app-icon name="shield-check" />
+        Correo verificado
+      </p>
+    } @else {
+      <section class="aviso" aria-labelledby="aviso-titulo">
+        <app-icon name="mail" />
+        <div class="aviso__texto">
+          <h2 id="aviso-titulo">Confirma tu correo para publicar</h2>
+          <p>
+            Te enviamos un link a <strong>{{ user.email }}</strong>. Puedes recorrer tu panel, pero para publicar y subir
+            fotos necesitamos saber que el correo es tuyo.
+          </p>
+          <p class="aviso__estado" [class.aviso__estado--visible]="mensajeReenvio()" aria-live="polite">
+            {{ mensajeReenvio() }}
+          </p>
+        </div>
+        <button
+          type="button"
+          class="btn btn--primary"
+          (click)="reenviar()"
+          [disabled]="reenvio() === 'enviando' || reenvio() === 'enviado'"
+        >
+          {{ reenvio() === 'enviando' ? 'Enviando…' : 'Reenviar correo' }}
+        </button>
+      </section>
+    }
+
+    <section class="mi-cuenta__propiedades" aria-labelledby="propiedades-titulo">
+      <h2 id="propiedades-titulo">Tus propiedades</h2>
+      <p class="mi-cuenta__vacio">Muy pronto vas a poder publicar y administrar tus propiedades desde aquí.</p>
+    </section>
+  }
+</main>

@@ -1,0 +1,109 @@
+.mi-cuenta {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding-block: 48px 88px;
+
+  @media (max-width: 640px) {
+    padding-block: 28px 56px;
+  }
+}
+
+.mi-cuenta__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  .eyebrow {
+    margin-bottom: 6px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.2rem);
+  }
+}
+
+.mi-cuenta__datos {
+  margin: 6px 0 0;
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.mi-cuenta__verificado {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  font-weight: 600;
+  color: var(--success);
+
+  app-icon {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+// Aviso de correo sin verificar: lavanda de marca, no rojo; no es un error, es un paso pendiente.
+.aviso {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 22px;
+  border: 1px solid var(--accent);
+  border-radius: 16px;
+  background: var(--accent-soft);
+
+  > app-icon {
+    width: 28px;
+    height: 28px;
+    color: var(--accent);
+    align-self: start;
+  }
+
+  h2 {
+    margin: 0 0 4px;
+    font-size: 1.05rem;
+  }
+
+  p {
+    margin: 0;
+    line-height: 1.5;
+    color: var(--text-muted);
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 640px) {
+    grid-template-columns: auto 1fr;
+
+    .btn {
+      grid-column: 1 / -1;
+    }
+  }
+}
+
+.aviso .aviso__estado--visible {
+  margin-top: 8px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.mi-cuenta__propiedades {
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+
+  h2 {
+    margin: 0 0 6px;
+    font-size: 1.2rem;
+  }
+}
+
+.mi-cuenta__vacio {
+  margin: 0;
+  color: var(--text-muted);
+}

@@ -11,7 +11,7 @@
       <span>Contraseña</span>
       <input name="password" type="password" [(ngModel)]="password" required autocomplete="current-password" />
     </label>
-    <a routerLink="/recuperar" class="cuenta__olvido">¿Olvidaste tu contraseña?</a>
+    <a routerLink="/cuenta/recuperar" class="cuenta__olvido">¿Olvidaste tu contraseña?</a>
 
     @if (error()) {
       <p class="cuenta__error" role="alert">{{ error() }}</p>
