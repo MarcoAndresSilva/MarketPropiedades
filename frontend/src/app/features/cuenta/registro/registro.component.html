@@ -1,0 +1,66 @@
+<main id="main-content" tabindex="-1" class="cuenta container">
+  <form class="cuenta__card cuenta__card--ancha" #f="ngForm" (ngSubmit)="registrar(f)" novalidate>
+    <h1>Crea tu cuenta</h1>
+    <p class="cuenta__bajada">
+      Publica gratis y recibe los contactos directo en tu WhatsApp. Cada propiedad la revisa nuestro equipo antes de
+      publicarse.
+    </p>
+
+    <fieldset class="tipos">
+      <legend>¿Cómo vas a publicar?</legend>
+      @for (tipo of tipos; track tipo.rol) {
+        <label class="tipo">
+          <input type="radio" name="rol" [value]="tipo.rol" [(ngModel)]="rol" />
+          <app-icon [name]="tipo.icono" />
+          <span class="tipo__titulo">{{ tipo.titulo }}</span>
+          <span class="tipo__detalle">{{ tipo.detalle }}</span>
+        </label>
+      }
+    </fieldset>
+
+    <label>
+      <span>{{ etiquetaNombre() }}</span>
+      <input name="name" [(ngModel)]="name" required minlength="2" maxlength="120" autocomplete="name" />
+    </label>
+    <div class="cuenta__fila">
+      <label>
+        <span>Correo</span>
+        <input name="email" type="email" [(ngModel)]="email" required email maxlength="200" autocomplete="email" />
+      </label>
+      <label>
+        <span>WhatsApp</span>
+        <input
+          name="whatsapp"
+          type="tel"
+          [(ngModel)]="whatsapp"
+          required
+          maxlength="20"
+          autocomplete="tel"
+          placeholder="9 1234 5678"
+        />
+      </label>
+    </div>
+    <label>
+      <span>Contraseña <span class="cuenta__ayuda">· mínimo 8 caracteres</span></span>
+      <input
+        name="password"
+        type="password"
+        [(ngModel)]="password"
+        required
+        minlength="8"
+        maxlength="128"
+        autocomplete="new-password"
+      />
+    </label>
+
+    @if (error()) {
+      <p class="cuenta__error" role="alert">{{ error() }}</p>
+    }
+
+    <button type="submit" class="btn btn--primary cuenta__enviar" [disabled]="enviando()">
+      {{ enviando() ? 'Creando tu cuenta…' : 'Crear cuenta' }}
+    </button>
+
+    <p class="cuenta__pie">¿Ya tienes cuenta? <a routerLink="/ingresar">Ingresa</a></p>
+  </form>
+</main>

@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home.component';
-import { authGuard } from './core/auth.guard';
+import { adminGuard } from './core/auth.guard';
 
 // Solo la home va en el bundle inicial: es la entrada del sitio y su LCP importa. Todo
 // lo demás se carga al visitarlo (loadComponent). Sobre todo el panel de admin, que un
@@ -44,13 +44,15 @@ export const routes: Routes = [
     path: 'favoritos',
     loadComponent: () => import('./features/favoritos/favoritos.component').then((m) => m.FavoritosComponent),
   },
+
+  // Cuentas de anunciante.
   {
     path: 'ingresar',
-    loadComponent: proximamente,
-    data: {
-      titulo: 'Cuentas para anunciantes',
-      texto: 'Estamos preparando el registro para propietarios, corredoras e inmobiliarias. Mientras tanto, publica con nosotros por WhatsApp.',
-    },
+    loadComponent: () => import('./features/cuenta/ingresar/ingresar.component').then((m) => m.IngresarComponent),
+  },
+  {
+    path: 'registro',
+    loadComponent: () => import('./features/cuenta/registro/registro.component').then((m) => m.RegistroComponent),
   },
 
   // Panel interno: sin SEO, sin SSR (ver app.routes.server.ts) — detrás de login.
@@ -60,23 +62,23 @@ export const routes: Routes = [
   },
   {
     path: 'admin/propiedades',
-    canActivate: [authGuard],
+    canActivate: [adminGuard],
     loadComponent: () =>
       import('./admin/properties/admin-properties-list.component').then((m) => m.AdminPropertiesListComponent),
   },
-  { path: 'admin/propiedades/nueva', canActivate: [authGuard], loadComponent: adminPropertyForm },
-  { path: 'admin/propiedades/:id/editar', canActivate: [authGuard], loadComponent: adminPropertyForm },
+  { path: 'admin/propiedades/nueva', canActivate: [adminGuard], loadComponent: adminPropertyForm },
+  { path: 'admin/propiedades/:id/editar', canActivate: [adminGuard], loadComponent: adminPropertyForm },
   {
     path: 'admin/proyectos',
-    canActivate: [authGuard],
+    canActivate: [adminGuard],
     loadComponent: () =>
       import('./admin/proyectos/admin-proyectos-list.component').then((m) => m.AdminProyectosListComponent),
   },
-  { path: 'admin/proyectos/nuevo', canActivate: [authGuard], loadComponent: adminProyectoForm },
-  { path: 'admin/proyectos/:id/editar', canActivate: [authGuard], loadComponent: adminProyectoForm },
+  { path: 'admin/proyectos/nuevo', canActivate: [adminGuard], loadComponent: adminProyectoForm },
+  { path: 'admin/proyectos/:id/editar', canActivate: [adminGuard], loadComponent: adminProyectoForm },
   {
     path: 'admin/consultas',
-    canActivate: [authGuard],
+    canActivate: [adminGuard],
     loadComponent: () => import('./admin/consultas/admin-consultas.component').then((m) => m.AdminConsultasComponent),
   },
 

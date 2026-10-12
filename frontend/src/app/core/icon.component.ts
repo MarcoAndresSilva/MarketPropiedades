@@ -19,6 +19,7 @@ export type IconName =
   | 'trending-up'
   | 'shield-check'
   | 'users'
+  | 'user'
   | 'chart-column-increasing'
   | 'eye'
   | 'message-circle'

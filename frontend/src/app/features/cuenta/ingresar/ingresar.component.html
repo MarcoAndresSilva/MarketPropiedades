@@ -1,0 +1,26 @@
+<main id="main-content" tabindex="-1" class="cuenta container">
+  <form class="cuenta__card" #f="ngForm" (ngSubmit)="entrar(f)" novalidate>
+    <h1>Ingresar</h1>
+    <p class="cuenta__bajada">Administra tus propiedades y revisa las consultas que te llegan.</p>
+
+    <label>
+      <span>Correo</span>
+      <input name="email" type="email" [(ngModel)]="email" required email autocomplete="username" />
+    </label>
+    <label>
+      <span>Contraseña</span>
+      <input name="password" type="password" [(ngModel)]="password" required autocomplete="current-password" />
+    </label>
+    <a routerLink="/recuperar" class="cuenta__olvido">¿Olvidaste tu contraseña?</a>
+
+    @if (error()) {
+      <p class="cuenta__error" role="alert">{{ error() }}</p>
+    }
+
+    <button type="submit" class="btn btn--primary cuenta__enviar" [disabled]="enviando()">
+      {{ enviando() ? 'Entrando…' : 'Entrar' }}
+    </button>
+
+    <p class="cuenta__pie">¿Aún no publicas en Habbi? <a routerLink="/registro">Crea tu cuenta</a></p>
+  </form>
+</main>

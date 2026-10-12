@@ -12,9 +12,6 @@ import { LogoComponent } from '../../layout/logo/logo.component';
   styleUrl: './admin-nav.component.scss',
 })
 export class AdminNavComponent {
+  // El usuario ya viene cargado: adminGuard lo pidió a la API antes de entrar a la ruta.
   protected readonly auth = inject(AuthService);
-
-  constructor() {
-    this.auth.loadCurrentUser().subscribe();
-  }
 }

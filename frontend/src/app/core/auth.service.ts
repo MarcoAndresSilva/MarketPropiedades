@@ -1,22 +1,41 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
+import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
-import { Observable, tap } from 'rxjs';
+import { Observable, of, switchMap, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-const TOKEN_KEY = 'admin_token';
+const TOKEN_KEY = 'habbi_token';
 
+export type Rol = 'ADMIN' | 'PERSONA' | 'CORREDORA' | 'INMOBILIARIA';
+
+/** Lo que devuelve `GET /auth/me` (AuthUser de JwtStrategy en el backend). */
 export interface AuthUser {
   id: string;
   email: string;
   name: string;
-  role: string;
+  role: Rol;
+  emailVerificado: boolean;
 }
 
-// El panel de admin es CSR puro (RenderMode.Client, ver app.routes.server.ts) — nunca
-// se renderiza en el servidor, pero igual se guarda con isPlatformBrowser por si algo
-// más adelante instancia este service fuera de esas rutas.
+/** Lo que pide `POST /auth/registro` (RegistroDto en el backend). */
+export interface RegistroData {
+  role: Exclude<Rol, 'ADMIN'>;
+  name: string;
+  email: string;
+  whatsapp: string;
+  password: string;
+}
+
+/** Adónde llega cada cuenta después de entrar. */
+export function inicioSegunRol(user: AuthUser): string {
+  return user.role === 'ADMIN' ? '/admin/propiedades' : '/mi-cuenta';
+}
+
+// Una sola sesión para el admin y los anunciantes: el backend firma el mismo JWT para
+// los dos y los separa por rol (RolesGuard), así que acá también. Las pantallas con
+// sesión son CSR puro (RenderMode.Client, ver app.routes.server.ts), pero el service se
+// inyecta en el header, que sí se renderiza en el servidor: por eso isPlatformBrowser.
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -26,21 +45,55 @@ export class AuthService {
 
   readonly token = signal<string | null>(this.readToken());
   readonly currentUser = signal<AuthUser | null>(null);
+  readonly esAdmin = computed(() => this.currentUser()?.role === 'ADMIN');
 
-  login(email: string, password: string): Observable<{ accessToken: string }> {
-    return this.http.post<{ accessToken: string }>(`${this.baseUrl}/login`, { email, password }).pipe(
-      tap(({ accessToken }) => this.setToken(accessToken)),
-    );
+  /** Abre la sesión y trae el usuario, para que quien llama sepa a qué panel mandarlo. */
+  login(email: string, password: string): Observable<AuthUser> {
+    return this.abrirSesion(this.http.post<{ accessToken: string }>(`${this.baseUrl}/login`, { email, password }));
+  }
+
+  /** El backend devuelve la sesión ya abierta: la cuenta nueva entra a su panel sin pasar por el login. */
+  registro(data: RegistroData): Observable<AuthUser> {
+    return this.abrirSesion(this.http.post<{ accessToken: string }>(`${this.baseUrl}/registro`, data));
   }
 
   loadCurrentUser(): Observable<AuthUser> {
     return this.http.get<AuthUser>(`${this.baseUrl}/me`).pipe(tap((user) => this.currentUser.set(user)));
   }
 
+  /**
+   * El usuario de la sesión, pidiéndolo a la API solo si todavía no está. Lo usan los
+   * guards: el rol se confirma con el backend y no leyendo el JWT, que el navegador
+   * puede tener guardado de una cuenta borrada o de antes de un cambio de contraseña.
+   */
+  usuario(): Observable<AuthUser | null> {
+    if (!this.token()) return of(null);
+    const user = this.currentUser();
+    return user ? of(user) : this.loadCurrentUser();
+  }
+
+  /**
+   * Cierra la sesión. Desde un panel lleva al login de ese panel; en una página pública
+   * no navega: ahí el header pide `/me` al cargar, y un token vencido de alguien que solo
+   * está mirando propiedades se limpia sin sacarlo de donde está.
+   */
   logout(): void {
+    const url = this.router.url;
+    const eraAdmin = this.esAdmin() || url.startsWith('/admin');
     this.setToken(null);
     this.currentUser.set(null);
-    this.router.navigateByUrl('/admin/login');
+    if (eraAdmin) {
+      this.router.navigateByUrl('/admin/login');
+    } else if (url.startsWith('/mi-cuenta')) {
+      this.router.navigateByUrl('/ingresar');
+    }
+  }
+
+  private abrirSesion(request: Observable<{ accessToken: string }>): Observable<AuthUser> {
+    return request.pipe(
+      tap(({ accessToken }) => this.setToken(accessToken)),
+      switchMap(() => this.loadCurrentUser()),
+    );
   }
 
   private setToken(token: string | null): void {

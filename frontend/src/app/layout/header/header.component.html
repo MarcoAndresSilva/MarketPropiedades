@@ -26,7 +26,14 @@
           <span class="site-header__count" [attr.aria-label]="favorites.count() + ' guardadas'">{{ favorites.count() }}</span>
         }
       </a>
-      <a routerLink="/ingresar" routerLinkActive="is-active" class="site-header__link">Iniciar sesión</a>
+      @if (auth.currentUser(); as user) {
+        <a [routerLink]="inicioSegunRol(user)" class="site-header__link">
+          <app-icon name="user" />
+          {{ user.role === 'ADMIN' ? 'Panel' : 'Mi cuenta' }}
+        </a>
+      } @else {
+        <a routerLink="/ingresar" routerLinkActive="is-active" class="site-header__link">Iniciar sesión</a>
+      }
       <a routerLink="/publicar" class="btn btn--primary site-header__cta">Publica tu propiedad</a>
     </div>
 
@@ -54,7 +61,13 @@
             <span class="site-header__count">{{ favorites.count() }}</span>
           }
         </a>
-        <a routerLink="/ingresar" routerLinkActive="is-active" (click)="cerrarMenu()">Iniciar sesión</a>
+        @if (auth.currentUser(); as user) {
+          <a [routerLink]="inicioSegunRol(user)" (click)="cerrarMenu()">
+            <app-icon name="user" /> {{ user.role === 'ADMIN' ? 'Panel' : 'Mi cuenta' }}
+          </a>
+        } @else {
+          <a routerLink="/ingresar" routerLinkActive="is-active" (click)="cerrarMenu()">Iniciar sesión</a>
+        }
         <div class="menu-mobile__footer">
           <a routerLink="/publicar" class="btn btn--primary" (click)="cerrarMenu()">Publica tu propiedad</a>
           <button

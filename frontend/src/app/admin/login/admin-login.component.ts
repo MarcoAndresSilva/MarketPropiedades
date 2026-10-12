@@ -1,7 +1,7 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '../../core/auth.service';
+import { AuthService, inicioSegunRol } from '../../core/auth.service';
 import { LogoComponent } from '../../layout/logo/logo.component';
 
 @Component({
@@ -24,7 +24,8 @@ export class AdminLoginComponent {
     this.error.set(false);
 
     this.auth.login(this.email, this.password).subscribe({
-      next: () => this.router.navigateByUrl('/admin/propiedades'),
+      // Un anunciante que entra por acá termina en su panel, no en uno que le responde 403.
+      next: (user) => this.router.navigateByUrl(inicioSegunRol(user)),
       error: () => {
         this.loading.set(false);
         this.error.set(true);
