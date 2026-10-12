@@ -4,8 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AdminNavComponent } from '../shared/admin-nav.component';
 import { AdminProyectosService, ProyectoPayload } from '../shared/admin-proyectos.service';
-import { CloudinaryUploadService } from '../shared/cloudinary-upload.service';
-import { LocationsService } from '../shared/locations.service';
+import { CloudinaryUploadService } from '../../core/cloudinary-upload.service';
+import { LocationsService } from '../../core/locations.service';
 import { Publisher, PublishersService } from '../shared/publishers.service';
 import { Comuna } from '../../core/property.model';
 import { ETAPA_LABEL, EtapaProyecto, ProyectoFoto } from '../../core/proyecto.model';
@@ -59,7 +59,7 @@ const MODELO_VACIO: FormModel = {
   selector: 'app-admin-proyecto-form',
   imports: [FormsModule, RouterLink, AdminNavComponent],
   templateUrl: './admin-proyecto-form.component.html',
-  styleUrl: '../properties/admin-property-form.component.scss',
+  styleUrl: '../../shared/propiedad-form/propiedad-form.component.scss',
 })
 export class AdminProyectoFormComponent implements OnInit {
   private readonly route = inject(ActivatedRoute);

@@ -1,8 +1,8 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { Comuna } from '../../core/property.model';
+import { environment } from '../../environments/environment';
+import { Comuna } from './property.model';
 
 @Injectable({ providedIn: 'root' })
 export class LocationsService {

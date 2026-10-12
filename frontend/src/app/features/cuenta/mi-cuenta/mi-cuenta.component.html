@@ -38,9 +38,13 @@
       </section>
     }
 
-    <section class="mi-cuenta__propiedades" aria-labelledby="propiedades-titulo">
-      <h2 id="propiedades-titulo">Tus propiedades</h2>
-      <p class="mi-cuenta__vacio">Muy pronto vas a poder publicar y administrar tus propiedades desde aquí.</p>
-    </section>
+    @if (user.emailVerificado) {
+      <app-mis-propiedades />
+    } @else {
+      <section class="mi-cuenta__propiedades" aria-labelledby="propiedades-titulo">
+        <h2 id="propiedades-titulo">Tus propiedades</h2>
+        <p class="mi-cuenta__vacio">Cuando confirmes tu correo vas a poder crear y publicar tus propiedades aquí.</p>
+      </section>
+    }
   }
 </main>

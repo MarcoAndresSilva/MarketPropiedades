@@ -1,7 +1,26 @@
-<app-admin-nav />
-<main id="main-content" tabindex="-1" class="admin admin--form">
-  <a routerLink="/admin/propiedades" class="admin__volver">← Volver al listado</a>
+@if (esAdmin) {
+  <app-admin-nav />
+}
+<main id="main-content" tabindex="-1" class="admin admin--form" [class.admin--anunciante]="!esAdmin">
+  <a [routerLink]="rutaListado" class="admin__volver">← {{ esAdmin ? 'Volver al listado' : 'Volver a mi cuenta' }}</a>
   <h1>{{ esEdicion ? 'Editar propiedad' : 'Nueva propiedad' }}</h1>
+
+  @if (!esAdmin && esEdicion && !loading()) {
+    <section [class]="'moderacion moderacion--' + estadoActual().toLowerCase()" aria-live="polite">
+      <p class="moderacion__estado">
+        <span [class]="'estado estado--' + estadoActual().toLowerCase()">{{ estadoPublicacion[estadoActual()].etiqueta }}</span>
+        {{ estadoPublicacion[estadoActual()].detalle }}
+      </p>
+      @if (estadoActual() === 'RECHAZADA' && motivoRechazo()) {
+        <p class="moderacion__motivo"><strong>Qué corregir:</strong> {{ motivoRechazo() }}</p>
+      }
+      @if (editarVuelveARevision) {
+        <p class="moderacion__aviso">
+          Si guardas cambios o agregas fotos, vuelve a revisión y deja de verse hasta que la aprobemos.
+        </p>
+      }
+    </section>
+  }
 
   @if (loading()) {
     <p role="status">Cargando…</p>
@@ -11,18 +30,20 @@
         <legend>Datos básicos</legend>
         <p class="form__hint">Los campos con <span class="form__asterisco">*</span> son obligatorios.</p>
 
-        <label class="form__field">
-          Publicador <span class="form__asterisco">*</span>
-          <select name="publicadorId" [(ngModel)]="model.publicadorId" required>
-            <option value="" disabled>Selecciona un publicador</option>
-            @for (p of publishers(); track p.id) {
-              <option [value]="p.id">{{ p.name }} ({{ etiquetaRol[p.role] }})</option>
-            }
-          </select>
-        </label>
+        @if (esAdmin) {
+          <label class="form__field">
+            <span>Publicador <span class="form__asterisco">*</span></span>
+            <select name="publicadorId" [(ngModel)]="model.publicadorId" required>
+              <option value="" disabled>Selecciona un publicador</option>
+              @for (p of publishers(); track p.id) {
+                <option [value]="p.id">{{ p.name }} ({{ etiquetaRol[p.role] }})</option>
+              }
+            </select>
+          </label>
+        }
 
         <label class="form__field">
-          Comuna <span class="form__asterisco">*</span>
+          <span>Comuna <span class="form__asterisco">*</span></span>
           <select name="comunaId" [(ngModel)]="model.comunaId" required>
             <option value="" disabled>Selecciona una comuna</option>
             @for (c of comunas(); track c.id) {
@@ -32,7 +53,7 @@
         </label>
 
         <label class="form__field">
-          Operación <span class="form__asterisco">*</span>
+          <span>Operación <span class="form__asterisco">*</span></span>
           <select name="tipoOperacion" [(ngModel)]="model.tipoOperacion" required>
             <option value="" disabled>Selecciona</option>
             <option value="VENTA">Venta</option>
@@ -41,7 +62,7 @@
         </label>
 
         <label class="form__field">
-          Tipo de propiedad <span class="form__asterisco">*</span>
+          <span>Tipo de propiedad <span class="form__asterisco">*</span></span>
           <select name="tipoPropiedad" [(ngModel)]="model.tipoPropiedad" required>
             <option value="" disabled>Selecciona</option>
             <option value="CASA">Casa</option>
@@ -54,20 +75,24 @@
           </select>
         </label>
 
-        <label class="form__field">
-          Estado
-          <select name="estado" [(ngModel)]="model.estado" required>
-            <option value="BORRADOR">Borrador</option>
-            <option value="PUBLICADA">Publicada</option>
-            <option value="PAUSADA">Pausada</option>
-            <option value="CERRADA">Cerrada</option>
-          </select>
-        </label>
+        @if (esAdmin) {
+          <label class="form__field">
+            Estado
+            <select name="estado" [(ngModel)]="model.estado" required>
+              <option value="BORRADOR">Borrador</option>
+              <option value="EN_REVISION">En revisión</option>
+              <option value="RECHAZADA">Rechazada</option>
+              <option value="PUBLICADA">Publicada</option>
+              <option value="PAUSADA">Pausada</option>
+              <option value="CERRADA">Cerrada</option>
+            </select>
+          </label>
 
-        <label class="form__checkbox">
-          <input type="checkbox" name="destacada" [(ngModel)]="model.destacada" />
-          Destacada
-        </label>
+          <label class="form__checkbox">
+            <input type="checkbox" name="destacada" [(ngModel)]="model.destacada" />
+            Destacada
+          </label>
+        }
 
         <label class="form__field">
           Dirección (sector, no es pública tal cual)
@@ -148,7 +173,7 @@
       <fieldset>
         <legend>Descripción</legend>
         <label class="form__field">
-          Título (5 a 120 caracteres) <span class="form__asterisco">*</span>
+          <span>Título (5 a 120 caracteres) <span class="form__asterisco">*</span></span>
           <input
             type="text"
             name="titulo"
@@ -160,7 +185,7 @@
           />
         </label>
         <label class="form__field">
-          Descripción (mínimo 20 caracteres) <span class="form__asterisco">*</span>
+          <span>Descripción (mínimo 20 caracteres) <span class="form__asterisco">*</span></span>
           <textarea
             name="descripcion"
             [(ngModel)]="model.descripcion"
@@ -218,10 +243,23 @@
       @if (error()) {
         <p class="form__error" role="alert">{{ error() }}</p>
       }
+      @if (guardado()) {
+        <p class="form__ok" role="status">Cambios guardados.</p>
+      }
 
-      <button type="submit" class="btn btn--primary" [disabled]="saving()">
-        {{ saving() ? 'Guardando…' : 'Guardar' }}
-      </button>
+      <div class="form__acciones">
+        <button type="submit" [class]="puedeEnviarARevision ? 'btn btn--ghost' : 'btn btn--primary'" [disabled]="saving()">
+          {{ saving() ? 'Guardando…' : esEdicion ? 'Guardar cambios' : 'Guardar borrador' }}
+        </button>
+        @if (puedeEnviarARevision) {
+          <button type="button" class="btn btn--primary" (click)="enviarARevision()" [disabled]="saving() || fotos().length === 0">
+            Enviar a revisión
+          </button>
+        }
+      </div>
+      @if (puedeEnviarARevision && fotos().length === 0) {
+        <p class="form__hint">Agrega al menos una foto para enviarla a revisión.</p>
+      }
     </form>
   }
 </main>

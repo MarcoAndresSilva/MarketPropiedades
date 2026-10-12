@@ -12,6 +12,9 @@ export type TipoPropiedad =
   | 'LOCAL_COMERCIAL'
   | 'BODEGA';
 
+// EN_REVISION y RECHAZADA son la moderación de lo que publican los anunciantes (Fase 35).
+export type EstadoPublicacion = 'BORRADOR' | 'EN_REVISION' | 'RECHAZADA' | 'PUBLICADA' | 'PAUSADA' | 'CERRADA';
+
 export interface Region {
   id: number;
   nombre: string;
@@ -40,7 +43,9 @@ export interface Publicador {
 export interface Property {
   id: string;
   slug: string;
-  estado: 'BORRADOR' | 'PUBLICADA' | 'PAUSADA' | 'CERRADA';
+  estado: EstadoPublicacion;
+  /** Solo en RECHAZADA: lo que el anunciante tiene que corregir. */
+  motivoRechazo: string | null;
   titulo: string;
   tipoOperacion: TipoOperacion;
   tipoPropiedad: TipoPropiedad;

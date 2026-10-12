@@ -6,7 +6,7 @@ import { Property } from '../../core/property.model';
 
 export type CreatePropertyPayload = Omit<
   Property,
-  'id' | 'slug' | 'comuna' | 'fotos' | 'publicador' | 'createdAt' | 'updatedAt' | 'precioUf'
+  'id' | 'slug' | 'comuna' | 'fotos' | 'publicador' | 'createdAt' | 'updatedAt' | 'precioUf' | 'motivoRechazo'
 > & { publicadorId: string; precioUf: number | null };
 
 export type UpdatePropertyPayload = Partial<CreatePropertyPayload>;

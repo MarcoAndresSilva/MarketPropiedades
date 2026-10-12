@@ -12,12 +12,12 @@
         <p class="form__hint">Los campos con <span class="form__asterisco">*</span> son obligatorios.</p>
 
         <label class="form__field">
-          Nombre del proyecto <span class="form__asterisco">*</span>
+          <span>Nombre del proyecto <span class="form__asterisco">*</span></span>
           <input type="text" name="nombre" [(ngModel)]="model.nombre" minlength="3" maxlength="120" required placeholder="Ej: Condominio Los Aromos" />
         </label>
 
         <label class="form__field">
-          Desarrolla (corredora o inmobiliaria) <span class="form__asterisco">*</span>
+          <span>Desarrolla (corredora o inmobiliaria) <span class="form__asterisco">*</span></span>
           <select name="publicadorId" [(ngModel)]="model.publicadorId" required>
             <option value="" disabled>Selecciona una cuenta</option>
             @for (p of desarrolladores(); track p.id) {
@@ -27,7 +27,7 @@
         </label>
 
         <label class="form__field">
-          Comuna <span class="form__asterisco">*</span>
+          <span>Comuna <span class="form__asterisco">*</span></span>
           <select name="comunaId" [(ngModel)]="model.comunaId" required>
             <option value="" disabled>Selecciona una comuna</option>
             @for (c of comunas(); track c.id) {
@@ -38,7 +38,7 @@
 
         <div class="form__grid">
           <label class="form__field">
-            Etapa <span class="form__asterisco">*</span>
+            <span>Etapa <span class="form__asterisco">*</span></span>
             <select name="etapa" [(ngModel)]="model.etapa" required>
               <option value="" disabled>Selecciona</option>
               @for (e of etapas; track e.value) {
@@ -114,7 +114,7 @@
       <fieldset>
         <legend>Descripción</legend>
         <label class="form__field">
-          Descripción (mínimo 20 caracteres) <span class="form__asterisco">*</span>
+          <span>Descripción (mínimo 20 caracteres) <span class="form__asterisco">*</span></span>
           <textarea name="descripcion" [(ngModel)]="model.descripcion" rows="6" minlength="20" maxlength="4000" required></textarea>
         </label>
       </fieldset>

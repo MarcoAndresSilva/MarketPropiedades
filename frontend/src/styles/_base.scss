@@ -319,6 +319,39 @@ input {
   color: var(--accent);
 }
 
+// Estado de publicación de una propiedad (paneles del anunciante y del admin). Sigue el
+// tema, a diferencia de .badge: va sobre fondos de página, no sobre fotos.
+.estado {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  white-space: nowrap;
+  background: var(--surface-3);
+  color: var(--text-muted);
+}
+
+.estado--en_revision {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.estado--rechazada {
+  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  color: var(--danger);
+}
+
+.estado--publicada {
+  background: var(--success-soft);
+  color: var(--success);
+}
+
+.estado--pausada {
+  background: color-mix(in srgb, var(--accent) 8%, transparent);
+  color: var(--text);
+}
+
 // Barra de filtros de los listados (propiedades y proyectos): una card blanca con los
 // selects en fila, en el lenguaje del buscador de la home; en celular, dos columnas.
 .filtros {

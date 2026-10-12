@@ -3,6 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { AuthService, Rol } from '../../../core/auth.service';
 import { IconComponent } from '../../../core/icon.component';
 import { SeoService } from '../../../core/seo.service';
+import { MisPropiedadesComponent } from '../mis-propiedades/mis-propiedades.component';
 
 const NOMBRE_ROL: Record<Rol, string> = {
   ADMIN: 'Administrador',
@@ -25,7 +26,7 @@ const MENSAJE_REENVIO: Record<EstadoReenvio, string> = {
 // por eso `user()` se lee directo sin pedirlo de nuevo.
 @Component({
   selector: 'app-mi-cuenta',
-  imports: [IconComponent],
+  imports: [IconComponent, MisPropiedadesComponent],
   templateUrl: './mi-cuenta.component.html',
   styleUrl: './mi-cuenta.component.scss',
 })

@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 import { HomeComponent } from './features/home/home.component';
-import { adminGuard, anuncianteGuard } from './core/auth.guard';
+import { adminGuard, anuncianteGuard, anuncianteVerificadoGuard } from './core/auth.guard';
 
 // Solo la home va en el bundle inicial: es la entrada del sitio y su LCP importa. Todo
 // lo demás se carga al visitarlo (loadComponent). Sobre todo el panel de admin, que un
@@ -8,8 +8,8 @@ import { adminGuard, anuncianteGuard } from './core/auth.guard';
 const catalogo = () => import('./features/catalog/catalog.component').then((m) => m.CatalogComponent);
 const proximamente = () =>
   import('./features/proximamente/proximamente.component').then((m) => m.ProximamenteComponent);
-const adminPropertyForm = () =>
-  import('./admin/properties/admin-property-form.component').then((m) => m.AdminPropertyFormComponent);
+const propiedadForm = () =>
+  import('./shared/propiedad-form/propiedad-form.component').then((m) => m.PropiedadFormComponent);
 const adminProyectoForm = () =>
   import('./admin/proyectos/admin-proyecto-form.component').then((m) => m.AdminProyectoFormComponent);
 
@@ -73,6 +73,18 @@ export const routes: Routes = [
     canActivate: [anuncianteGuard],
     loadComponent: () => import('./features/cuenta/mi-cuenta/mi-cuenta.component').then((m) => m.MiCuentaComponent),
   },
+  {
+    path: 'mi-cuenta/propiedades/nueva',
+    canActivate: [anuncianteVerificadoGuard],
+    loadComponent: propiedadForm,
+    data: { panel: 'anunciante' },
+  },
+  {
+    path: 'mi-cuenta/propiedades/:id/editar',
+    canActivate: [anuncianteVerificadoGuard],
+    loadComponent: propiedadForm,
+    data: { panel: 'anunciante' },
+  },
 
   // Panel interno: sin SEO, sin SSR (ver app.routes.server.ts) — detrás de login.
   {
@@ -85,8 +97,8 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./admin/properties/admin-properties-list.component').then((m) => m.AdminPropertiesListComponent),
   },
-  { path: 'admin/propiedades/nueva', canActivate: [adminGuard], loadComponent: adminPropertyForm },
-  { path: 'admin/propiedades/:id/editar', canActivate: [adminGuard], loadComponent: adminPropertyForm },
+  { path: 'admin/propiedades/nueva', canActivate: [adminGuard], loadComponent: propiedadForm },
+  { path: 'admin/propiedades/:id/editar', canActivate: [adminGuard], loadComponent: propiedadForm },
   {
     path: 'admin/proyectos',
     canActivate: [adminGuard],

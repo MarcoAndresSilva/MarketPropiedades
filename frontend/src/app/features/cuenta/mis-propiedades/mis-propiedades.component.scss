@@ -1,0 +1,163 @@
+.mis-propiedades {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+
+  @media (max-width: 640px) {
+    padding: 18px 14px;
+  }
+}
+
+.mis-propiedades__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+
+  h2 {
+    margin: 0;
+    font-size: 1.2rem;
+  }
+}
+
+.mis-propiedades__vacio {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.mis-propiedades__error {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.9rem;
+}
+
+.lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  padding: 16px 0;
+  border-top: 1px solid var(--border);
+
+  &:first-child {
+    border-top: none;
+    padding-top: 4px;
+  }
+
+  @media (max-width: 520px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.item__foto {
+  width: 120px;
+  height: 90px;
+  border-radius: 10px;
+  object-fit: cover;
+
+  @media (max-width: 520px) {
+    width: 100%;
+    height: 160px;
+  }
+}
+
+.item__foto--vacia {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface-2);
+  border: 1px dashed var(--border-strong);
+  color: var(--text-subtle);
+  font-size: 0.8rem;
+}
+
+.item__cuerpo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  p {
+    margin: 0;
+    line-height: 1.45;
+  }
+}
+
+.item__titulo {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+    overflow-wrap: anywhere;
+  }
+}
+
+.item__sub,
+.item__detalle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.item__motivo {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--danger) 8%, transparent);
+  font-size: 0.88rem;
+}
+
+.item__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 10px;
+  margin-top: 4px;
+
+  .btn:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+}
+
+.btn--sm {
+  min-height: 36px;
+  padding: 6px 14px;
+  font-size: 0.85rem;
+}
+
+.item__link {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.item__eliminar {
+  margin-left: auto;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--danger);
+  cursor: pointer;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}

@@ -139,26 +139,69 @@ fieldset {
   border-radius: 8px;
 }
 
-.btn {
-  align-self: flex-start;
-  padding: 11px 24px;
-  font-size: 0.95rem;
+.form__ok {
+  margin: 0;
+  color: var(--success);
+  font-size: 0.88rem;
   font-weight: 600;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
 }
 
-.btn--primary {
-  background: var(--accent);
-  color: var(--accent-contrast);
+// Los botones son los píldora globales (styles/_base.scss); acá solo su ubicación y el
+// disabled. El de proyectos va suelto en el form, sin .form__acciones.
+.form > .btn {
+  align-self: flex-start;
+}
 
-  &:hover:not(:disabled) {
-    background: var(--accent-hover);
-  }
+.form__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
 
-  &:disabled {
-    opacity: 0.7;
-    cursor: default;
+.btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+
+// Panel del anunciante: va con el header del sitio, no con la barra del admin.
+.admin--anunciante {
+  padding-top: 40px;
+}
+
+// Estado de moderación arriba del formulario del anunciante.
+.moderacion {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 16px 18px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface-2);
+
+  p {
+    margin: 0;
+    line-height: 1.5;
   }
+}
+
+.moderacion--rechazada {
+  border-color: var(--danger);
+}
+
+.moderacion__estado {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  color: var(--text-muted);
+}
+
+.moderacion__motivo {
+  color: var(--text);
+}
+
+.moderacion__aviso {
+  font-size: 0.88rem;
+  color: var(--text-muted);
 }

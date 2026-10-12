@@ -1,0 +1,71 @@
+<section class="mis-propiedades" aria-labelledby="mis-propiedades-titulo">
+  <header class="mis-propiedades__head">
+    <h2 id="mis-propiedades-titulo">Tus propiedades</h2>
+    <a routerLink="/mi-cuenta/propiedades/nueva" class="btn btn--primary">+ Nueva propiedad</a>
+  </header>
+
+  @if (error()) {
+    <p class="mis-propiedades__error" role="alert">{{ error() }}</p>
+  }
+
+  @if (cargando()) {
+    <p role="status" class="mis-propiedades__vacio">Cargando…</p>
+  } @else if (errorCarga()) {
+    <p role="alert" class="mis-propiedades__vacio">No pudimos cargar tus propiedades. Intenta de nuevo en un momento.</p>
+  } @else if (items().length === 0) {
+    <p class="mis-propiedades__vacio">
+      Aún no tienes propiedades. Crea la primera, súbele fotos y envíala a revisión: nuestro equipo la revisa antes de
+      publicarla.
+    </p>
+  } @else {
+    <ul class="lista">
+      @for (p of items(); track p.id) {
+        <li class="item">
+          @if (p.fotos[0]; as foto) {
+            <img class="item__foto" [src]="cloudinaryImageUrl(foto.cloudinaryPublicId, 240, 180)" alt="" loading="lazy" />
+          } @else {
+            <div class="item__foto item__foto--vacia">Sin fotos</div>
+          }
+
+          <div class="item__cuerpo">
+            <div class="item__titulo">
+              <span [class]="'estado estado--' + p.estado.toLowerCase()">{{ estado[p.estado].etiqueta }}</span>
+              <h3>{{ p.titulo }}</h3>
+            </div>
+            <p class="item__sub">
+              {{ formatTipoPropiedad(p.tipoPropiedad) }} · {{ p.tipoOperacion === 'VENTA' ? 'Venta' : 'Arriendo' }} ·
+              {{ p.comuna.nombre }} · {{ formatPrecio(p) }}
+            </p>
+            <p class="item__detalle">{{ estado[p.estado].detalle }}</p>
+            @if (p.estado === 'RECHAZADA' && p.motivoRechazo) {
+              <p class="item__motivo"><strong>Qué corregir:</strong> {{ p.motivoRechazo }}</p>
+            }
+
+            <div class="item__acciones">
+              @if (p.estado !== 'CERRADA') {
+                <a [routerLink]="['/mi-cuenta/propiedades', p.id, 'editar']" class="btn btn--ghost btn--sm">Editar</a>
+              }
+              @for (accion of acciones[p.estado]; track accion.hacia) {
+                <button
+                  type="button"
+                  class="btn btn--ghost btn--sm"
+                  [disabled]="ocupada() === p.id || (accion.hacia === 'EN_REVISION' && p.fotos.length === 0)"
+                  [title]="accion.hacia === 'EN_REVISION' && p.fotos.length === 0 ? 'Agrégale al menos una foto' : ''"
+                  (click)="cambiarEstado(p, accion)"
+                >
+                  {{ accion.etiqueta }}
+                </button>
+              }
+              @if (p.estado === 'PUBLICADA') {
+                <a [routerLink]="['/propiedad', p.slug]" class="item__link">Ver publicada</a>
+              }
+              <button type="button" class="item__eliminar" [disabled]="ocupada() === p.id" (click)="eliminar(p)">
+                Eliminar
+              </button>
+            </div>
+          </div>
+        </li>
+      }
+    </ul>
+  }
+</section>
