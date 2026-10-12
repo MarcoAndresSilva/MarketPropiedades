@@ -16,6 +16,7 @@
     "seed": "prisma db seed",
     "seed:admin": "tsx prisma/seed-admin.ts",
     "seed:demo": "tsx prisma/seed-demo.ts",
+    "seed:anunciantes": "tsx prisma/seed-anunciantes.ts",
     "test": "vitest run",
     "test:watch": "vitest",
     "test:cov": "vitest run --coverage",
