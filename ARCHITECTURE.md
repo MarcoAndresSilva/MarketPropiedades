@@ -1455,3 +1455,29 @@ cuenta verificada en todo el controller, incluido el listado. En vez de mostrar 
 **Detalle — el estado de publicación tiene su propia clase, `.estado`, en los estilos globales.**
 `.badge` es la etiqueta de marca con colores fijos para ir sobre fotos; el estado va sobre fondos
 de página y tiene que seguir el tema claro/oscuro.
+
+### Fase 38 — Moderación desde el panel de admin
+
+**Decisión — la cola de revisión es una pestaña del listado, no una pantalla aparte.** El admin ya
+revisa todo desde `/admin/propiedades`; "En revisión" filtra esa misma tabla y muestra cuántas
+esperan. El filtro se hace en el cliente sobre el listado que ya está cargado, en vez de usar el
+`?estado=` de `GET /properties/admin/all`: con el volumen actual es la misma descarga y el
+contador de la pestaña sale sin otra request. La pestaña queda en la URL
+(`/admin/propiedades?estado=EN_REVISION`), así se puede volver a la cola desde un link.
+
+**Decisión — aprobar y rechazar solo desde la cola, no desde el select de estado.** Los endpoints
+`aprobar` y `rechazar` son los que avisan por correo al anunciante; cambiar el estado con el
+`PATCH` del formulario lo publicaría sin aviso. El select sigue mostrando todos los estados (para
+que una propiedad en revisión no aparezca con el select en blanco), y en ese caso el formulario
+indica que la decisión va por la cola.
+
+**Decisión — el motivo del rechazo se pide en un `<dialog>` nativo.** `showModal()` atrapa el
+foco, cierra con Escape y deja el resto de la página inerte sin código propio ni librería. El
+mínimo de 10 caracteres se valida antes de llamar a la API (`RechazarPropertyDto` lo exige igual),
+con un mensaje que recuerda que ese texto es lo que va a leer el anunciante.
+
+**Detalle — el estado de propiedades y proyectos usa la clase `.estado` en todo el panel.** Los
+badges propios del listado de admin (`.badge--publicada`, etc.) se reemplazan por la clase global
+de la Fase 37 y por las etiquetas de `ESTADO_PUBLICACION`, así "En revisión" se ve igual en los dos
+paneles. De paso, las acciones de cada fila pasan a un `div` dentro de la celda: con `display:
+flex` en el `<td>` mismo la celda salía del layout de tabla y desalineaba el borde de la fila.
