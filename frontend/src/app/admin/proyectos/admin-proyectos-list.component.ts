@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { AdminNavComponent } from '../shared/admin-nav.component';
 import { AdminProyectosService } from '../shared/admin-proyectos.service';
 import { ETAPA_LABEL, Proyecto } from '../../core/proyecto.model';
+import { ESTADO_PUBLICACION } from '../../core/estado-publicacion';
 
 @Component({
   selector: 'app-admin-proyectos-list',
@@ -14,6 +15,7 @@ export class AdminProyectosListComponent implements OnInit {
   private readonly proyectos = inject(AdminProyectosService);
 
   protected readonly etapa = ETAPA_LABEL;
+  protected readonly estadoPublicacion = ESTADO_PUBLICACION;
   protected readonly items = signal<Proyecto[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal(false);

@@ -36,6 +36,16 @@ export class AdminPropertiesService {
     return this.http.delete<{ ok: true }>(`${this.baseUrl}/${id}`);
   }
 
+  /** Publica una propiedad en revisión y avisa al anunciante por correo. */
+  aprobar(id: string): Observable<{ ok: true }> {
+    return this.http.post<{ ok: true }>(`${this.baseUrl}/${id}/aprobar`, {});
+  }
+
+  /** La devuelve al anunciante con lo que tiene que corregir (le llega por correo y en su panel). */
+  rechazar(id: string, motivo: string): Observable<{ ok: true }> {
+    return this.http.post<{ ok: true }>(`${this.baseUrl}/${id}/rechazar`, { motivo });
+  }
+
   addFoto(propertyId: string, cloudinaryPublicId: string, orden: number): Observable<unknown> {
     return this.http.post(`${this.baseUrl}/${propertyId}/fotos`, { cloudinaryPublicId, orden });
   }

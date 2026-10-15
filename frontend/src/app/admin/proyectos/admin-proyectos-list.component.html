@@ -31,16 +31,18 @@
         <tbody>
           @for (p of items(); track p.id) {
             <tr>
-              <td><span class="badge" [class]="'badge--' + p.estado.toLowerCase()">{{ p.estado }}</span></td>
+              <td><span [class]="'estado estado--' + p.estado.toLowerCase()">{{ estadoPublicacion[p.estado].etiqueta }}</span></td>
               <td>
                 <strong>{{ p.nombre }}</strong>
                 <span class="admin__sub">{{ etapa[p.etapa] }} · {{ p.comuna.nombre }}{{ p.destacado ? ' · Destacado' : '' }}</span>
               </td>
               <td>{{ p.precioDesdeUf ? 'UF ' + precio(p) : '—' }}</td>
               <td>{{ p.publicador.name }}</td>
-              <td class="admin__row-actions">
-                <a [routerLink]="['/admin/proyectos', p.id, 'editar']">Editar</a>
-                <button type="button" class="link-danger" (click)="eliminar(p)">Eliminar</button>
+              <td>
+                <div class="admin__row-actions">
+                  <a [routerLink]="['/admin/proyectos', p.id, 'editar']">Editar</a>
+                  <button type="button" class="link-danger" (click)="eliminar(p)">Eliminar</button>
+                </div>
               </td>
             </tr>
           }

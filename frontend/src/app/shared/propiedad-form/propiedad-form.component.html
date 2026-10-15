@@ -87,6 +87,13 @@
               <option value="CERRADA">Cerrada</option>
             </select>
           </label>
+          @if (estadoActual() === 'EN_REVISION') {
+            <p class="form__hint">
+              Para aprobarla o rechazarla usa la
+              <a routerLink="/admin/propiedades" [queryParams]="{ estado: 'EN_REVISION' }">cola de revisión</a>: así le
+              llega el aviso por correo al anunciante.
+            </p>
+          }
 
           <label class="form__checkbox">
             <input type="checkbox" name="destacada" [(ngModel)]="model.destacada" />

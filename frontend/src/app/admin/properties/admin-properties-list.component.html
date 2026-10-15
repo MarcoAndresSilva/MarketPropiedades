@@ -10,12 +10,26 @@
     </div>
   </header>
 
+  <div class="filtro-tabs" role="group" aria-label="Filtrar propiedades">
+    <button type="button" [attr.aria-pressed]="filtro() === 'todas'" (click)="cambiarFiltro('todas')">Todas</button>
+    <button type="button" [attr.aria-pressed]="filtro() === 'revision'" (click)="cambiarFiltro('revision')">
+      En revisión
+      @if (enRevision().length > 0) {
+        <span class="filtro-tabs__count">{{ enRevision().length }}</span>
+      }
+    </button>
+  </div>
+
+  @if (accionError()) {
+    <p class="admin__error" role="alert">{{ accionError() }}</p>
+  }
+
   @if (loading()) {
     <p role="status">Cargando…</p>
   } @else if (error()) {
     <p role="alert">No se pudo cargar el listado. Intenta de nuevo más tarde.</p>
-  } @else if (items().length === 0) {
-    <p>Todavía no hay propiedades cargadas.</p>
+  } @else if (visibles().length === 0) {
+    <p>{{ filtro() === 'revision' ? 'No hay propiedades esperando revisión.' : 'Todavía no hay propiedades cargadas.' }}</p>
   } @else {
     <div class="table-wrap">
       <table>
@@ -33,9 +47,14 @@
           </tr>
         </thead>
         <tbody>
-          @for (p of items(); track p.id) {
+          @for (p of visibles(); track p.id) {
             <tr>
-              <td><span class="badge" [class]="'badge--' + p.estado.toLowerCase()">{{ p.estado }}</span></td>
+              <td>
+                <span [class]="'estado estado--' + p.estado.toLowerCase()">{{ estadoPublicacion[p.estado].etiqueta }}</span>
+                @if (p.estado === 'RECHAZADA' && p.motivoRechazo) {
+                  <span class="admin__sub admin__motivo" [title]="p.motivoRechazo">{{ p.motivoRechazo }}</span>
+                }
+              </td>
               <td>
                 <strong>{{ p.titulo }}</strong>
                 <span class="admin__sub">{{ formatTipoPropiedad(p.tipoPropiedad) }} · {{ p.tipoOperacion === 'VENTA' ? 'Venta' : 'Arriendo' }} · {{ p.comuna.nombre }}</span>
@@ -53,9 +72,15 @@
                 <td class="num">0</td>
                 <td class="num">0</td>
               }
-              <td class="admin__row-actions">
-                <a [routerLink]="['/admin/propiedades', p.id, 'editar']">Editar</a>
-                <button type="button" class="link-danger" (click)="eliminar(p)">Eliminar</button>
+              <td>
+                <div class="admin__row-actions">
+                  @if (p.estado === 'EN_REVISION') {
+                    <button type="button" class="link-accion" [disabled]="ocupada() === p.id" (click)="aprobar(p)">Aprobar</button>
+                    <button type="button" class="link-danger" [disabled]="ocupada() === p.id" (click)="abrirRechazo(p)">Rechazar</button>
+                  }
+                  <a [routerLink]="['/admin/propiedades', p.id, 'editar']">{{ p.estado === 'EN_REVISION' ? 'Revisar' : 'Editar' }}</a>
+                  <button type="button" class="link-danger" (click)="eliminar(p)">Eliminar</button>
+                </div>
               </td>
             </tr>
           }
@@ -64,4 +89,32 @@
     </div>
     <p class="table-hint">← Desliza para ver todas las columnas →</p>
   }
+
+  <dialog #dialogoRechazo class="dialogo" aria-labelledby="dialogo-rechazo-titulo" (close)="rechazando.set(null)">
+    <form class="dialogo__form" (ngSubmit)="confirmarRechazo()">
+      <h2 id="dialogo-rechazo-titulo">Rechazar propiedad</h2>
+      @if (rechazando(); as p) {
+        <p class="dialogo__sub">
+          <strong>{{ p.titulo }}</strong> · {{ p.publicador.name }}. Le llega por correo y lo ve en su panel.
+        </p>
+      }
+      <label class="dialogo__campo">
+        Qué tiene que corregir
+        <textarea
+          name="motivo"
+          rows="4"
+          [(ngModel)]="motivo"
+          [maxlength]="motivoMax"
+          placeholder="Ej: Las fotos están muy oscuras; sube otras con luz de día."
+        ></textarea>
+      </label>
+      @if (motivoError()) {
+        <p class="admin__error" role="alert">{{ motivoError() }}</p>
+      }
+      <div class="dialogo__acciones">
+        <button type="button" class="btn btn--ghost" (click)="cerrarRechazo()">Cancelar</button>
+        <button type="submit" class="btn btn--danger" [disabled]="ocupada() !== null">Rechazar</button>
+      </div>
+    </form>
+  </dialog>
 </main>
