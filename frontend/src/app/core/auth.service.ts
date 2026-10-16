@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
-import { Observable, of, switchMap, tap } from 'rxjs';
+import { Observable, finalize, of, shareReplay, switchMap, tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 const TOKEN_KEY = 'habbi_token';
@@ -46,6 +46,9 @@ export class AuthService {
   readonly token = signal<string | null>(this.readToken());
   readonly currentUser = signal<AuthUser | null>(null);
   readonly esAdmin = computed(() => this.currentUser()?.role === 'ADMIN');
+
+  /** El `/me` en vuelo, para que el guard y el header no lo pidan dos veces al cargar. */
+  private usuarioEnCurso: Observable<AuthUser> | null = null;
 
   /** Abre la sesión y trae el usuario, para que quien llama sepa a qué panel mandarlo. */
   login(email: string, password: string): Observable<AuthUser> {
@@ -99,7 +102,15 @@ export class AuthService {
   usuario(): Observable<AuthUser | null> {
     if (!this.token()) return of(null);
     const user = this.currentUser();
-    return user ? of(user) : this.loadCurrentUser();
+    if (user) return of(user);
+    // Al entrar directo a /mi-cuenta, el guard y el header piden el usuario casi a la vez:
+    // el segundo se suma a la request del primero. Al terminar (bien o mal) se suelta, así
+    // un error no queda guardado para siempre.
+    this.usuarioEnCurso ??= this.loadCurrentUser().pipe(
+      finalize(() => (this.usuarioEnCurso = null)),
+      shareReplay(1),
+    );
+    return this.usuarioEnCurso;
   }
 
   /**
@@ -121,6 +132,7 @@ export class AuthService {
   private limpiarSesion(): void {
     this.setToken(null);
     this.currentUser.set(null);
+    this.usuarioEnCurso = null;
   }
 
   private abrirSesion(request: Observable<{ accessToken: string }>): Observable<AuthUser> {
