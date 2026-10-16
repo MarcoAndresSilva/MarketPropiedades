@@ -112,28 +112,13 @@
   text-align: center;
 }
 
-.publicar__boton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 14px 32px;
-  border-radius: 999px;
-  background: var(--accent);
-  color: var(--accent-contrast);
-  font-weight: 600;
-  text-decoration: none;
-  transition:
-    background-color 0.15s ease,
-    transform 0.15s ease;
-
-  &:hover {
-    background: var(--accent-hover);
-    transform: translateY(-1px);
-  }
-}
-
 .publicar__nota {
   margin: 14px 0 0;
   color: var(--text-subtle);
-  font-size: 0.85rem;
+  font-size: 0.88rem;
+
+  a {
+    color: var(--accent);
+    font-weight: 600;
+  }
 }

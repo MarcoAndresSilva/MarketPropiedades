@@ -1,4 +1,5 @@
 import { Component, OnInit, inject } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { BUSINESS_WHATSAPP } from '../../core/business-contact';
 import { buildWhatsappUrl } from '../../core/whatsapp.util';
 import { SeoService } from '../../core/seo.service';
@@ -11,30 +12,32 @@ interface PasoPublicacion {
   texto: string;
 }
 
+// El camino de autoservicio (Fases 35-38): cuenta, propiedad y revisión del equipo. Subirla
+// "por nosotros" sigue existiendo y queda como alternativa por WhatsApp debajo del botón.
 const PASOS: PasoPublicacion[] = [
   {
     numero: 1,
-    titulo: 'Escríbenos por WhatsApp',
+    titulo: 'Crea tu cuenta',
     texto:
-      'Cuéntanos sobre tu propiedad: tipo, comuna, precio referencial y si es para venta o arriendo. No necesitas tener nada más listo todavía.',
+      'Elige si eres propietario, corredora o inmobiliaria, deja tu WhatsApp de contacto y confirma tu correo. Es gratis.',
   },
   {
     numero: 2,
-    titulo: 'Armamos tu ficha',
+    titulo: 'Carga tu propiedad',
     texto:
-      'Coordinamos contigo las fotos (y video, si tienes) y redactamos la descripción. Tú revisas y das el visto bueno antes de publicar.',
+      'Desde tu panel completas los datos, el precio y las fotos. Puedes guardarla como borrador y terminarla después.',
   },
   {
     numero: 3,
-    titulo: 'Recibes los contactos directo',
+    titulo: 'La revisamos y se publica',
     texto:
-      'Tu propiedad queda publicada con tu WhatsApp de contacto. Cuando alguien se interesa, te escribe directo a ti — sin intermediarios.',
+      'Nuestro equipo revisa cada ficha antes de publicarla y te avisa por correo. Los interesados te escriben directo a tu WhatsApp.',
   },
 ];
 
 @Component({
   selector: 'app-publicar',
-  imports: [RevealOnScrollDirective],
+  imports: [RouterLink, RevealOnScrollDirective],
   templateUrl: './publicar.component.html',
   styleUrl: './publicar.component.scss',
 })
@@ -52,7 +55,7 @@ export class PublicarComponent implements OnInit {
     this.seo.setPage({
       title: 'Cómo publicar tu propiedad',
       description:
-        `Publica tu casa, departamento o parcela en ${BRAND_NAME}. Te contamos el proceso paso a paso: contáctanos por WhatsApp, armamos tu ficha y recibes los contactos directo.`,
+        `Publica gratis tu casa, departamento o parcela en ${BRAND_NAME}: crea tu cuenta, carga tu propiedad y recibe los contactos directo en tu WhatsApp.`,
       path: '/publicar',
     });
   }

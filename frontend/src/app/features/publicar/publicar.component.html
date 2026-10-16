@@ -2,9 +2,8 @@
   <header class="publicar__intro">
     <h1>¿Cómo publico mi propiedad?</h1>
     <p>
-      Todavía no tenemos registro automático — cada propiedad la subimos nosotros a partir de lo
-      que nos cuentas, para asegurarnos de que la ficha quede bien armada desde el principio. Así
-      funciona hoy:
+      Publicar en Habbi es gratis. Tú cargas tu propiedad y nuestro equipo la revisa antes de
+      publicarla, para que el catálogo tenga solo fichas reales y bien armadas.
     </p>
   </header>
 
@@ -15,11 +14,8 @@
           @switch (paso.numero) {
             @case (1) {
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6">
-                <path
-                  d="M4 5.5c0-1 .8-1.8 1.8-1.8h12.4c1 0 1.8.8 1.8 1.8v9c0 1-.8 1.8-1.8 1.8H9.5L5 20V16.3H5.8c-1 0-1.8-.8-1.8-1.8v-9Z"
-                  stroke-linejoin="round"
-                />
-                <path d="M8 9h8M8 12.3h5" stroke-linecap="round" />
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" stroke-linecap="round" stroke-linejoin="round" />
+                <circle cx="12" cy="7" r="4" />
               </svg>
             }
             @case (2) {
@@ -51,9 +47,11 @@
   </ol>
 
   <div class="publicar__cta">
-    <a [href]="contactoUrl" target="_blank" rel="noopener" class="publicar__boton">
-      Escribir por WhatsApp
-    </a>
-    <p class="publicar__nota">Te respondemos directo, sin formularios ni esperas.</p>
+    <a routerLink="/registro" class="btn btn--primary btn--lg">Crear mi cuenta</a>
+    <p class="publicar__nota">¿Ya tienes cuenta? <a routerLink="/ingresar">Ingresa</a></p>
+    <p class="publicar__nota">
+      ¿Prefieres que la subamos nosotros?
+      <a [href]="contactoUrl" target="_blank" rel="noopener">Escríbenos por WhatsApp</a>
+    </p>
   </div>
 </main>
