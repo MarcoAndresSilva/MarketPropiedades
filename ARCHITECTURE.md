@@ -20,7 +20,9 @@ lead. Market Propiedades ofrece contacto directo desde el día uno.
 **Decisiones de alcance tomadas al inicio, no se reabren sin motivo:**
 - **MVP curado, no autoservicio:** las propiedades se cargan desde un panel de administración, no
   hay registro público para corredoras ni dueños todavía. Así se valida que el negocio funciona
-  antes de construir el sistema de cuentas multi-publicador.
+  antes de construir el sistema de cuentas multi-publicador. *Reabierta en la etapa 3 (Fases
+  35-38):* con propiedades reales publicadas y el rebrand a Habbi, se abrió el registro de
+  anunciantes con moderación del equipo; la carga por el admin sigue existiendo como alternativa.
 - **El modelo de `User` deja espacio para roles futuros** (persona natural / agente de corredora /
   admin) y **la ubicación se modela como región + comuna**, no hardcodeada a Melipilla — para no
   tener que rehacer el schema si el negocio decide abrir registro público o expandirse a otras
@@ -1481,3 +1483,50 @@ badges propios del listado de admin (`.badge--publicada`, etc.) se reemplazan po
 de la Fase 37 y por las etiquetas de `ESTADO_PUBLICACION`, así "En revisión" se ve igual en los dos
 paneles. De paso, las acciones de cada fila pasan a un `div` dentro de la celda: con `display:
 flex` en el `<td>` mismo la celda salía del layout de tabla y desalineaba el borde de la fila.
+
+### Fase 39 — Refactors de la segunda auditoría
+
+**Bug — editar una propiedad aprobada la ocultaba sin avisar a nadie.** La Fase 35 aceptó que
+editar algo publicado lo mande a revisión porque "el equipo revisa en el día", pero solo el envío
+explícito (`PATCH /mis-propiedades/:id/estado`) avisaba a los admins. Editar los datos o agregar
+una foto pasaba a `EN_REVISION` en silencio y la propiedad podía quedar fuera del catálogo hasta
+que alguien entrara a la cola por casualidad. `update` y `addFoto` ahora avisan cuando el estado
+cambia a revisión (`avisarSiVuelveARevision`), con tests sobre el service, y el link del correo
+lleva directo a la pestaña "En revisión".
+
+**Tests de los tokens de un solo uso.** `TokensCuentaService` no tenía ninguno, y un cambio en el
+filtro del `updateMany` (`usadoAt: null`, `expiraAt`) habría dejado los links reutilizables sin que
+nada lo notara. Se prueban el hash, la invalidación de los links anteriores en la misma
+transacción, la vigencia de cada tipo y el 400 de un link usado o vencido.
+
+**El formulario compartido elige su API una sola vez.** Repetía `esAdmin ? admin.x() : mis.x()`
+en cinco operaciones; ahora arma al construirse un objeto `PanelApi` (cargar, guardar, actualizar,
+subir y borrar fotos) con la implementación de su panel, y el admin agrega ahí los campos que solo
+él decide. Una operación nueva ya no puede llamar al endpoint del otro panel por olvidar el
+ternario. Se eligió un objeto y no dos subclases del componente: lo que cambia es la API, no la
+pantalla.
+
+**Capas.** `CreatePropertyPayload` pasa del service del admin a `core/property.model.ts`, porque
+el panel del anunciante deriva su payload de ese tipo y no debe importar archivos del admin.
+`/mi-cuenta` usa `ETIQUETA_ROL` en vez de su propia copia de las etiquetas de rol.
+
+**Validación del motivo de rechazo.** `@MinLength(10)` contaba los espacios y el service recortaba
+después, así que `"         x"` pasaba. El DTO recorta antes de validar y el service ya no lo hace.
+
+**Tokens de rojo y contraste en oscuro.** `--danger-soft` reemplaza los `color-mix` repetidos y
+`--danger-contrast` corrige el botón "Rechazar": texto blanco sobre el rojo claro del modo oscuro
+no alcanzaba AA. El fondo del diálogo queda como valor fijo a propósito: `::backdrop` recién hereda
+variables CSS en navegadores de 2024 en adelante.
+
+**Un solo `/auth/me` por carga.** Al entrar directo a `/mi-cuenta`, el guard y el header pedían el
+usuario casi a la vez y salían dos requests. `usuario()` comparte la que está en vuelo
+(`shareReplay`) y la suelta al terminar, para no guardar un error.
+
+**`/publicar` describe el autoservicio.** La página decía que no había registro y solo ofrecía
+WhatsApp. Ahora explica los tres pasos (cuenta, propiedad, revisión), lleva a `/registro` y deja
+WhatsApp como alternativa para quien prefiera que el equipo suba la propiedad.
+
+**Decisión — el registro sigue diciendo si el correo ya existe.** Es la única respuesta que revela
+cuentas (el login y la recuperación no lo hacen), pero ocultarlo en el registro deja al usuario sin
+saber por qué no puede crear su cuenta, y el límite de 5 registros cada 10 minutos por IP lo vuelve
+caro de explotar. Se deja así a propósito.
