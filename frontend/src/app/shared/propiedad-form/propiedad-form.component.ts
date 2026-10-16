@@ -21,6 +21,23 @@ import { mensajeDeErrorHttp } from '../../core/http-error.util';
 /** Quién usa el formulario: viene de `data.panel` en app.routes.ts. */
 type Panel = 'admin' | 'anunciante';
 
+/** Lo que responden las dos APIs: la del anunciante no trae el publicador (es él mismo). */
+type PropiedadDelPanel = Omit<Property, 'publicador'> & { publicador?: Property['publicador'] };
+
+/**
+ * Las operaciones que el formulario necesita, iguales para los dos paneles. Se elige una
+ * implementación al crear el componente y los métodos la usan sin preguntar de qué panel
+ * son: así una operación nueva no puede llamar por error al endpoint del otro panel.
+ */
+interface PanelApi {
+  findOne(id: string): Observable<PropiedadDelPanel>;
+  /** Crea (sin id) o actualiza la propiedad con lo que tiene el formulario. */
+  guardar(id: string | null, datos: PropiedadAnunciantePayload): Observable<PropiedadDelPanel>;
+  update(id: string, cambios: Partial<PropiedadAnunciantePayload>): Observable<PropiedadDelPanel>;
+  addFoto(propertyId: string, cloudinaryPublicId: string, orden: number): Observable<unknown>;
+  removeFoto(fotoId: string): Observable<unknown>;
+}
+
 // Campos numéricos/opcionales del formulario, sueltos como strings/number|null porque
 // vienen de <input> — se convierten a la forma que espera el backend recién al armar
 // el payload en guardar().
@@ -96,6 +113,7 @@ export class PropiedadFormComponent implements OnInit {
   readonly esAdmin = this.panel === 'admin';
   readonly rutaListado = this.esAdmin ? '/admin/propiedades' : '/mi-cuenta';
   private readonly rutaPropiedades = this.esAdmin ? '/admin/propiedades' : '/mi-cuenta/propiedades';
+  private readonly api: PanelApi = this.esAdmin ? this.apiAdmin() : this.apiAnunciante();
 
   readonly propertyId = signal<string | null>(null);
   readonly comunas = signal<Comuna[]>([]);
@@ -140,11 +158,7 @@ export class PropiedadFormComponent implements OnInit {
 
     this.propertyId.set(id);
     this.loading.set(true);
-    const request: Observable<Omit<Property, 'publicador'> & { publicador?: Property['publicador'] }> = this.esAdmin
-      ? this.adminProperties.findOne(id)
-      : this.misPropiedades.findOne(id);
-
-    request.subscribe({
+    this.api.findOne(id).subscribe({
       next: (p) => {
         this.model = {
           publicadorId: p.publicador?.id ?? '',
@@ -206,11 +220,7 @@ export class PropiedadFormComponent implements OnInit {
 
     this.uploadingFoto.set(true);
     this.cloudinary
-      .subirEnOrden(Array.from(input.files), (publicId) =>
-        this.esAdmin
-          ? this.adminProperties.addFoto(propertyId, publicId, this.fotos().length)
-          : this.misPropiedades.addFoto(propertyId, publicId, this.fotos().length),
-      )
+      .subirEnOrden(Array.from(input.files), (publicId) => this.api.addFoto(propertyId, publicId, this.fotos().length))
       .subscribe({
         next: (publicId) =>
           this.fotos.update((fs) => [...fs, { id: `temp-${publicId}`, cloudinaryPublicId: publicId, orden: fs.length }]),
@@ -232,8 +242,7 @@ export class PropiedadFormComponent implements OnInit {
   }
 
   eliminarFoto(fotoId: string): void {
-    const request = this.esAdmin ? this.adminProperties.removeFoto(fotoId) : this.misPropiedades.removeFoto(fotoId);
-    request.subscribe(() => {
+    this.api.removeFoto(fotoId).subscribe(() => {
       this.fotos.update((fs) => fs.filter((f) => f.id !== fotoId));
     });
   }
@@ -247,11 +256,7 @@ export class PropiedadFormComponent implements OnInit {
     this.uploadingVideo.set(true);
     this.cloudinary.subir(file).subscribe({
       next: (res) => {
-        const payload = { videoUrl: res.secure_url };
-        const update: Observable<Pick<Property, 'estado' | 'motivoRechazo'>> = this.esAdmin
-          ? this.adminProperties.update(propertyId, payload)
-          : this.misPropiedades.update(propertyId, payload);
-        update.subscribe((p) => {
+        this.api.update(propertyId, { videoUrl: res.secure_url }).subscribe((p) => {
           this.videoUrl.set(res.secure_url);
           this.actualizarEstado(p);
           this.uploadingVideo.set(false);
@@ -265,8 +270,8 @@ export class PropiedadFormComponent implements OnInit {
     input.value = '';
   }
 
-  private requestGuardar(): Observable<Pick<Property, 'id' | 'estado' | 'motivoRechazo'>> {
-    const base: PropiedadAnunciantePayload = {
+  private requestGuardar(): Observable<PropiedadDelPanel> {
+    const datos: PropiedadAnunciantePayload = {
       comunaId: this.model.comunaId,
       tipoOperacion: this.model.tipoOperacion as TipoOperacion,
       tipoPropiedad: this.model.tipoPropiedad as TipoPropiedad,
@@ -289,24 +294,41 @@ export class PropiedadFormComponent implements OnInit {
       descripcion: this.model.descripcion,
       videoUrl: this.videoUrl(),
     };
-    const id = this.propertyId();
-
-    if (this.esAdmin) {
-      const payload = {
-        ...base,
-        publicadorId: this.model.publicadorId,
-        estado: this.model.estado,
-        destacada: this.model.destacada,
-      };
-      return id ? this.adminProperties.update(id, payload) : this.adminProperties.create(payload);
-    }
-    return id ? this.misPropiedades.update(id, base) : this.misPropiedades.create(base);
+    return this.api.guardar(this.propertyId(), datos);
   }
 
-  private ejecutar<T extends Pick<Property, 'id' | 'estado' | 'motivoRechazo'>>(
-    request: Observable<T>,
-    alTerminar: (property: T) => void,
-  ): void {
+  /** El admin suma al guardar lo que solo él decide: publicador, estado y destacada. */
+  private apiAdmin(): PanelApi {
+    const api = this.adminProperties;
+    return {
+      findOne: (id) => api.findOne(id),
+      guardar: (id, datos) => {
+        const payload = {
+          ...datos,
+          publicadorId: this.model.publicadorId,
+          estado: this.model.estado,
+          destacada: this.model.destacada,
+        };
+        return id ? api.update(id, payload) : api.create(payload);
+      },
+      update: (id, cambios) => api.update(id, cambios),
+      addFoto: (propertyId, publicId, orden) => api.addFoto(propertyId, publicId, orden),
+      removeFoto: (fotoId) => api.removeFoto(fotoId),
+    };
+  }
+
+  private apiAnunciante(): PanelApi {
+    const api = this.misPropiedades;
+    return {
+      findOne: (id) => api.findOne(id),
+      guardar: (id, datos) => (id ? api.update(id, datos) : api.create(datos)),
+      update: (id, cambios) => api.update(id, cambios),
+      addFoto: (propertyId, publicId, orden) => api.addFoto(propertyId, publicId, orden),
+      removeFoto: (fotoId) => api.removeFoto(fotoId),
+    };
+  }
+
+  private ejecutar(request: Observable<PropiedadDelPanel>, alTerminar: (property: PropiedadDelPanel) => void): void {
     this.saving.set(true);
     this.error.set(null);
     this.guardado.set(false);
