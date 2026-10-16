@@ -30,7 +30,7 @@ export class MisPropiedadesController {
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdatePropiedadAnuncianteDto, @CurrentUser() user: AuthUser) {
-    return this.misPropiedades.update(id, dto, user.id);
+    return this.misPropiedades.update(id, dto, user);
   }
 
   @Patch(':id/estado')
@@ -45,7 +45,7 @@ export class MisPropiedadesController {
 
   @Post(':id/fotos')
   addFoto(@Param('id') id: string, @Body() dto: CreatePropertyFotoDto, @CurrentUser() user: AuthUser) {
-    return this.misPropiedades.addFoto(id, dto, user.id);
+    return this.misPropiedades.addFoto(id, dto, user);
   }
 
   @Delete('fotos/:fotoId')

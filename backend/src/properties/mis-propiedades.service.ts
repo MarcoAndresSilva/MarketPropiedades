@@ -48,9 +48,12 @@ export class MisPropiedadesService {
     return this.properties.create({ ...dto, publicadorId: userId, estado: EstadoPublicacion.BORRADOR });
   }
 
-  async update(id: string, dto: UpdatePropiedadAnuncianteDto, userId: string) {
-    const actual = await this.findPropia(id, userId);
-    return this.properties.update(id, { ...dto, estado: estadoTrasEditar(actual.estado) });
+  async update(id: string, dto: UpdatePropiedadAnuncianteDto, user: AuthUser) {
+    const actual = await this.findPropia(id, user.id);
+    const estado = estadoTrasEditar(actual.estado);
+    const property = await this.properties.update(id, { ...dto, estado });
+    await this.avisarSiVuelveARevision(actual.estado, estado, property.titulo, user.name);
+    return property;
   }
 
   async cambiarEstado(id: string, estado: EstadoPublicacion, user: AuthUser) {
@@ -78,13 +81,14 @@ export class MisPropiedadesService {
   }
 
   /** Una foto nueva es contenido nuevo: si la propiedad estaba aprobada, vuelve a revisión. */
-  async addFoto(id: string, dto: CreatePropertyFotoDto, userId: string) {
-    const actual = await this.findPropia(id, userId);
+  async addFoto(id: string, dto: CreatePropertyFotoDto, user: AuthUser) {
+    const actual = await this.findPropia(id, user.id);
     const foto = await this.properties.addFoto(id, dto);
     const estado = estadoTrasEditar(actual.estado);
     if (estado !== actual.estado) {
       await this.prisma.property.update({ where: { id }, data: { estado } });
     }
+    await this.avisarSiVuelveARevision(actual.estado, estado, actual.titulo, user.name);
     return foto;
   }
 
@@ -105,6 +109,17 @@ export class MisPropiedadesService {
       throw new NotFoundException('Propiedad no encontrada.');
     }
     return property;
+  }
+
+  /**
+   * Editar algo aprobado lo saca del catálogo hasta que el admin lo vuelva a aprobar
+   * (estadoTrasEditar). Sin este aviso la propiedad quedaba oculta hasta que alguien
+   * entrara por casualidad a la cola.
+   */
+  private async avisarSiVuelveARevision(antes: EstadoPublicacion, despues: EstadoPublicacion, titulo: string, anunciante: string) {
+    if (antes !== despues && despues === EstadoPublicacion.EN_REVISION) {
+      await this.avisarAdmins(titulo, anunciante);
+    }
   }
 
   private async avisarAdmins(titulo: string, anunciante: string) {

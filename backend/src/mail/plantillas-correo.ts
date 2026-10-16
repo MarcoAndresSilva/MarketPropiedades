@@ -92,7 +92,8 @@ export class PlantillasCorreo {
   }
 
   propiedadParaRevisar(para: string, titulo: string, anunciante: string): Correo {
-    const url = `${this.appUrl}/admin/propiedades`;
+    // Directo a la pestaña "En revisión" del listado (Fase 38).
+    const url = `${this.appUrl}/admin/propiedades?estado=EN_REVISION`;
     return {
       para,
       asunto: `Propiedad para revisar: ${titulo}`,
