@@ -338,7 +338,7 @@ input {
 }
 
 .estado--rechazada {
-  background: color-mix(in srgb, var(--danger) 14%, transparent);
+  background: var(--danger-soft);
   color: var(--danger);
 }
 

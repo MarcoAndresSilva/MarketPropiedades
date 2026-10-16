@@ -52,6 +52,8 @@
   --success: #1a7d69;
   --success-soft: rgba(56, 181, 156, 0.14);
   --danger: #d92d20;
+  --danger-soft: rgba(217, 45, 32, 0.12);
+  --danger-contrast: #ffffff;
 
   // Franja navy (CTA "Es el momento…") — igual en ambos temas: es un bloque de
   // marca, no una superficie que deba invertirse.
@@ -91,6 +93,9 @@
   --success: #4fd1b5;
   --success-soft: rgba(79, 209, 181, 0.14);
   --danger: #f97066;
+  --danger-soft: rgba(249, 112, 102, 0.14);
+  // El rojo se aclara en oscuro (como --accent): el texto blanco ya no alcanza AA encima.
+  --danger-contrast: #0b1220;
 
   --ink: #16213a;
   --ink-2: #24314f;

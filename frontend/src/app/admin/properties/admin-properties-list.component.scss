@@ -226,6 +226,8 @@ td.num {
   color: var(--text);
   box-shadow: var(--shadow);
 
+  // Valor fijo y no var(--marca-navy): ::backdrop recién hereda variables CSS en los
+  // navegadores de 2024 en adelante, y en uno anterior el fondo quedaría transparente.
   &::backdrop {
     background: rgba(7, 22, 43, 0.45);
   }
@@ -278,7 +280,7 @@ td.num {
 
 .btn--danger {
   background: var(--danger);
-  color: #ffffff;
+  color: var(--danger-contrast);
 
   &:disabled {
     opacity: 0.6;
