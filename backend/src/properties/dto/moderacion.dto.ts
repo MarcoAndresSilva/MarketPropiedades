@@ -1,3 +1,4 @@
+import { Transform } from 'class-transformer';
 import { IsEnum, IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
 import { EstadoPublicacion } from '../../generated/prisma/enums';
 
@@ -9,7 +10,9 @@ export class QueryAdminPropertiesDto {
 }
 
 export class RechazarPropertyDto {
-  // Le llega al anunciante por correo y en su panel: tiene que decirle qué corregir.
+  // Le llega al anunciante por correo y en su panel: tiene que decirle qué corregir. Se
+  // recorta antes de validar: con espacios de relleno "         x" pasaba el mínimo.
+  @Transform(({ value }: { value: unknown }) => (typeof value === 'string' ? value.trim() : value))
   @IsString()
   @MinLength(10)
   @MaxLength(500)

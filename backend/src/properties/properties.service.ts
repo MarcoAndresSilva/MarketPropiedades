@@ -164,11 +164,11 @@ export class PropertiesService {
     await this.exigirEnRevision(id);
     const property = await this.prisma.property.update({
       where: { id },
-      data: { estado: EstadoPublicacion.RECHAZADA, motivoRechazo: motivo.trim() },
+      data: { estado: EstadoPublicacion.RECHAZADA, motivoRechazo: motivo },
       include: { publicador: { select: { email: true, name: true } } },
     });
     await this.mail.enviar(
-      this.plantillas.propiedadRechazada(property.publicador.email, property.publicador.name, property.titulo, motivo.trim()),
+      this.plantillas.propiedadRechazada(property.publicador.email, property.publicador.name, property.titulo, motivo),
     );
     return { ok: true };
   }
