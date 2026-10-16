@@ -2,14 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Property } from '../../core/property.model';
-
-export type CreatePropertyPayload = Omit<
-  Property,
-  'id' | 'slug' | 'comuna' | 'fotos' | 'publicador' | 'createdAt' | 'updatedAt' | 'precioUf' | 'motivoRechazo'
-> & { publicadorId: string; precioUf: number | null };
-
-export type UpdatePropertyPayload = Partial<CreatePropertyPayload>;
+import { CreatePropertyPayload, Property, UpdatePropertyPayload } from '../../core/property.model';
 
 @Injectable({ providedIn: 'root' })
 export class AdminPropertiesService {

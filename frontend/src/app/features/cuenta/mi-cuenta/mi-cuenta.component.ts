@@ -1,16 +1,10 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { AuthService, Rol } from '../../../core/auth.service';
+import { AuthService } from '../../../core/auth.service';
+import { ETIQUETA_ROL } from '../../../core/format.util';
 import { IconComponent } from '../../../core/icon.component';
 import { SeoService } from '../../../core/seo.service';
 import { MisPropiedadesComponent } from '../mis-propiedades/mis-propiedades.component';
-
-const NOMBRE_ROL: Record<Rol, string> = {
-  ADMIN: 'Administrador',
-  PERSONA: 'Propietario',
-  CORREDORA: 'Corredora',
-  INMOBILIARIA: 'Inmobiliaria',
-};
 
 type EstadoReenvio = 'listo' | 'enviando' | 'enviado' | 'limite' | 'error';
 
@@ -37,7 +31,7 @@ export class MiCuentaComponent implements OnInit {
   protected readonly user = this.auth.currentUser;
   protected readonly nombreRol = computed(() => {
     const user = this.user();
-    return user ? NOMBRE_ROL[user.role] : '';
+    return user ? ETIQUETA_ROL[user.role] : '';
   });
   protected readonly reenvio = signal<EstadoReenvio>('listo');
   protected readonly mensajeReenvio = computed(() => MENSAJE_REENVIO[this.reenvio()]);

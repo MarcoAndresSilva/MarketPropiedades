@@ -2,8 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { environment } from '../../../../environments/environment';
-import { EstadoPublicacion, Property } from '../../../core/property.model';
-import { CreatePropertyPayload } from '../../../admin/shared/admin-properties.service';
+import { CreatePropertyPayload, EstadoPublicacion, Property } from '../../../core/property.model';
 
 /** Lo que devuelve `/mis-propiedades`: la propiedad sin el publicador, que siempre es uno mismo. */
 export type MiPropiedad = Omit<Property, 'publicador'>;

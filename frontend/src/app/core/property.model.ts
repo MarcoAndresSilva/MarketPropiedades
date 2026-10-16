@@ -71,6 +71,18 @@ export interface Property {
   createdAt: string;
 }
 
+/**
+ * Lo que se manda al crear una propiedad desde el panel del admin. Vive acá y no en el
+ * service del admin porque el panel del anunciante deriva su payload de este
+ * (PropiedadAnunciantePayload) y no debe depender de archivos del admin.
+ */
+export type CreatePropertyPayload = Omit<
+  Property,
+  'id' | 'slug' | 'comuna' | 'fotos' | 'publicador' | 'createdAt' | 'updatedAt' | 'precioUf' | 'motivoRechazo'
+> & { publicadorId: string; precioUf: number | null };
+
+export type UpdatePropertyPayload = Partial<CreatePropertyPayload>;
+
 export interface PaginatedProperties {
   items: Property[];
   total: number;
